@@ -21,16 +21,8 @@ namespace MiroslavGPT.AWS
             string botUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME");
             int maxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS") ?? "100");
 
-            var dynamoDbConfig = new AmazonDynamoDBConfig
-            {
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_REGION")),
-            };
-
-            var dynamoDb = new AmazonDynamoDBClient(dynamoDbConfig);
-            IUsersRepository usersRepository = new DynamoDBUsersRepository(dynamoDb, dynamoDbTableName);
-
-            // Create an instance of AmazonTranslator
             string region = Environment.GetEnvironmentVariable("AWS_REGION");
+            IUsersRepository usersRepository = new DynamoDBUsersRepository(region, dynamoDbTableName);
             ITranslator translator = new AmazonTranslator(region);
 
             // Pass the translator to the ChatGPTBot constructor

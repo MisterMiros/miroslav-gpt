@@ -12,9 +12,9 @@ namespace MiroslavGPT.AWS
         private readonly IAmazonDynamoDB _dynamoDb;
         private readonly string _tableName;
 
-        public DynamoDBUsersRepository(IAmazonDynamoDB dynamoDb, string tableName)
+        public DynamoDBUsersRepository(string region, string tableName)
         {
-            _dynamoDb = dynamoDb;
+            _dynamoDb = new AmazonDynamoDBClient(Amazon.RegionEndpoint.GetBySystemName(region));
             _tableName = tableName;
         }
 
