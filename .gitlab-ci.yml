@@ -18,6 +18,7 @@ deploy:
   stage: deploy
   image: amazon/aws-cli:latest
   script:
+    - echo "Hi, im running"
     - cd publish
     - zip -r lambda.zip .
     - aws lambda update-function-code --function-name $FUNCTION_NAME --zip-file fileb://lambda.zip
