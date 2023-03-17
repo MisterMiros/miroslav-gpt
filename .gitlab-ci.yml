@@ -9,7 +9,7 @@ build:
   script:
     - dotnet restore
     - dotnet build --configuration Release --no-restore
-    - dotnet publish --configuration Release --no-build --output ./publish --runtime linux-x64
+    - dotnet publish MiroslavGPT.AWS --configuration Release --no-build --output ./publish --runtime linux-x64
   artifacts:
     paths:
       - ./publish
