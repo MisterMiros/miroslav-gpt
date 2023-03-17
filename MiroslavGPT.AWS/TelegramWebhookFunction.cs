@@ -28,7 +28,13 @@ namespace MiroslavGPT.AWS
 
             var dynamoDb = new AmazonDynamoDBClient(dynamoDbConfig);
             IUsersRepository usersRepository = new DynamoDBUsersRepository(dynamoDb, dynamoDbTableName);
-            ChatGPTBot chatGPTBot = new ChatGPTBot(secretKey, usersRepository, openAiApiKey, maxTokens);
+
+            // Create an instance of AmazonTranslator
+            string region = Environment.GetEnvironmentVariable("AWS_REGION");
+            ITranslator translator = new AmazonTranslator(region);
+
+            // Pass the translator to the ChatGPTBot constructor
+            ChatGPTBot chatGPTBot = new ChatGPTBot(secretKey, usersRepository, openAiApiKey, maxTokens, translator);
 
             _telegramMessageHandler = new TelegramMessageHandler(chatGPTBot, telegramBotToken, botUsername);
         }
