@@ -21,13 +21,8 @@ namespace MiroslavGPT.AWS
             string botUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME");
             int maxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS") ?? "100");
 
-            var dynamoDbConfig = new AmazonDynamoDBConfig
-            {
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_REGION")),
-            };
-
-            var dynamoDb = new AmazonDynamoDBClient(dynamoDbConfig);
-            IUsersRepository usersRepository = new DynamoDBUsersRepository(dynamoDb, dynamoDbTableName);
+            string region = Environment.GetEnvironmentVariable("AWS_REGION");
+            IUsersRepository usersRepository = new DynamoDBUsersRepository(region, dynamoDbTableName);
             ChatGPTBot chatGPTBot = new ChatGPTBot(secretKey, usersRepository, openAiApiKey, maxTokens);
 
             _telegramMessageHandler = new TelegramMessageHandler(chatGPTBot, telegramBotToken, botUsername);
