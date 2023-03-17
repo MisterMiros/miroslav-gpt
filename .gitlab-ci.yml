@@ -1,0 +1,28 @@
+image: mcr.microsoft.com/dotnet/sdk:5.0
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script:
+    - dotnet restore
+    - dotnet build --configuration Release --no-restore
+    - dotnet publish --configuration Release --no-build --output ./publish
+  artifacts:
+    paths:
+      - ./publish
+
+deploy:
+  stage: deploy
+  image: amazon/aws-cli:2.x
+  script:
+    - cd publish
+    - zip -r lambda.zip .
+    - aws lambda update-function-code --function-name $FUNCTION_NAME --zip-file fileb://lambda.zip
+    - aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN,OPENAI_API_KEY=$OPENAI_API_KEY,SECRET_KEY=$SECRET_KEY,DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME,BOT_NAME=$BOT_NAME,MAX_TOKENS=$MAX_TOKENS}"
+  only:
+    - master
+  environment:
+    name: production
