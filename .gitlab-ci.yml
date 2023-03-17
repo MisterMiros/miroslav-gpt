@@ -8,7 +8,7 @@ build:
   stage: build
   script:
     - dotnet restore
-    - dotnet build --configuration Release --no-restore --runtime linux-x64
+    - dotnet build MiroslavGPT.AWS --configuration Release --no-restore --runtime linux-x64
     - dotnet publish MiroslavGPT.AWS --configuration Release --no-build --output ./publish --runtime linux-x64
   artifacts:
     paths:
