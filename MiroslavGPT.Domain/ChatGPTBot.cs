@@ -11,13 +11,15 @@ namespace MiroslavGPT.Domain
         private readonly IUsersRepository _usersRepository;
         private readonly OpenAIAPI _openAIApi;
         private readonly int _maxTokens;
+        private readonly ITranslator _translator;
 
-        public ChatGPTBot(string secretKey, IUsersRepository usersRepository, string openAiApiKey, int maxTokens)
+        public ChatGPTBot(string secretKey, IUsersRepository usersRepository, string openAiApiKey, int maxTokens, ITranslator translator)
         {
             _secretKey = secretKey;
             _usersRepository = usersRepository;
             _openAIApi = new OpenAIAPI(openAiApiKey);
             _maxTokens = maxTokens;
+            _translator = translator;
         }
 
         public async Task<string> ProcessCommandAsync(long chatId, string text)
@@ -62,7 +64,23 @@ namespace MiroslavGPT.Domain
                 return "Please provide a prompt after the /prompt command.";
             }
 
-            string response = await GetChatGPTResponse(prompt); // Implement this method to call ChatGPT API
+            // Detect the language of the prompt
+            string promptLanguage = await _translator.DetectLanguageAsync(prompt);
+
+            // If the language is not English, translate the prompt to English
+            if (promptLanguage != "en")
+            {
+                prompt = await _translator.TranslateTextAsync(prompt, promptLanguage, "en");
+            }
+
+            string response = await GetChatGPTResponse(prompt);
+
+            // If the original language was not English, translate the response back to the original language
+            if (promptLanguage != "en")
+            {
+                response = await _translator.TranslateTextAsync(response, "en", promptLanguage);
+            }
+
             return response;
         }
 
