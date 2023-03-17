@@ -16,7 +16,7 @@ build:
 
 deploy:
   stage: deploy
-  image: amazon/aws-cli:2.x
+  image: amazon/aws-cli:latest
   script:
     - cd publish
     - zip -r lambda.zip .
