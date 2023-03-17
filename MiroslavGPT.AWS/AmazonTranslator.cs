@@ -20,7 +20,7 @@ namespace MiroslavGPT.AWS
             _comprehendClient = new AmazonComprehendClient(regionEndpoint);
         }
 
-        public async Task<string> TranslateTextAsync(string sourceLanguage, string targetLanguage, string text)
+        public async Task<string> TranslateTextAsync(string text, string sourceLanguage, string targetLanguage)
         {
             var request = new TranslateTextRequest
             {
