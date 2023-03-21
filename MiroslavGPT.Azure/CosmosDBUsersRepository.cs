@@ -10,9 +10,9 @@ namespace MiroslavGPT.Azure
         private readonly CosmosClient _client;
         private readonly Container _container;
 
-        public CosmosDBUsersRepository(string endpointUri, string primaryKey, string databaseName, string containerName)
+        public CosmosDBUsersRepository(string connectionString, string databaseName, string containerName)
         {
-            _client = new CosmosClient(endpointUri, primaryKey);
+            _client = new CosmosClient(connectionString);
             _container = _client.GetContainer(databaseName, containerName);
         }
 

@@ -26,14 +26,13 @@ namespace MiroslavGPT.Azure
             string secretKey = config["SECRET_KEY"];
             string openAiApiKey = config["OPENAI_API_KEY"];
             string telegramBotToken = config["TELEGRAM_BOT_TOKEN"];
-            string endpointUri = config["COSMOSDB_ENDPOINT_URI"];
-            string primaryKey = config["COSMOSDB_PRIMARY_KEY"];
+            string connectionString = config["COSMOSDB_CONNECTION_STRING"];
             string databaseName = config["COSMOSDB_DATABASE_NAME"];
             string containerName = config["COSMOSDB_CONTAINER_NAME"];
             string botUsername = config["TELEGRAM_BOT_USERNAME"];
             int maxTokens = int.Parse(config["MAX_TOKENS"] ?? "100");
 
-            CosmosDBUsersRepository usersRepository = new CosmosDBUsersRepository(endpointUri, primaryKey, databaseName, containerName);
+            CosmosDBUsersRepository usersRepository = new CosmosDBUsersRepository(connectionString, databaseName, containerName);
             ChatGPTBot chatGPTBot = new ChatGPTBot(secretKey, usersRepository, openAiApiKey, maxTokens);
 
             _telegramMessageHandler = new TelegramMessageHandler(chatGPTBot, telegramBotToken, botUsername);
