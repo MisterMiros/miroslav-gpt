@@ -1,56 +1,62 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MiroslavGPT.Domain;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
+using System;
 
 namespace MiroslavGPT.Azure
 {
-    public class TelegramWebhookFunction
+    public static class TelegramWebhookFunction
     {
-        private readonly TelegramMessageHandler _telegramMessageHandler;
+        private static readonly TelegramMessageHandler _telegramMessageHandler;
 
-        public TelegramWebhookFunction()
+        static TelegramWebhookFunction()
         {
-            string endpointUri = Environment.GetEnvironmentVariable("COSMOS_ENDPOINT_URI");
-            string primaryKey = Environment.GetEnvironmentVariable("COSMOS_PRIMARY_KEY");
-            string databaseId = Environment.GetEnvironmentVariable("COSMOS_DATABASE_ID");
-            string containerId = Environment.GetEnvironmentVariable("COSMOS_CONTAINER_ID");
-            string secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
-            string openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-            string telegramBotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
-            string botUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME");
-            int maxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS") ?? "100");
+            IConfigurationRoot config = new ConfigurationBuilder()
+                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
 
-            IUsersRepository usersRepository = new CosmosDBUsersRepository(endpointUri, primaryKey, databaseId, containerId);
+            string secretKey = config["SECRET_KEY"];
+            string openAiApiKey = config["OPENAI_API_KEY"];
+            string telegramBotToken = config["TELEGRAM_BOT_TOKEN"];
+            string endpointUri = config["COSMOSDB_ENDPOINT_URI"];
+            string primaryKey = config["COSMOSDB_PRIMARY_KEY"];
+            string databaseName = config["COSMOSDB_DATABASE_NAME"];
+            string containerName = config["COSMOSDB_CONTAINER_NAME"];
+            string botUsername = config["TELEGRAM_BOT_USERNAME"];
+            int maxTokens = int.Parse(config["MAX_TOKENS"] ?? "100");
+
+            CosmosDBUsersRepository usersRepository = new CosmosDBUsersRepository(endpointUri, primaryKey, databaseName, containerName);
             ChatGPTBot chatGPTBot = new ChatGPTBot(secretKey, usersRepository, openAiApiKey, maxTokens);
 
             _telegramMessageHandler = new TelegramMessageHandler(chatGPTBot, telegramBotToken, botUsername);
         }
 
-        public async Task<IActionResult> Run(HttpRequest req, ILogger log)
+        [Function("TelegramWebhookFunction")]
+        public static async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequestData req,
+            FunctionContext context)
         {
+            var logger = context.GetLogger("TelegramWebhookFunction");
+
             try
             {
-                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var update = JsonConvert.DeserializeObject<Update>(requestBody);
+                var requestBody = await req.ReadAsStringAsync();
+                var update = JObject.Parse(requestBody).ToObject<Update>();
                 await _telegramMessageHandler.ProcessUpdateAsync(update);
 
                 return new OkResult();
             }
             catch (Exception ex)
             {
-                log.LogError($"Error processing webhook request: {ex.Message}");
+                logger.LogError($"Error processing webhook request: {ex.Message}");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }

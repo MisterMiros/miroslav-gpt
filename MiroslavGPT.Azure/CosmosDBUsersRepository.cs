@@ -1,8 +1,5 @@
 ﻿using MiroslavGPT.Domain;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 
@@ -10,43 +7,58 @@ namespace MiroslavGPT.Azure
 {
     public class CosmosDBUsersRepository : IUsersRepository
     {
+        private readonly CosmosClient _client;
         private readonly Container _container;
 
-        public CosmosDBUsersRepository(string endpointUri, string primaryKey, string databaseId, string containerId)
+        public CosmosDBUsersRepository(string endpointUri, string primaryKey, string databaseName, string containerName)
         {
-            var client = new CosmosClient(endpointUri, primaryKey);
-            var database = client.GetDatabase(databaseId);
-            _container = database.GetContainer(containerId);
+            _client = new CosmosClient(endpointUri, primaryKey);
+            _container = _client.GetContainer(databaseName, containerName);
         }
 
-        public async Task AuthorizeUserAsync(long chatId)
+        public async Task<bool> IsAuthorizedAsync(long userId)
         {
-            var item = new UserDocument
+            try
             {
-                ChatId = chatId,
-                Authorized = true
+                var query = new QueryDefinition("SELECT * FROM c WHERE c.userId = @userId")
+                    .WithParameter("@userId", userId);
+
+                var iterator = _container.GetItemQueryIterator<User>(query);
+
+                if (iterator.HasMoreResults)
+                {
+                    var response = await iterator.ReadNextAsync();
+                    var user = response.FirstOrDefault();
+
+                    if (user != null)
+                    {
+                        return user.IsAuthorized;
+                    }
+                }
+
+                return false;
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+        }
+
+        public async Task AuthorizeUserAsync(long userId)
+        {
+            var user = new User
+            {
+                UserId = userId,
+                IsAuthorized = true
             };
 
-            await _container.CreateItemAsync(item);
+            await _container.CreateItemAsync(user, new PartitionKey(userId.ToString()));
         }
 
-        public async Task<bool> IsAuthorizedAsync(long chatId)
+        private class User
         {
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.ChatId = @chatId AND c.Authorized = true")
-                .WithParameter("@chatId", chatId);
-
-            var iterator = _container.GetItemQueryIterator<UserDocument>(query);
-
-            while (iterator.HasMoreResults)
-            {
-                var response = await iterator.ReadNextAsync();
-                foreach (var item in response)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            public long UserId { get; set; }
+            public bool IsAuthorized { get; set; }
         }
     }
 }
