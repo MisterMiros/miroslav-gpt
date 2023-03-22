@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MiroslavGPT.Domain;
@@ -9,6 +7,9 @@ using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using System;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using System.IO;
 
 namespace MiroslavGPT.Azure
 {
@@ -38,16 +39,14 @@ namespace MiroslavGPT.Azure
             _telegramMessageHandler = new TelegramMessageHandler(chatGPTBot, telegramBotToken, botUsername);
         }
 
-        [Function("TelegramWebhookFunction")]
+        [FunctionName("TelegramWebhookFunction")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequestData req,
-            FunctionContext context)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequest req,
+            ILogger logger)
         {
-            var logger = context.GetLogger("TelegramWebhookFunction");
-
             try
             {
-                var requestBody = await req.ReadAsStringAsync();
+                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 var update = JObject.Parse(requestBody).ToObject<Update>();
                 await _telegramMessageHandler.ProcessUpdateAsync(update);
 
@@ -55,7 +54,8 @@ namespace MiroslavGPT.Azure
             }
             catch (Exception ex)
             {
-                logger.LogError($"Error processing webhook request: {ex.Message}");
+                logger.LogError($"Error processing webhook request: {ex}");
+                logger.LogError(ex.StackTrace);
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }

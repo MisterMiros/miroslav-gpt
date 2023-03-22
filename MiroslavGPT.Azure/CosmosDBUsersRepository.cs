@@ -20,8 +20,8 @@ namespace MiroslavGPT.Azure
         {
             try
             {
-                var query = new QueryDefinition("SELECT * FROM c WHERE c.userId = @userId")
-                    .WithParameter("@userId", userId);
+                var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @userId")
+                    .WithParameter("@userId", userId.ToString());
 
                 var iterator = _container.GetItemQueryIterator<User>(query);
 
@@ -29,11 +29,7 @@ namespace MiroslavGPT.Azure
                 {
                     var response = await iterator.ReadNextAsync();
                     var user = response.FirstOrDefault();
-
-                    if (user != null)
-                    {
-                        return user.IsAuthorized;
-                    }
+                    return user?.isAuthorized == true;
                 }
 
                 return false;
@@ -46,19 +42,11 @@ namespace MiroslavGPT.Azure
 
         public async Task AuthorizeUserAsync(long userId)
         {
-            var user = new User
-            {
-                UserId = userId,
-                IsAuthorized = true
-            };
+            var user = new User(userId.ToString(), true);
 
-            await _container.CreateItemAsync(user, new PartitionKey(userId.ToString()));
+            await _container.UpsertItemAsync(user, new PartitionKey(userId.ToString()));
         }
 
-        private class User
-        {
-            public long UserId { get; set; }
-            public bool IsAuthorized { get; set; }
-        }
+        private record User(string id, bool isAuthorized);
     }
 }

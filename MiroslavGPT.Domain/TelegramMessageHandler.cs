@@ -40,7 +40,6 @@ namespace MiroslavGPT.Domain
             await _telegramBotClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: response,
-                parseMode: ParseMode.Markdown,
                 replyToMessageId: replyToMessageId,
                 disableWebPagePreview: true
             );

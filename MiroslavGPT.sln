@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiroslavGPT.Domain", "Miros
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiroslavGPT.AWS", "MiroslavGPT.AWS\MiroslavGPT.AWS.csproj", "{DE206A38-F721-46C1-B2F9-7DE92D144B19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiroslavGPT.Azure", "MiroslavGPT.Azure\MiroslavGPT.Azure.csproj", "{5E181924-9599-46B3-8D81-BF5BA30BC194}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiroslavGPT.Azure", "MiroslavGPT.Azure\MiroslavGPT.Azure.csproj", "{5E181924-9599-46B3-8D81-BF5BA30BC194}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
