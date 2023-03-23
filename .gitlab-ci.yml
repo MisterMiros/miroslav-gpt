@@ -10,9 +10,9 @@ build:
   script:
     - dotnet restore
     - dotnet build MiroslavGPT.AWS --configuration Release --no-restore --runtime linux-x64
-    - dotnet build MiroslavGPT.Azure --configuration Release --no-restore --runtime linux-x64
+    - dotnet build MiroslavGPT.Azure --configuration Release --no-restore
     - dotnet publish MiroslavGPT.AWS --configuration Release --no-build --output ./publish/aws --runtime linux-x64
-    - dotnet publish MiroslavGPT.Azure --configuration Release --no-build --output ./publish/azure --runtime linux-x64
+    - dotnet publish MiroslavGPT.Azure --configuration Release --no-build --output ./publish/azure
   artifacts:
     paths:
       - ./publish
