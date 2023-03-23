@@ -33,10 +33,7 @@ deploy_aws:
 
 deploy_azure:
   stage: deploy-azure
-  image: mcr.microsoft.com/dotnet/sdk:latest
-  before_script:
-    - dotnet tool install -g Azure.Functions.Cli
-    - export PATH="$PATH:/root/.dotnet/tools"
+  image: mcr.microsoft.com/azure-functions/dotnet:latest
   script:
     - az login --service-principal --username $AZURE_APP_ID --password $AZURE_PASSWORD --tenant $AZURE_TENANT_ID
     - cd publish/azure
