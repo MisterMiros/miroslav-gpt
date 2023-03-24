@@ -33,7 +33,12 @@ deploy_aws:
 
 deploy_azure:
   stage: deploy-azure
-  image: mcr.microsoft.com/azure-functions/node:4-node18
+  image: mcr.microsoft.com/dotnet/sdk:latest
+  before_script:
+    - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+    - apt-get install curl && curl -sL https://deb.nodesource.com/setup_12.x | bash -
+    - apt-get install nodejs
+    - npm install -g azure-functions-core-tools@3 --unsafe-perm true
   script:
     - az login --service-principal --username $AZURE_APP_ID --password $AZURE_PASSWORD --tenant $AZURE_TENANT_ID
     - cd publish/azure
