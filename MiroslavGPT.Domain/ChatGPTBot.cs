@@ -9,13 +9,15 @@ namespace MiroslavGPT.Domain
     {
         private readonly string _secretKey;
         private readonly IUsersRepository _usersRepository;
+        private readonly IPersonalityProvider _personalityProvider;
         private readonly OpenAIAPI _openAIApi;
         private readonly int _maxTokens;
 
-        public ChatGPTBot(string secretKey, IUsersRepository usersRepository, string openAiApiKey, int maxTokens)
+        public ChatGPTBot(string secretKey, IUsersRepository usersRepository, IPersonalityProvider personalityProvider, string openAiApiKey, int maxTokens)
         {
             _secretKey = secretKey;
             _usersRepository = usersRepository;
+            _personalityProvider = personalityProvider;
             _openAIApi = new OpenAIAPI(openAiApiKey);
             _maxTokens = maxTokens;
         }
@@ -68,10 +70,23 @@ namespace MiroslavGPT.Domain
 
         private async Task<string> GetChatGPTResponse(string prompt)
         {
-            var request = new OpenAI_API.Completions.CompletionRequest
+            var request = new OpenAI_API.Chat.ChatRequest
             {
-                Model = "text-davinci-003",
-                Prompt = prompt,
+                Model = OpenAI_API.Models.Model.ChatGPTTurbo.ModelID,
+                Messages = new List<OpenAI_API.Chat.ChatMessage>
+                {
+                    new OpenAI_API.Chat.ChatMessage
+                    {
+                        Role = OpenAI_API.Chat.ChatMessageRole.System,
+                        Content = _personalityProvider.GetSystemMessage(),
+                    },
+                    new OpenAI_API.Chat.ChatMessage
+                    {
+                        Role = OpenAI_API.Chat.ChatMessageRole.System,
+                        Content = prompt,
+                    }
+
+                },
                 MaxTokens = _maxTokens,
                 Temperature = 0.7,
                 TopP = 1,
@@ -81,8 +96,8 @@ namespace MiroslavGPT.Domain
 
             try
             {
-                var result = await _openAIApi.Completions.CreateCompletionAsync(request);
-                var combinedResponse = string.Join("\n", result.Completions.Select(c => c.Text.Trim()));
+                var result = await _openAIApi.Chat.CreateChatCompletionAsync(request);
+                var combinedResponse = string.Join("\n", result.Choices.Select(c => c.Message.Content.Trim()));
                 return $"*Response from ChatGPT API for prompt '{prompt}':*\n\n{combinedResponse}";
             }
             catch (Exception e)
@@ -91,4 +106,4 @@ namespace MiroslavGPT.Domain
             }
         }
     }
-} 
+}
