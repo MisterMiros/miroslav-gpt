@@ -42,7 +42,6 @@ deploy_azure:
   script:
     - az login --service-principal --username $AZURE_APP_ID --password $AZURE_PASSWORD --tenant $AZURE_TENANT_ID
     - cd publish/azure
-    - func init --worker-runtime dotnet --no-git
     - func azure functionapp publish $AZURE_FUNCTION_APP_NAME --dotnet-version 6.0 --no-build
     - CONNECTION_STRING="AccountEndpoint=$COSMOSDB_ENDPOINT_URL;AccountKey=$COSMOSDB_PRIMARY_KEY;ApiKind=Gremlin"
     - az functionapp config appsettings set --name $AZURE_FUNCTION_APP_NAME --resource-group $AZURE_RESOURCE_GROUP --settings "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN OPENAI_API_KEY=$OPENAI_API_KEY SECRET_KEY=$SECRET_KEY COSMOSDB_CONNECTION_STRING=$CONNECTION_STRING COSMOSDB_DATABASE_NAME=$COSMOSDB_DATABASE_NAME COSMOSDB_CONTAINER_NAME=$COSMOSDB_CONTAINER_NAME TELEGRAM_BOT_USERNAME=$BOT_NAME MAX_TOKENS=$MAX_TOKENS"
