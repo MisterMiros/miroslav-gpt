@@ -34,6 +34,8 @@ deploy_aws:
 deploy_azure:
   stage: deploy-azure
   image: mcr.microsoft.com/azure-cli:latest
+  before_script:
+    - npm install --global azure-functions-core-tools@core
   script:
     - az login --service-principal --username $AZURE_APP_ID --password $AZURE_PASSWORD --tenant $AZURE_TENANT_ID
     - cd publish/azure
