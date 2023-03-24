@@ -22,7 +22,7 @@ namespace MiroslavGPT.Domain
             _maxTokens = maxTokens;
         }
 
-        public async Task<string> ProcessCommandAsync(long chatId, string text)
+        public async Task<string> ProcessCommandAsync(long chatId, string username, string text)
         {
             string[] parts = text.Split(' ', 2);
             string command = parts[0];
@@ -33,7 +33,7 @@ namespace MiroslavGPT.Domain
                 case "/init":
                     return await InitCommandAsync(chatId, argument);
                 case "/prompt":
-                    return await PromptCommandAsync(chatId, argument);
+                    return await PromptCommandAsync(chatId, username, argument);
                 default:
                     return "Unknown command. Please use /init or /prompt.";
             }
@@ -52,7 +52,7 @@ namespace MiroslavGPT.Domain
             }
         }
 
-        private async Task<string> PromptCommandAsync(long chatId, string prompt)
+        private async Task<string> PromptCommandAsync(long chatId, string username, string prompt)
         {
             if (!await _usersRepository.IsAuthorizedAsync(chatId))
             {
@@ -64,17 +64,17 @@ namespace MiroslavGPT.Domain
                 return "Please provide a prompt after the /prompt command.";
             }
 
-            string response = await GetChatGPTResponse(prompt); // Implement this method to call ChatGPT API
+            string response = await GetChatGPTResponse(username, prompt); // Implement this method to call ChatGPT API
             return response;
         }
 
-        private async Task<string> GetChatGPTResponse(string prompt)
+        private async Task<string> GetChatGPTResponse(string username, string prompt)
         {
             var messages = _personalityProvider.GetPersonalityMessages();
-            messages.Append(new OpenAI_API.Chat.ChatMessage
+            messages.Add(new OpenAI_API.Chat.ChatMessage
             {
                 Role = OpenAI_API.Chat.ChatMessageRole.User,
-                Content = prompt,
+                Content = $"@{username}: {prompt}",
             });
             var request = new OpenAI_API.Chat.ChatRequest
             {

@@ -31,7 +31,7 @@ namespace MiroslavGPT.Domain
             }
 
             string text = update.Message.Text.Replace("@" + _botUsername, "").Trim();
-            string response = await _chatGPTBot.ProcessCommandAsync(update.Message.Chat.Id, text);
+            string response = await _chatGPTBot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
             await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
         }
 
@@ -40,7 +40,6 @@ namespace MiroslavGPT.Domain
             await _telegramBotClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: response,
-                parseMode: ParseMode.Markdown,
                 replyToMessageId: replyToMessageId,
                 disableWebPagePreview: true
             );
