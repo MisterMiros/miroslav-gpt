@@ -70,23 +70,16 @@ namespace MiroslavGPT.Domain
 
         private async Task<string> GetChatGPTResponse(string prompt)
         {
+            var messages = _personalityProvider.GetPersonalityMessages();
+            messages.Append(new OpenAI_API.Chat.ChatMessage
+            {
+                Role = OpenAI_API.Chat.ChatMessageRole.User,
+                Content = prompt,
+            });
             var request = new OpenAI_API.Chat.ChatRequest
             {
                 Model = OpenAI_API.Models.Model.ChatGPTTurbo.ModelID,
-                Messages = new List<OpenAI_API.Chat.ChatMessage>
-                {
-                    new OpenAI_API.Chat.ChatMessage
-                    {
-                        Role = OpenAI_API.Chat.ChatMessageRole.System,
-                        Content = _personalityProvider.GetSystemMessage(),
-                    },
-                    new OpenAI_API.Chat.ChatMessage
-                    {
-                        Role = OpenAI_API.Chat.ChatMessageRole.System,
-                        Content = prompt,
-                    }
-
-                },
+                Messages = messages,
                 MaxTokens = _maxTokens,
                 Temperature = 0.7,
                 TopP = 1,

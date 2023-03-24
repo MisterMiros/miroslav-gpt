@@ -2,6 +2,6 @@
 {
     public interface IPersonalityProvider
     {
-        string GetSystemMessage();
+        List<OpenAI_API.Chat.ChatMessage> GetPersonalityMessages();
     }
 }
