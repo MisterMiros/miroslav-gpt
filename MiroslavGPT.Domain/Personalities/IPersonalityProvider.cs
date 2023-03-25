@@ -1,4 +1,4 @@
-﻿namespace MiroslavGPT.Domain
+﻿namespace MiroslavGPT.Domain.Personalities
 {
     public interface IPersonalityProvider
     {
