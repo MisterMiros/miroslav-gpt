@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace MiroslavGPT.Domain
+namespace MiroslavGPT.Domain.Interfaces
 {
     public interface IUsersRepository
     {

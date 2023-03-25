@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MiroslavGPT.Domain
+namespace MiroslavGPT.Domain.Personalities
 {
     public class JohnnyBravoPersonalityProvider : IPersonalityProvider
     {

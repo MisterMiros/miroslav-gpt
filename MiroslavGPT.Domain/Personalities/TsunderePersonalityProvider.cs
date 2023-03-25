@@ -1,4 +1,4 @@
-﻿namespace MiroslavGPT.Domain
+﻿namespace MiroslavGPT.Domain.Personalities
 {
     public class TsunderePersonalityProvider : IPersonalityProvider
     {
