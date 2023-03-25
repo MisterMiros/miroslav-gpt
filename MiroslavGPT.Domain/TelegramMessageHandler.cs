@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using MiroslavGPT.Domain.Interfaces;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -8,14 +9,15 @@ namespace MiroslavGPT.Domain
     public class TelegramMessageHandler
     {
         private readonly ChatGPTBot _chatGPTBot;
+        private readonly ITelegramBotSettings _settings;
         private readonly ITelegramBotClient _telegramBotClient;
-        private readonly string _botUsername;
 
-        public TelegramMessageHandler(ChatGPTBot chatGPTBot, string telegramBotToken, string botUsername)
+        public TelegramMessageHandler(ChatGPTBot chatGPTBot, ITelegramBotSettings telegramBotSettings)
         {
             _chatGPTBot = chatGPTBot;
-            _telegramBotClient = new TelegramBotClient(telegramBotToken);
-            _botUsername = botUsername;
+            _settings = telegramBotSettings;
+            _telegramBotClient = new TelegramBotClient(_settings.TelegramBotToken);
+           
         }
 
         public async Task ProcessUpdateAsync(Update update)
@@ -25,12 +27,12 @@ namespace MiroslavGPT.Domain
                 return;
             }
 
-            if (update.Message.Chat.Type != ChatType.Private && !update.Message.Text.Contains("@" + _botUsername))
+            if (update.Message.Chat.Type != ChatType.Private && !update.Message.Text.Contains("@" + _settings.TelegramBotName))
             {
                 return;
             }
 
-            string text = update.Message.Text.Replace("@" + _botUsername, "").Trim();
+            string text = update.Message.Text.Replace("@" + _settings.TelegramBotName, "").Trim();
             string response = await _chatGPTBot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
             await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
         }

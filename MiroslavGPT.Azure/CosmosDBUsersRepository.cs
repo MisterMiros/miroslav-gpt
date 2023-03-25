@@ -1,7 +1,8 @@
-﻿using MiroslavGPT.Domain;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using MiroslavGPT.Azure.Settings;
+using MiroslavGPT.Domain.Interfaces;
 
 namespace MiroslavGPT.Azure
 {
@@ -10,10 +11,10 @@ namespace MiroslavGPT.Azure
         private readonly CosmosClient _client;
         private readonly Container _container;
 
-        public CosmosDBUsersRepository(string connectionString, string databaseName, string containerName)
+        public CosmosDBUsersRepository(ICosmosDBSettings cosmosDBSettings, ICosmosDBUsersSettings cosmosDBUsersSettings)
         {
-            _client = new CosmosClient(connectionString);
-            _container = _client.GetContainer(databaseName, containerName);
+            _client = new CosmosClient(cosmosDBSettings.ConnectionString);
+            _container = _client.GetContainer(cosmosDBUsersSettings.UsersDatabaseName, cosmosDBUsersSettings.UsersContainerName);
         }
 
         public async Task<bool> IsAuthorizedAsync(long userId)

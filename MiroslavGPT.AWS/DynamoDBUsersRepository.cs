@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
-using MiroslavGPT.Domain;
+using MiroslavGPT.Domain.Interfaces;
 
 namespace MiroslavGPT.AWS
 {

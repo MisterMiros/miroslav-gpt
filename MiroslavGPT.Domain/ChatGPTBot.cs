@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MiroslavGPT.Domain.Interfaces;
+using MiroslavGPT.Domain.Personalities;
 using OpenAI_API;
 using Telegram.Bot.Types.Enums;
 
@@ -7,19 +9,17 @@ namespace MiroslavGPT.Domain
 {
     public class ChatGPTBot
     {
-        private readonly string _secretKey;
+        private readonly IChatGptBotSettings _settings;
         private readonly IUsersRepository _usersRepository;
         private readonly IPersonalityProvider _personalityProvider;
         private readonly OpenAIAPI _openAIApi;
-        private readonly int _maxTokens;
 
-        public ChatGPTBot(string secretKey, IUsersRepository usersRepository, IPersonalityProvider personalityProvider, string openAiApiKey, int maxTokens)
+        public ChatGPTBot(IUsersRepository usersRepository, IPersonalityProvider personalityProvider, IChatGptBotSettings chatGptBotSettings)
         {
-            _secretKey = secretKey;
             _usersRepository = usersRepository;
             _personalityProvider = personalityProvider;
-            _openAIApi = new OpenAIAPI(openAiApiKey);
-            _maxTokens = maxTokens;
+            _settings = chatGptBotSettings;
+            _openAIApi = new OpenAIAPI(_settings.OpenAiApiKey);
         }
 
         public async Task<string> ProcessCommandAsync(long chatId, string username, string text)
@@ -41,7 +41,7 @@ namespace MiroslavGPT.Domain
 
         private async Task<string> InitCommandAsync(long chatId, string secretKey)
         {
-            if (secretKey == _secretKey)
+            if (secretKey == _settings.SecretKey)
             {
                 await _usersRepository.AuthorizeUserAsync(chatId);
                 return "Authorization successful! You can now use /prompt command.";
@@ -80,7 +80,7 @@ namespace MiroslavGPT.Domain
             {
                 Model = OpenAI_API.Models.Model.ChatGPTTurbo.ModelID,
                 Messages = messages,
-                MaxTokens = _maxTokens,
+                MaxTokens = _settings.MaxTokens,
                 Temperature = 0.7,
                 TopP = 1,
                 FrequencyPenalty = 0,
