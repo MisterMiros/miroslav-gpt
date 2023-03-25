@@ -14,16 +14,17 @@ namespace MiroslavGPT.AWS
 
         public TelegramWebhookFunction()
         {
-            string secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
-            string openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-            string telegramBotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
-            string dynamoDbTableName = Environment.GetEnvironmentVariable("DYNAMODB_TABLE_NAME");
-            string botUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME");
-            int maxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS") ?? "100");
+            var secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
+            var openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+            var telegramBotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+            var dynamoDbTableName = Environment.GetEnvironmentVariable("DYNAMODB_TABLE_NAME");
+            var botUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME");
+            var maxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS") ?? "100");
 
-            string region = Environment.GetEnvironmentVariable("AWS_REGION");
-            IUsersRepository usersRepository = new DynamoDBUsersRepository(region, dynamoDbTableName);
-            ChatGPTBot chatGPTBot = new ChatGPTBot(secretKey, usersRepository, openAiApiKey, maxTokens);
+            var region = Environment.GetEnvironmentVariable("AWS_REGION");
+            var usersRepository = new DynamoDBUsersRepository(region, dynamoDbTableName);
+            var personality = new TsunderePersonalityProvider();
+            var chatGPTBot = new ChatGPTBot(secretKey, usersRepository, personality, openAiApiKey, maxTokens);
 
             _telegramMessageHandler = new TelegramMessageHandler(chatGPTBot, telegramBotToken, botUsername);
         }

@@ -9,18 +9,20 @@ namespace MiroslavGPT.Domain
     {
         private readonly string _secretKey;
         private readonly IUsersRepository _usersRepository;
+        private readonly IPersonalityProvider _personalityProvider;
         private readonly OpenAIAPI _openAIApi;
         private readonly int _maxTokens;
 
-        public ChatGPTBot(string secretKey, IUsersRepository usersRepository, string openAiApiKey, int maxTokens)
+        public ChatGPTBot(string secretKey, IUsersRepository usersRepository, IPersonalityProvider personalityProvider, string openAiApiKey, int maxTokens)
         {
             _secretKey = secretKey;
             _usersRepository = usersRepository;
+            _personalityProvider = personalityProvider;
             _openAIApi = new OpenAIAPI(openAiApiKey);
             _maxTokens = maxTokens;
         }
 
-        public async Task<string> ProcessCommandAsync(long chatId, string text)
+        public async Task<string> ProcessCommandAsync(long chatId, string username, string text)
         {
             string[] parts = text.Split(' ', 2);
             string command = parts[0];
@@ -31,7 +33,7 @@ namespace MiroslavGPT.Domain
                 case "/init":
                     return await InitCommandAsync(chatId, argument);
                 case "/prompt":
-                    return await PromptCommandAsync(chatId, argument);
+                    return await PromptCommandAsync(chatId, username, argument);
                 default:
                     return "Unknown command. Please use /init or /prompt.";
             }
@@ -50,7 +52,7 @@ namespace MiroslavGPT.Domain
             }
         }
 
-        private async Task<string> PromptCommandAsync(long chatId, string prompt)
+        private async Task<string> PromptCommandAsync(long chatId, string username, string prompt)
         {
             if (!await _usersRepository.IsAuthorizedAsync(chatId))
             {
@@ -62,16 +64,22 @@ namespace MiroslavGPT.Domain
                 return "Please provide a prompt after the /prompt command.";
             }
 
-            string response = await GetChatGPTResponse(prompt); // Implement this method to call ChatGPT API
+            string response = await GetChatGPTResponse(username, prompt); // Implement this method to call ChatGPT API
             return response;
         }
 
-        private async Task<string> GetChatGPTResponse(string prompt)
+        private async Task<string> GetChatGPTResponse(string username, string prompt)
         {
-            var request = new OpenAI_API.Completions.CompletionRequest
+            var messages = _personalityProvider.GetPersonalityMessages();
+            messages.Add(new OpenAI_API.Chat.ChatMessage
             {
-                Model = "text-davinci-003",
-                Prompt = prompt,
+                Role = OpenAI_API.Chat.ChatMessageRole.User,
+                Content = $"@{username}: {prompt}",
+            });
+            var request = new OpenAI_API.Chat.ChatRequest
+            {
+                Model = OpenAI_API.Models.Model.ChatGPTTurbo.ModelID,
+                Messages = messages,
                 MaxTokens = _maxTokens,
                 Temperature = 0.7,
                 TopP = 1,
@@ -81,8 +89,8 @@ namespace MiroslavGPT.Domain
 
             try
             {
-                var result = await _openAIApi.Completions.CreateCompletionAsync(request);
-                var combinedResponse = string.Join("\n", result.Completions.Select(c => c.Text.Trim()));
+                var result = await _openAIApi.Chat.CreateChatCompletionAsync(request);
+                var combinedResponse = string.Join("\n", result.Choices.Select(c => c.Message.Content.Trim()));
                 return $"*Response from ChatGPT API for prompt '{prompt}':*\n\n{combinedResponse}";
             }
             catch (Exception e)
@@ -91,4 +99,4 @@ namespace MiroslavGPT.Domain
             }
         }
     }
-} 
+}

@@ -24,17 +24,18 @@ namespace MiroslavGPT.Azure
                 .AddEnvironmentVariables()
                 .Build();
 
-            string secretKey = config["SECRET_KEY"];
-            string openAiApiKey = config["OPENAI_API_KEY"];
-            string telegramBotToken = config["TELEGRAM_BOT_TOKEN"];
-            string connectionString = config["COSMOSDB_CONNECTION_STRING"];
-            string databaseName = config["COSMOSDB_DATABASE_NAME"];
-            string containerName = config["COSMOSDB_CONTAINER_NAME"];
-            string botUsername = config["TELEGRAM_BOT_USERNAME"];
-            int maxTokens = int.Parse(config["MAX_TOKENS"] ?? "100");
+            var secretKey = config["SECRET_KEY"];
+            var openAiApiKey = config["OPENAI_API_KEY"];
+            var telegramBotToken = config["TELEGRAM_BOT_TOKEN"];
+            var connectionString = config["COSMOSDB_CONNECTION_STRING"];
+            var databaseName = config["COSMOSDB_DATABASE_NAME"];
+            var containerName = config["COSMOSDB_CONTAINER_NAME"];
+            var botUsername = config["TELEGRAM_BOT_USERNAME"];
+            var maxTokens = int.Parse(config["MAX_TOKENS"] ?? "100");
 
-            CosmosDBUsersRepository usersRepository = new CosmosDBUsersRepository(connectionString, databaseName, containerName);
-            ChatGPTBot chatGPTBot = new ChatGPTBot(secretKey, usersRepository, openAiApiKey, maxTokens);
+            var usersRepository = new CosmosDBUsersRepository(connectionString, databaseName, containerName);
+            var personality = new TsunderePersonalityProvider();
+            var chatGPTBot = new ChatGPTBot(secretKey, usersRepository, personality, openAiApiKey, maxTokens);
 
             _telegramMessageHandler = new TelegramMessageHandler(chatGPTBot, telegramBotToken, botUsername);
         }
