@@ -32,7 +32,7 @@ namespace MiroslavGPT.AWS
             }
             catch (Exception ex)
             {
-                context.Logger.LogError($"Error processing webhook request: {ex.Message}");
+                context.Logger.LogError($"Error processing webhook request: {ex}");
                 return new APIGatewayProxyResponse { StatusCode = 500 };
             }
         }

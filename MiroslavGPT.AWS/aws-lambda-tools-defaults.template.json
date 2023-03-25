@@ -21,7 +21,7 @@
     "function-subnets"      : "",
     "function-security-groups" : "",
     "tracing-mode"             : "PassThrough",
-    "environment-variables"    : "\"TELEGRAM_BOT_TOKEN\"=\"{YourBotToken}\";\"DYNAMODB_TABLE_NAME\"=\"{YourDynamoDbTableName}\";\"TELEGRAM_BOT_USERNAME\"=\"{YourBotName}\";\"SECRET_KEY\"=\"{YourSecretKey}\";\"OPENAI_API_KEY\"=\"{YourOpenAiApiKey}\";\"MAX_TOKENS\"=\"500\"",
+    "environment-variables"    : "\"TELEGRAM_BOT_TOKEN\"=\"{YourBotToken}\";\"DYNAMODB_USERS_TABLE_NAME\"=\"{YourDynamoDbTableName}\";\"TELEGRAM_BOT_USERNAME\"=\"{YourBotName}\";\"SECRET_KEY\"=\"{YourSecretKey}\";\"OPENAI_API_KEY\"=\"{YourOpenAiApiKey}\";\"MAX_TOKENS\"=\"500\"",
     "image-tag"                : "",
     "function-description"     : ""
 }
