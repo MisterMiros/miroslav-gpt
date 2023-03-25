@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Personalities;
+using MiroslavGPT.Domain.Settings;
 using OpenAI_API;
 using Telegram.Bot.Types.Enums;
 

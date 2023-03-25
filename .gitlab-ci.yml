@@ -24,7 +24,7 @@ deploy_aws:
     - cd publish/aws
     - zip -r lambda.zip .
     - aws lambda update-function-code --function-name $FUNCTION_NAME --zip-file fileb://lambda.zip
-    - aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN,OPENAI_API_KEY=$OPENAI_API_KEY,SECRET_KEY=$SECRET_KEY,DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME,TELEGRAM_BOT_USERNAME=$TELEGRAM_BOT_USERNAME,MAX_TOKENS=$MAX_TOKENS}"
+    - aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN,OPENAI_API_KEY=$OPENAI_API_KEY,SECRET_KEY=$SECRET_KEY,DYNAMODB_USERS_TABLE_NAME=$DYNAMODB_USERS_TABLE_NAME,TELEGRAM_BOT_USERNAME=$TELEGRAM_BOT_USERNAME,MAX_TOKENS=$MAX_TOKENS}"
   only:
     - master
   when: manual

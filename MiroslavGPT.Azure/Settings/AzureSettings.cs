@@ -4,7 +4,7 @@ namespace MiroslavGPT.Azure.Settings
 {
     public class AzureSettings : ITelegramBotSettings, IChatGptBotSettings, ICosmosDBSettings, ICosmosDBUsersSettings
     {
-        public string TelegramBotName { get; set; }
+        public string TelegramBotUsername { get; set; }
         public string TelegramBotToken { get; set; }
         public string SecretKey { get; set; }
         public string OpenAiApiKey { get; set; }

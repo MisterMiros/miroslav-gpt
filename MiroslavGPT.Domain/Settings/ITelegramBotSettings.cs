@@ -2,7 +2,7 @@
 {
     public interface ITelegramBotSettings
     {
-        public string TelegramBotName { get; set; }
+        public string TelegramBotUsername { get; set; }
         public string TelegramBotToken { get; set; }
     }
 }

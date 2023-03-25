@@ -18,7 +18,7 @@ namespace MiroslavGPT.Azure
 
             var azureSettings = new AzureSettings
             {
-                TelegramBotName = config["TELEGRAM_BOT_USERNAME"],
+                TelegramBotUsername = config["TELEGRAM_BOT_USERNAME"],
                 TelegramBotToken = config["TELEGRAM_BOT_TOKEN"],
                 SecretKey = config["SECRET_KEY"],
                 OpenAiApiKey = config["OPENAI_API_KEY"],

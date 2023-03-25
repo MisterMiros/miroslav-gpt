@@ -1,4 +1,4 @@
-﻿using MiroslavGPT.Domain.Interfaces;
+﻿using MiroslavGPT.Domain.Settings;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -27,12 +27,12 @@ namespace MiroslavGPT.Domain
                 return;
             }
 
-            if (update.Message.Chat.Type != ChatType.Private && !update.Message.Text.Contains("@" + _settings.TelegramBotName))
+            if (update.Message.Chat.Type != ChatType.Private && !update.Message.Text.Contains("@" + _settings.TelegramBotUsername))
             {
                 return;
             }
 
-            string text = update.Message.Text.Replace("@" + _settings.TelegramBotName, "").Trim();
+            string text = update.Message.Text.Replace("@" + _settings.TelegramBotUsername, "").Trim();
             string response = await _chatGPTBot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
             await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
         }
