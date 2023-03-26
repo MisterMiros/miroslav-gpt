@@ -1,7 +1,9 @@
-﻿namespace MiroslavGPT.Domain.Factories
+﻿using OpenAI_API.Chat;
+
+namespace MiroslavGPT.Domain.Factories
 {
     public interface IOpenAiClientFactory
     {
-        public OpenAI_API.OpenAIAPI CreateClient(string openAiApiKey);
+        public IChatEndpoint CreateChatClient(string openAiApiKey);
     }
 }

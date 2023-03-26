@@ -7,7 +7,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace MiroslavGPT.Domain
 {
-    public class TelegramMessageHandler: ITelegramMessageHandler
+    public class TelegramMessageHandler : ITelegramMessageHandler
     {
         private readonly IBot _bot;
         private readonly ITelegramBotSettings _settings;
@@ -18,7 +18,7 @@ namespace MiroslavGPT.Domain
             _bot = bot;
             _settings = telegramBotSettings;
             _telegramBotClient = telegramClientFactory.CreateBotClient(_settings.TelegramBotToken);
-           
+
         }
 
         public async Task ProcessUpdateAsync(Update update)
@@ -33,9 +33,13 @@ namespace MiroslavGPT.Domain
                 return;
             }
 
-            string text = update.Message.Text.Replace("@" + _settings.TelegramBotUsername, "").Trim();
-            string response = await _bot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
-            await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
+            var text = update.Message.Text.Replace("@" + _settings.TelegramBotUsername, "").Trim();
+            var response = await _bot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
+
+            if (!string.IsNullOrWhiteSpace(response))
+            {
+                await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
+            }
         }
 
         private async Task SendTextMessageAsync(long chatId, string response, int replyToMessageId)

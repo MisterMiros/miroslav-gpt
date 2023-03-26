@@ -1,12 +1,13 @@
 ﻿using OpenAI_API;
+using OpenAI_API.Chat;
 
 namespace MiroslavGPT.Domain.Factories
 {
     public class OpenAiClientFactory : IOpenAiClientFactory
     {
-        public OpenAIAPI CreateClient(string openAiApiKey)
+        public IChatEndpoint CreateChatClient(string openAiApiKey)
         {
-            return new OpenAIAPI(openAiApiKey);
+            return new OpenAIAPI(openAiApiKey).Chat;
         }
     }
 }
