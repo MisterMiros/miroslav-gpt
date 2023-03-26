@@ -35,8 +35,8 @@ namespace MiroslavGPT.Azure
 
             builder.Services.AddSingleton<IUsersRepository, CosmosDBUsersRepository>();
             builder.Services.AddSingleton<IPersonalityProvider, TsunderePersonalityProvider>();
-            builder.Services.AddSingleton<ChatGPTBot>();
-            builder.Services.AddSingleton<TelegramMessageHandler>();
+            builder.Services.AddSingleton<IBot, ChatGPTBot>();
+            builder.Services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
         }
     }
 }
