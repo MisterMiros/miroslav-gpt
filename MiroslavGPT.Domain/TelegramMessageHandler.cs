@@ -1,6 +1,6 @@
-﻿using MiroslavGPT.Domain.Interfaces;
+﻿using MiroslavGPT.Domain.Factories;
+using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Settings;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -13,11 +13,11 @@ namespace MiroslavGPT.Domain
         private readonly ITelegramBotSettings _settings;
         private readonly ITelegramBotClient _telegramBotClient;
 
-        public TelegramMessageHandler(IBot bot, ITelegramBotSettings telegramBotSettings)
+        public TelegramMessageHandler(IBot bot, ITelegramBotSettings telegramBotSettings, ITelegramClientFactory telegramClientFactory)
         {
             _bot = bot;
             _settings = telegramBotSettings;
-            _telegramBotClient = new TelegramBotClient(_settings.TelegramBotToken);
+            _telegramBotClient = telegramClientFactory.CreateBotClient(_settings.TelegramBotToken);
            
         }
 

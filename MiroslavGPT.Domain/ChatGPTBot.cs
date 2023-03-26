@@ -1,4 +1,5 @@
-﻿using MiroslavGPT.Domain.Interfaces;
+﻿using MiroslavGPT.Domain.Factories;
+using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Personalities;
 using MiroslavGPT.Domain.Settings;
 using OpenAI_API;
@@ -12,12 +13,12 @@ namespace MiroslavGPT.Domain
         private readonly IPersonalityProvider _personalityProvider;
         private readonly OpenAIAPI _openAIApi;
 
-        public ChatGPTBot(IUsersRepository usersRepository, IPersonalityProvider personalityProvider, IChatGptBotSettings chatGptBotSettings)
+        public ChatGPTBot(IUsersRepository usersRepository, IPersonalityProvider personalityProvider, IChatGptBotSettings chatGptBotSettings, IOpenAiClientFactory openAiClientFactory)
         {
             _usersRepository = usersRepository;
             _personalityProvider = personalityProvider;
             _settings = chatGptBotSettings;
-            _openAIApi = new OpenAIAPI(_settings.OpenAiApiKey);
+            _openAIApi = openAiClientFactory.CreateClient(_settings.OpenAiApiKey);
         }
 
         public async Task<string> ProcessCommandAsync(long chatId, string username, string text)
