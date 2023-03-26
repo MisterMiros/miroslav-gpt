@@ -29,8 +29,8 @@ namespace MiroslavGPT.AWS
 
             services.AddSingleton<IUsersRepository, DynamoDBUsersRepository>();
             services.AddSingleton<IPersonalityProvider, TsunderePersonalityProvider>();
-            services.AddSingleton<ChatGPTBot>();
-            services.AddSingleton<TelegramMessageHandler>();
+            services.AddSingleton<IBot, ChatGPTBot>();
+            services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
         }
     }
 }

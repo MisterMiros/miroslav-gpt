@@ -1,7 +1,7 @@
 ﻿using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Microsoft.Extensions.DependencyInjection;
-using MiroslavGPT.Domain;
+using MiroslavGPT.Domain.Interfaces;
 using Newtonsoft.Json.Linq;
 using Telegram.Bot.Types;
 
@@ -10,7 +10,7 @@ namespace MiroslavGPT.AWS
 {
     public class TelegramWebhookFunction
     {
-        private readonly TelegramMessageHandler _telegramMessageHandler;
+        private readonly ITelegramMessageHandler _telegramMessageHandler;
 
         public TelegramWebhookFunction()
         {
@@ -18,7 +18,7 @@ namespace MiroslavGPT.AWS
             Startup.ConfigureServices(services);
             var serviceProvider = services.BuildServiceProvider();
 
-            _telegramMessageHandler = serviceProvider.GetRequiredService<TelegramMessageHandler>();
+            _telegramMessageHandler = serviceProvider.GetRequiredService<ITelegramMessageHandler>();
         }
 
         public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest request, ILambdaContext context)
