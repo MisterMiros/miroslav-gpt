@@ -1,7 +1,8 @@
-﻿using MiroslavGPT.Domain.Interfaces;
+﻿using MiroslavGPT.Domain.Factories;
+using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Personalities;
 using MiroslavGPT.Domain.Settings;
-using OpenAI_API;
+using OpenAI_API.Chat;
 
 namespace MiroslavGPT.Domain
 {
@@ -10,21 +11,25 @@ namespace MiroslavGPT.Domain
         private readonly IChatGptBotSettings _settings;
         private readonly IUsersRepository _usersRepository;
         private readonly IPersonalityProvider _personalityProvider;
-        private readonly OpenAIAPI _openAIApi;
+        private readonly IChatEndpoint _chatClient;
 
-        public ChatGPTBot(IUsersRepository usersRepository, IPersonalityProvider personalityProvider, IChatGptBotSettings chatGptBotSettings)
+        public ChatGPTBot(IUsersRepository usersRepository, IPersonalityProvider personalityProvider, IChatGptBotSettings chatGptBotSettings, IOpenAiClientFactory openAiClientFactory)
         {
             _usersRepository = usersRepository;
             _personalityProvider = personalityProvider;
             _settings = chatGptBotSettings;
-            _openAIApi = new OpenAIAPI(_settings.OpenAiApiKey);
+            _chatClient = openAiClientFactory.CreateChatClient(_settings.OpenAiApiKey);
         }
 
         public async Task<string> ProcessCommandAsync(long chatId, string username, string text)
         {
-            string[] parts = text.Split(' ', 2);
-            string command = parts[0];
-            string argument = parts.Length > 1 ? parts[1] : string.Empty;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+            var parts = text.Split(' ', 2);
+            var command = parts[0];
+            var argument = parts.Length > 1 ? parts[1].Trim() : string.Empty;
 
             switch (command)
             {
@@ -68,13 +73,12 @@ namespace MiroslavGPT.Domain
 
         private async Task<string> GetChatGPTResponse(string username, string prompt)
         {
-            var messages = _personalityProvider.GetPersonalityMessages();
-            messages.Add(new OpenAI_API.Chat.ChatMessage
+            var messages = _personalityProvider.GetPersonalityMessages().Append(new ChatMessage
             {
-                Role = OpenAI_API.Chat.ChatMessageRole.User,
-                Content = $"@{username}: {prompt}",
-            });
-            var request = new OpenAI_API.Chat.ChatRequest
+                Role = ChatMessageRole.User,
+                Content = string.IsNullOrWhiteSpace(username) ? prompt : $"@{username}: {prompt}",
+            }).ToList();
+            var request = new ChatRequest
             {
                 Model = OpenAI_API.Models.Model.ChatGPTTurbo.ModelID,
                 Messages = messages,
@@ -87,7 +91,7 @@ namespace MiroslavGPT.Domain
 
             try
             {
-                var result = await _openAIApi.Chat.CreateChatCompletionAsync(request);
+                var result = await _chatClient.CreateChatCompletionAsync(request);
                 var combinedResponse = string.Join("\n", result.Choices.Select(c => c.Message.Content.Trim()));
                 return $"*Response from ChatGPT API for prompt '{prompt}':*\n\n{combinedResponse}";
             }
