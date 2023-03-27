@@ -38,7 +38,10 @@ namespace MiroslavGPT.Domain.Tests
             // Arrange
             var chatId = _fixture.Create<long>();
             var username = _fixture.Create<string>();
-            var text = _fixture.Create<string>();
+            var text = $"/command {_fixture.Create<string>()}";
+
+            _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("command"))
+                .Returns(false);
 
             // Act
             var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
@@ -116,6 +119,9 @@ namespace MiroslavGPT.Domain.Tests
             var username = _fixture.Create<string>();
             var text = $"/prompt {_fixture.Create<string>()}";
 
+            _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
+                .Returns(true);
+
             _mockUserRepository.Setup(r => r.IsAuthorizedAsync(chatId))
                 .ReturnsAsync(false);
 
@@ -137,6 +143,9 @@ namespace MiroslavGPT.Domain.Tests
             var chatId = _fixture.Create<long>();
             var username = _fixture.Create<string>();
             var text = $"/prompt{prompt}";
+
+            _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
+                .Returns(true);
 
             _mockUserRepository.Setup(r => r.IsAuthorizedAsync(chatId))
                 .ReturnsAsync(true);
@@ -167,8 +176,11 @@ namespace MiroslavGPT.Domain.Tests
             _mockUserRepository.Setup(r => r.IsAuthorizedAsync(chatId))
                 .ReturnsAsync(true);
 
+            _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
+                .Returns(true);
+
             var personality = _fixture.CreateMany<ChatMessage>().ToList();
-            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages(It.IsAny<string>()))
+            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages("/prompt"))
                 .Returns(personality);
 
             ChatRequest sentRequest = null;
@@ -220,8 +232,11 @@ namespace MiroslavGPT.Domain.Tests
             _mockUserRepository.Setup(r => r.IsAuthorizedAsync(chatId))
                 .ReturnsAsync(true);
 
+            _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
+                .Returns(true);
+
             var personality = _fixture.CreateMany<ChatMessage>().ToList();
-            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages(It.IsAny<string>()))
+            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages("/prompt"))
                 .Returns(personality);
 
             ChatRequest sentRequest = null;
@@ -272,8 +287,11 @@ namespace MiroslavGPT.Domain.Tests
             _mockUserRepository.Setup(r => r.IsAuthorizedAsync(chatId))
                 .ReturnsAsync(true);
 
+            _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
+                .Returns(true);
+
             var personality = _fixture.CreateMany<ChatMessage>().ToList();
-            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages(It.IsAny<string>()))
+            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages("/prompt"))
                 .Returns(personality);
 
             ChatRequest sentRequest = null;
