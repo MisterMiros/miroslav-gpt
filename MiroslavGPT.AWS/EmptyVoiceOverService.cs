@@ -2,7 +2,7 @@
 
 namespace MiroslavGPT.AWS
 {
-    public class AmazonVoiceOverService : IVoiceOverService
+    public class EmptyVoiceOverService : IVoiceOverService
     {
         public MemoryStream VoiceOver(string text)
         {

@@ -26,13 +26,16 @@ namespace MiroslavGPT.Azure
                 MaxTokens = int.Parse(config["MAX_TOKENS"] ?? "100"),
                 ConnectionString = config["COSMOSDB_CONNECTION_STRING"],
                 UsersDatabaseName = config["COSMOSDB_DATABASE_NAME"],
-                UsersContainerName = config["COSMOSDB_CONTAINER_NAME"]
+                UsersContainerName = config["COSMOSDB_CONTAINER_NAME"],
+                AzureSpeechRegion = config["AZURE_SPEECH_REGION"],
+                AzureSpeechKey = config["AZURE_SPEECH_KEY"],
             };
 
             builder.Services.AddSingleton<ITelegramBotSettings>(azureSettings);
             builder.Services.AddSingleton<IChatGptBotSettings>(azureSettings);
             builder.Services.AddSingleton<ICosmosDBSettings>(azureSettings);
             builder.Services.AddSingleton<ICosmosDBUsersSettings>(azureSettings);
+            builder.Services.AddSingleton<IAzureSpeechSettings>(azureSettings);
 
             builder.Services.AddSingleton<ITelegramClientFactory, TelegramClientFactory>();
             builder.Services.AddSingleton<IOpenAiClientFactory, OpenAiClientFactory>();
@@ -40,6 +43,7 @@ namespace MiroslavGPT.Azure
             builder.Services.AddSingleton<IPersonalityProvider, PersonalityProvider>();
             builder.Services.AddSingleton<IBot, ChatGPTBot>();
             builder.Services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
+            builder.Services.AddSingleton<IVoiceOverService, AzureSpeechVoiceOverService>();
         }
     }
 }
