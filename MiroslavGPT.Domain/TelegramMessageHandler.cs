@@ -48,11 +48,17 @@ namespace MiroslavGPT.Domain
             try
             {
                 var response = await _bot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
-                if (!string.IsNullOrWhiteSpace(response))
+                if (!string.IsNullOrWhiteSpace(response.Text))
                 {
-                    await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
+                    await SendTextMessageAsync(update.Message.Chat.Id, response.Text, update.Message.MessageId);
                 }
-            } catch (Exception)
+                if (response.Sound != null)
+                {
+                    await SendVoiceAsync(update.Message.Chat.Id, response.Sound, update.Message.MessageId);
+                }
+
+            }
+            catch (Exception)
             {
                 await SendTextMessageAsync(update.Message.Chat.Id, "Error handling the command", update.Message.MessageId);
                 throw;
@@ -67,6 +73,15 @@ namespace MiroslavGPT.Domain
                 replyToMessageId: replyToMessageId,
                 parseMode: ParseMode.Markdown,
                 disableWebPagePreview: true
+            );
+        }
+
+        private async Task SendVoiceAsync(long chatId, MemoryStream sound, int replyToMessageId)
+        {
+            await _telegramBotClient.SendVoiceAsync(
+                chatId: chatId,
+                voice: sound,
+                replyToMessageId: replyToMessageId
             );
         }
     }

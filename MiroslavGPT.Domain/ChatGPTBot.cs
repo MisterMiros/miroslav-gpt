@@ -1,5 +1,6 @@
 ﻿using MiroslavGPT.Domain.Factories;
 using MiroslavGPT.Domain.Interfaces;
+using MiroslavGPT.Domain.Models;
 using MiroslavGPT.Domain.Settings;
 using OpenAI_API.Chat;
 
@@ -8,19 +9,21 @@ namespace MiroslavGPT.Domain
     public class ChatGPTBot: IBot
     {
         private readonly IChatGptBotSettings _settings;
+        private readonly IVoiceOverService _voiceOverService;
         private readonly IUsersRepository _usersRepository;
         private readonly IPersonalityProvider _personalityProvider;
         private readonly IChatEndpoint _chatClient;
 
-        public ChatGPTBot(IUsersRepository usersRepository, IPersonalityProvider personalityProvider, IChatGptBotSettings chatGptBotSettings, IOpenAiClientFactory openAiClientFactory)
+        public ChatGPTBot(IUsersRepository usersRepository, IPersonalityProvider personalityProvider, IChatGptBotSettings chatGptBotSettings, IOpenAiClientFactory openAiClientFactory, IVoiceOverService voiceOverService)
         {
             _usersRepository = usersRepository;
             _personalityProvider = personalityProvider;
             _settings = chatGptBotSettings;
+            _voiceOverService = voiceOverService;
             _chatClient = openAiClientFactory.CreateChatClient(_settings.OpenAiApiKey);
         }
 
-        public async Task<string> ProcessCommandAsync(long chatId, string username, string text)
+        public async Task<BotResponse> ProcessCommandAsync(long chatId, string username, string text)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -34,41 +37,77 @@ namespace MiroslavGPT.Domain
             {
                 return await InitCommandAsync(chatId, argument);
             } 
+            if (command == "/enablevoice")
+            {
+                return await EnableVoiceOverCommandAsync(chatId);
+            }
+            if (command == "/disablevoice")
+            {
+                return await DisableVoiceOverCommandAsync(chatId);
+            }
             if (_personalityProvider.HasPersonalityCommand(command))
             {
                 return await PromptCommandAsync(command, chatId, username, argument);
             }
 
-            return "Unknown command. Please use /init or /prompt.";
+            return BotResponse.From("Unknown command.");
         }
 
-        private async Task<string> InitCommandAsync(long chatId, string secretKey)
+        private async Task<BotResponse> EnableVoiceOverCommandAsync(long chatId)
+        {
+            if (!await _usersRepository.IsAuthorizedAsync(chatId))
+            {
+                return BotResponse.From("You are not authorized. Please use /init command with the correct secret key.");
+            }
+            await _usersRepository.SetVoiceOverAsync(chatId, true);
+            return BotResponse.From("Successfully enabled voice over for responses.");
+        }
+
+        private async Task<BotResponse> DisableVoiceOverCommandAsync(long chatId)
+        {
+            if (!await _usersRepository.IsAuthorizedAsync(chatId))
+            {
+                return BotResponse.From("You are not authorized. Please use /init command with the correct secret key.");
+            }
+            await _usersRepository.SetVoiceOverAsync(chatId, false);
+            return BotResponse.From("Successfully disabled voice over for responses.");
+        }
+
+        private async Task<BotResponse> InitCommandAsync(long chatId, string secretKey)
         {
             if (secretKey == _settings.SecretKey)
             {
                 await _usersRepository.AuthorizeUserAsync(chatId);
-                return "Authorization successful! You can now use /prompt command.";
+                return BotResponse.From("Authorization successful! You can now use /prompt command.");
             }
             else
             {
-                return "Incorrect secret key. Please try again.";
+                return BotResponse.From("Incorrect secret key. Please try again.");
             }
         }
 
-        private async Task<string> PromptCommandAsync(string command, long chatId, string username, string prompt)
+        private async Task<BotResponse> PromptCommandAsync(string command, long chatId, string username, string prompt)
         {
             if (!await _usersRepository.IsAuthorizedAsync(chatId))
             {
-                return "You are not authorized. Please use /init command with the correct secret key.";
+                return BotResponse.From("You are not authorized. Please use /init command with the correct secret key.");
             }
 
             if (string.IsNullOrWhiteSpace(prompt))
             {
-                return "Please provide a prompt after the /prompt command.";
+                return BotResponse.From("Please provide a prompt after the /prompt command.");
             }
 
-            string response = await GetChatGPTResponse(command, username, prompt); // Implement this method to call ChatGPT API
-            return response;
+            var chatResponse = await GetChatGPTResponse(command, username, prompt);
+            var textRespone = $"*Response from ChatGPT API for prompt '{prompt}':*\n\n{chatResponse}";
+
+            if (!await _usersRepository.IsVoiceOverEnabledAsync(chatId))
+            {
+                return BotResponse.From(textRespone);
+            }
+
+            var soundResponse = _voiceOverService.VoiceOver(chatResponse);
+            return BotResponse.From(textRespone, soundResponse);
         }
 
         private async Task<string> GetChatGPTResponse(string command, string username, string prompt)
@@ -89,16 +128,8 @@ namespace MiroslavGPT.Domain
                 PresencePenalty = 0
             };
 
-            try
-            {
-                var result = await _chatClient.CreateChatCompletionAsync(request);
-                var combinedResponse = string.Join("\n", result.Choices.Select(c => c.Message.Content.Trim()));
-                return $"*Response from ChatGPT API for prompt '{prompt}':*\n\n{combinedResponse}";
-            }
-            catch (Exception e)
-            {
-                return $"Error while fetching response from ChatGPT API: {e.Message}";
-            }
+            var result = await _chatClient.CreateChatCompletionAsync(request);
+            return string.Join("\n", result.Choices.Select(c => c.Message.Content.Trim()));
         }
     }
 }
