@@ -32,5 +32,25 @@ namespace MiroslavGPT.AWS
             var document = await table.GetItemAsync(chatId);
             return document != null && document["Authorized"].AsBoolean();
         }
+
+        public async Task<bool> IsVoiceOverEnabledAsync(long chatId)
+        {
+            var table = Table.LoadTable(_dynamoDb, _settings.UsersTableName);
+            var document = await table.GetItemAsync(chatId);
+            return document != null && document["VoiceOver"] != null && document["VoiceOver"].AsBoolean();
+        }
+
+        public async Task SetVoiceOverAsync(long chatId, bool enabled)
+        {
+            var table = Table.LoadTable(_dynamoDb, _settings.UsersTableName);
+            var document = await table.GetItemAsync(chatId);
+            if (document == null)
+            {
+                return;
+            }
+
+            document["VoiceOver"] = true;
+            await table.UpdateItemAsync(document);
+        }
     }
 }

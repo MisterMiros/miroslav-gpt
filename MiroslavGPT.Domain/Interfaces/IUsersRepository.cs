@@ -6,5 +6,7 @@ namespace MiroslavGPT.Domain.Interfaces
     {
         Task<bool> IsAuthorizedAsync(long userId);
         Task AuthorizeUserAsync(long userId);
+        Task<bool> IsVoiceOverEnabledAsync(long userId);
+        Task SetVoiceOverAsync(long userId, bool enabled);
     }
 }

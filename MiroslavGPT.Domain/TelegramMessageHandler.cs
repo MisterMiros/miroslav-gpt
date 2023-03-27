@@ -56,7 +56,7 @@ namespace MiroslavGPT.Domain
             {
                 await SendTextMessageAsync(update.Message.Chat.Id, "Error handling the command", update.Message.MessageId);
                 throw;
-            }            
+            }
         }
 
         private async Task SendTextMessageAsync(long chatId, string response, int replyToMessageId)
