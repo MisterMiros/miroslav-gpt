@@ -31,7 +31,7 @@ namespace MiroslavGPT.AWS
             services.AddSingleton<ITelegramClientFactory, TelegramClientFactory>();
             services.AddSingleton<IOpenAiClientFactory, OpenAiClientFactory>();
             services.AddSingleton<IUsersRepository, DynamoDBUsersRepository>();
-            services.AddSingleton<IPersonalityProvider, TsunderePersonalityProvider>();
+            services.AddSingleton<IPersonalityProvider, PersonalityProvider>();
             services.AddSingleton<IBot, ChatGPTBot>();
             services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
         }
