@@ -1,6 +1,7 @@
 ﻿using MiroslavGPT.Domain.Factories;
 using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Settings;
+using System.Collections.Immutable;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -9,6 +10,11 @@ namespace MiroslavGPT.Domain
 {
     public class TelegramMessageHandler : ITelegramMessageHandler
     {
+        private readonly ImmutableArray<ChatType> _allowedTypes = new[]
+        {
+            ChatType.Group,
+            ChatType.Private,
+        }.ToImmutableArray();
         private readonly IBot _bot;
         private readonly ITelegramBotSettings _settings;
         private readonly ITelegramBotClient _telegramBotClient;
@@ -23,7 +29,12 @@ namespace MiroslavGPT.Domain
 
         public async Task ProcessUpdateAsync(Update update)
         {
-            if (update == null || update.Message == null || update.Message.Text == null || !update.Message.Text.StartsWith("/"))
+            if (update == null || update.Message == null || string.IsNullOrWhiteSpace(update.Message.Text) || !update.Message.Text.StartsWith("/"))
+            {
+                return;
+            }
+
+            if (!_allowedTypes.Contains(update.Message.Chat.Type))
             {
                 return;
             }
@@ -34,12 +45,18 @@ namespace MiroslavGPT.Domain
             }
 
             var text = update.Message.Text.Replace("@" + _settings.TelegramBotUsername, "").Trim();
-            var response = await _bot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
-
-            if (!string.IsNullOrWhiteSpace(response))
+            try
             {
-                await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
-            }
+                var response = await _bot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
+                if (!string.IsNullOrWhiteSpace(response))
+                {
+                    await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
+                }
+            } catch (Exception)
+            {
+                await SendTextMessageAsync(update.Message.Chat.Id, "Error handling the command", update.Message.MessageId);
+                throw;
+            }            
         }
 
         private async Task SendTextMessageAsync(long chatId, string response, int replyToMessageId)
@@ -48,6 +65,7 @@ namespace MiroslavGPT.Domain
                 chatId: chatId,
                 text: response,
                 replyToMessageId: replyToMessageId,
+                parseMode: ParseMode.Markdown,
                 disableWebPagePreview: true
             );
         }
