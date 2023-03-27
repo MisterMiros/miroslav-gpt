@@ -1,6 +1,5 @@
 ﻿using MiroslavGPT.Domain.Factories;
 using MiroslavGPT.Domain.Interfaces;
-using MiroslavGPT.Domain.Personalities;
 using MiroslavGPT.Domain.Settings;
 using OpenAI_API.Chat;
 
@@ -31,15 +30,16 @@ namespace MiroslavGPT.Domain
             var command = parts[0];
             var argument = parts.Length > 1 ? parts[1].Trim() : string.Empty;
 
-            switch (command)
+            if (command == "/init")
             {
-                case "/init":
-                    return await InitCommandAsync(chatId, argument);
-                case "/prompt":
-                    return await PromptCommandAsync(chatId, username, argument);
-                default:
-                    return "Unknown command. Please use /init or /prompt.";
+                return await InitCommandAsync(chatId, argument);
+            } 
+            if (_personalityProvider.HasPersonalityCommand(command))
+            {
+                return await PromptCommandAsync(command, chatId, username, argument);
             }
+
+            return "Unknown command. Please use /init or /prompt.";
         }
 
         private async Task<string> InitCommandAsync(long chatId, string secretKey)
@@ -55,7 +55,7 @@ namespace MiroslavGPT.Domain
             }
         }
 
-        private async Task<string> PromptCommandAsync(long chatId, string username, string prompt)
+        private async Task<string> PromptCommandAsync(string command, long chatId, string username, string prompt)
         {
             if (!await _usersRepository.IsAuthorizedAsync(chatId))
             {
@@ -67,13 +67,13 @@ namespace MiroslavGPT.Domain
                 return "Please provide a prompt after the /prompt command.";
             }
 
-            string response = await GetChatGPTResponse(username, prompt); // Implement this method to call ChatGPT API
+            string response = await GetChatGPTResponse(command, username, prompt); // Implement this method to call ChatGPT API
             return response;
         }
 
-        private async Task<string> GetChatGPTResponse(string username, string prompt)
+        private async Task<string> GetChatGPTResponse(string command, string username, string prompt)
         {
-            var messages = _personalityProvider.GetPersonalityMessages().Append(new ChatMessage
+            var messages = _personalityProvider.GetPersonalityMessages(command).Append(new ChatMessage
             {
                 Role = ChatMessageRole.User,
                 Content = string.IsNullOrWhiteSpace(username) ? prompt : $"@{username}: {prompt}",

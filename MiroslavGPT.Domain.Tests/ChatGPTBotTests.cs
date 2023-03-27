@@ -1,6 +1,5 @@
 ﻿using MiroslavGPT.Domain.Factories;
 using MiroslavGPT.Domain.Interfaces;
-using MiroslavGPT.Domain.Personalities;
 using MiroslavGPT.Domain.Settings;
 using OpenAI_API.Chat;
 
@@ -169,7 +168,7 @@ namespace MiroslavGPT.Domain.Tests
                 .ReturnsAsync(true);
 
             var personality = _fixture.CreateMany<ChatMessage>().ToList();
-            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages())
+            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages(It.IsAny<string>()))
                 .Returns(personality);
 
             ChatRequest sentRequest = null;
@@ -222,7 +221,7 @@ namespace MiroslavGPT.Domain.Tests
                 .ReturnsAsync(true);
 
             var personality = _fixture.CreateMany<ChatMessage>().ToList();
-            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages())
+            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages(It.IsAny<string>()))
                 .Returns(personality);
 
             ChatRequest sentRequest = null;
@@ -274,7 +273,7 @@ namespace MiroslavGPT.Domain.Tests
                 .ReturnsAsync(true);
 
             var personality = _fixture.CreateMany<ChatMessage>().ToList();
-            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages())
+            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages(It.IsAny<string>()))
                 .Returns(personality);
 
             ChatRequest sentRequest = null;
