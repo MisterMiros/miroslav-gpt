@@ -2,6 +2,6 @@
 {
     public interface IVoiceOverService
     {
-        public MemoryStream VoiceOver(string text);
+        public Task<MemoryStream> VoiceOverAsync(string text);
     }
 }

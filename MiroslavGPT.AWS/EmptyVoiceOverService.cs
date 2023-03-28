@@ -4,9 +4,9 @@ namespace MiroslavGPT.AWS
 {
     public class EmptyVoiceOverService : IVoiceOverService
     {
-        public MemoryStream VoiceOver(string text)
+        public Task<MemoryStream> VoiceOverAsync(string text)
         {
-            return null;
+            return Task.FromResult(null);
         }
     }
 }

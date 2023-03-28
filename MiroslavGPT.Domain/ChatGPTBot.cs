@@ -106,7 +106,7 @@ namespace MiroslavGPT.Domain
                 return BotResponse.From(textRespone);
             }
 
-            var soundResponse = _voiceOverService.VoiceOver(chatResponse);
+            var soundResponse = await _voiceOverService.VoiceOverAsync(chatResponse);
             return BotResponse.From(textRespone, soundResponse);
         }
 

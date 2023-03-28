@@ -68,8 +68,8 @@ namespace MiroslavGPT.Azure
 
         public async Task SetVoiceOverAsync(long userId, bool enabled)
         {
-            var patch = PatchOperation.Set("voiceOver", enabled);
-            await _container.PatchItemAsync<User>(userId.ToString(), new PartitionKey(userId.ToString()), new[] { patch });
+            var user = new User(userId.ToString(), true, enabled);
+            await _container.UpsertItemAsync(user, new PartitionKey(userId.ToString()));
         }
 
         private record User(string id, bool isAuthorized, bool voiceOver);

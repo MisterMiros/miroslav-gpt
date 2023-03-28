@@ -31,14 +31,12 @@ namespace MiroslavGPT.Azure
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 var update = JObject.Parse(requestBody).ToObject<Update>();
                 await _telegramMessageHandler.ProcessUpdateAsync(update);
-
-                return new OkResult();
             }
             catch (Exception ex)
             {
                 logger.LogError($"Error processing webhook request: {ex}");
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
+            return new OkResult();
         }
     }
 }
