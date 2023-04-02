@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using MiroslavGPT.Azure.Factories;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Domain;
 using MiroslavGPT.Domain.Factories;
@@ -35,6 +36,7 @@ namespace MiroslavGPT.Azure
             builder.Services.AddSingleton<ICosmosDBUsersSettings>(azureSettings);
 
             builder.Services.AddSingleton<IUsersRepository, CosmosDBUsersRepository>();
+            builder.Services.AddSingleton<ICosmosClientFactory, CosmosClientFactory>();
 
             builder.Services.AddSingleton<ITelegramClientFactory, TelegramClientFactory>();
             builder.Services.AddSingleton<IOpenAiClientFactory, OpenAiClientFactory>();
