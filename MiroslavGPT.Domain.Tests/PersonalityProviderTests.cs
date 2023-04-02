@@ -30,6 +30,7 @@ namespace MiroslavGPT.Domain.Tests
         [TestCase("/command")]
         [TestCase("ABCDEF")]
         [TestCase("")]
+        [TestCase("   ")]
         [TestCase(null)]
         public void HasPersonalityCommand_ShouldReturnFalse_WithNotExistingPersonality(string command)
         {

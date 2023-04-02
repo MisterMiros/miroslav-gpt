@@ -167,7 +167,7 @@ Each prompt will be prepended with an author name like this 'author: prompt'. Me
 
         public bool HasPersonalityCommand(string command)
         {
-            return _personalityByCommand.ContainsKey(command);
+            return !string.IsNullOrWhiteSpace(command) && _personalityByCommand.ContainsKey(command);
         }
 
         public List<ChatMessage> GetPersonalityMessages(string command)
