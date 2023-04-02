@@ -100,7 +100,7 @@ namespace MiroslavGPT.Domain.Tests
             var botName = "thebot";
             var update = _fixture.Create<Update>();
             update.Message.Text = "/command";
-            update.Message.Chat.Type = ChatType.Group;
+            update.Message.Chat.Type = chatType;
 
             _mockSettings.Setup(s => s.TelegramBotUsername)
                 .Returns(botName);
@@ -188,6 +188,37 @@ namespace MiroslavGPT.Domain.Tests
             _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.Is<SendMessageRequest>(r =>
             r.ChatId == update.Message.Chat.Id
             && r.Text == response
+            && r.ReplyToMessageId == update.Message.MessageId
+            && r.DisableWebPagePreview == true
+            && r.ParseMode == ParseMode.Markdown), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task ProcessUpdateAsync_ShouldSendMessage_OnException()
+        {
+            // Arrange
+            var text = "/command";
+            var update = _fixture.Create<Update>();
+            update.Message.Text = text;
+            update.Message.Chat.Type = ChatType.Private;
+
+            var ex = new Exception("Failed");
+
+            _mockBot.Setup(b => b.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text))
+                .ThrowsAsync(ex);
+
+            // Act
+            // Assert
+            Assert.ThrowsAsync<Exception>(async () => await _handler.ProcessUpdateAsync(update))
+                .Should()
+                .NotBeNull()
+                .And
+                .Be(ex);
+
+            _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+            _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.Is<SendMessageRequest>(r =>
+            r.ChatId == update.Message.Chat.Id
+            && r.Text == "Error handling the command"
             && r.ReplyToMessageId == update.Message.MessageId
             && r.DisableWebPagePreview == true
             && r.ParseMode == ParseMode.Markdown), It.IsAny<CancellationToken>()), Times.Once);
