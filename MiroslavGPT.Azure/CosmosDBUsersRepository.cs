@@ -31,7 +31,7 @@ namespace MiroslavGPT.Azure
                 {
                     var response = await iterator.ReadNextAsync();
                     var user = response.FirstOrDefault();
-                    return user?.isAuthorized == true;
+                    return user.isAuthorized;
                 }
 
                 return false;
@@ -49,6 +49,6 @@ namespace MiroslavGPT.Azure
             await _container.UpsertItemAsync(user, new PartitionKey(userId.ToString()));
         }
 
-        private record User(string id, bool isAuthorized);
+        public record User(string id, bool isAuthorized);
     }
 }
