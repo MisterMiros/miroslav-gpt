@@ -148,7 +148,7 @@ namespace MiroslavGPT.Azure.Tests
             }, _mockBuilder.Object);
 
 
-            // Assert\
+            // Assert
             serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IChatGptBotSettings))
                 .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
                 .Which.MaxTokens.Should().Be(100);

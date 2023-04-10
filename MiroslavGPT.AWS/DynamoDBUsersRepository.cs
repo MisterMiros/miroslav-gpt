@@ -1,5 +1,6 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
+using MiroslavGPT.AWS.Factories;
 using MiroslavGPT.AWS.Settings;
 using MiroslavGPT.Domain.Interfaces;
 
@@ -10,9 +11,9 @@ namespace MiroslavGPT.AWS
         private readonly IAmazonDynamoDB _dynamoDb;
         private readonly IDynamoDBUsersSettings _settings;
 
-        public DynamoDBUsersRepository(IRegionSettings regionSettings, IDynamoDBUsersSettings dynamoDBUsersSettings)
+        public DynamoDBUsersRepository(IDynamoDBClientFactory clientFactory, IRegionSettings regionSettings, IDynamoDBUsersSettings dynamoDBUsersSettings)
         {
-            _dynamoDb = new AmazonDynamoDBClient(Amazon.RegionEndpoint.GetBySystemName(regionSettings.RegionName));
+            _dynamoDb = clientFactory.CreateClient(regionSettings.RegionName);
             _settings = dynamoDBUsersSettings;
         }
 
