@@ -27,7 +27,7 @@ namespace MiroslavGPT.Azure
                 MaxTokens = int.Parse(config["MAX_TOKENS"] ?? "100"),
                 ConnectionString = config["COSMOSDB_CONNECTION_STRING"],
                 UsersDatabaseName = config["COSMOSDB_DATABASE_NAME"],
-                UsersContainerName = config["COSMOSDB_CONTAINER_NAME"]
+                UsersContainerName = config["COSMOSDB_CONTAINER_NAME"],
             };
 
             builder.Services.AddSingleton<ITelegramBotSettings>(azureSettings);
