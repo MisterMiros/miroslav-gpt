@@ -21,6 +21,11 @@ namespace MiroslavGPT.AWS
             _telegramMessageHandler = serviceProvider.GetRequiredService<ITelegramMessageHandler>();
         }
 
+        public TelegramWebhookFunction(ITelegramMessageHandler messageHandler)
+        {
+            _telegramMessageHandler = messageHandler;
+        }
+
         public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest request, ILambdaContext context)
         {
             try

@@ -11,7 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiroslavGPT.Azure", "Mirosl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0FEF0D68-3370-4BE7-AD52-9D5DD20CDB79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiroslavGPT.Domain.Tests", "MiroslavGPT.Domain.Tests\MiroslavGPT.Domain.Tests.csproj", "{961D0B04-3A21-49CD-A343-6A1243885B17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiroslavGPT.Domain.Tests", "MiroslavGPT.Domain.Tests\MiroslavGPT.Domain.Tests.csproj", "{961D0B04-3A21-49CD-A343-6A1243885B17}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiroslavGPT.Azure.Tests", "MiroslavGPT.Azure.Tests\MiroslavGPT.Azure.Tests.csproj", "{998EEE97-5DB0-4917-8EB8-0861E694A677}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIroslavGPT.Tests.Core", "MIroslavGPT.Tests.Core\MIroslavGPT.Tests.Core.csproj", "{2EC052C4-E76E-4139-B1B7-D93BE02AF989}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiroslavGPT.AWS.Tests", "MiroslavGPT.AWS.Tests\MiroslavGPT.AWS.Tests.csproj", "{6B9E4EED-313F-4B06-A88E-AB32B0819D89}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,12 +41,27 @@ Global
 		{961D0B04-3A21-49CD-A343-6A1243885B17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{961D0B04-3A21-49CD-A343-6A1243885B17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{961D0B04-3A21-49CD-A343-6A1243885B17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{998EEE97-5DB0-4917-8EB8-0861E694A677}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{998EEE97-5DB0-4917-8EB8-0861E694A677}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{998EEE97-5DB0-4917-8EB8-0861E694A677}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{998EEE97-5DB0-4917-8EB8-0861E694A677}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EC052C4-E76E-4139-B1B7-D93BE02AF989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EC052C4-E76E-4139-B1B7-D93BE02AF989}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EC052C4-E76E-4139-B1B7-D93BE02AF989}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EC052C4-E76E-4139-B1B7-D93BE02AF989}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B9E4EED-313F-4B06-A88E-AB32B0819D89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B9E4EED-313F-4B06-A88E-AB32B0819D89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B9E4EED-313F-4B06-A88E-AB32B0819D89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B9E4EED-313F-4B06-A88E-AB32B0819D89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{961D0B04-3A21-49CD-A343-6A1243885B17} = {0FEF0D68-3370-4BE7-AD52-9D5DD20CDB79}
+		{998EEE97-5DB0-4917-8EB8-0861E694A677} = {0FEF0D68-3370-4BE7-AD52-9D5DD20CDB79}
+		{2EC052C4-E76E-4139-B1B7-D93BE02AF989} = {0FEF0D68-3370-4BE7-AD52-9D5DD20CDB79}
+		{6B9E4EED-313F-4B06-A88E-AB32B0819D89} = {0FEF0D68-3370-4BE7-AD52-9D5DD20CDB79}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F78CBB35-934D-4DAB-9148-310E49F96ADF}

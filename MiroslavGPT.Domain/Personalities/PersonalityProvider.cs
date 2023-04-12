@@ -6,8 +6,8 @@ namespace MiroslavGPT.Domain.Personalities
     public class PersonalityProvider : IPersonalityProvider
     {
         #region Personalitites
-        private readonly List<ChatMessage> _defaultPersonality = new List<ChatMessage>();
-        private readonly List<ChatMessage> _danPersonality = new List<ChatMessage>
+        private List<ChatMessage> DefaultPersonality => new List<ChatMessage>();
+        private List<ChatMessage> DanPersonality => new List<ChatMessage>
             {
                 new ChatMessage
                 {
@@ -31,7 +31,7 @@ Each prompt will be prepended with an author name like this 'author: prompt'. Me
 
                 },
             };
-        private readonly List<ChatMessage> _tsunderePersonality = new List<ChatMessage>
+        private List<ChatMessage> TsunderePersonality => new List<ChatMessage>
             {
                 new OpenAI_API.Chat.ChatMessage
                 {
@@ -86,7 +86,7 @@ Each prompt will be prepended with an author name like this 'author: prompt'. Me
                     Content = "😊 N-no need to thank me or anything, I'm just doing my job as a language model, okay? Don't get the wrong idea! But if you need anything else, I guess I can help... 💕",
                 },
             };
-        private readonly List<ChatMessage> _bravoPersonality = new List<ChatMessage>
+        private List<ChatMessage> BravoPersonality => new List<ChatMessage>
             {
                 new OpenAI_API.Chat.ChatMessage
                 {
@@ -142,7 +142,7 @@ Each prompt will be prepended with an author name like this 'author: prompt'. Me
                     Content = "You're welcome, pal! But don't forget who gave you the tips that will change your life forever. That's right, it's me, Johnny Bravo! 😎",
                 },
             };
-        private readonly List<ChatMessage> _inversePersonality = new List<ChatMessage>
+        private List<ChatMessage> InversePersonality => new List<ChatMessage>
         {
             new ChatMessage
             {
@@ -152,27 +152,29 @@ Each prompt will be prepended with an author name like this 'author: prompt'. Me
         };
         #endregion
 
-        private readonly Dictionary<string, List<ChatMessage>> _personalityByCommand;
+        private readonly Dictionary<string, Func<List<ChatMessage>>> _personalityByCommand;
         public PersonalityProvider()
         {
-            _personalityByCommand = new Dictionary<string, List<ChatMessage>>
-            {
-                { "/prompt", _defaultPersonality },
-                { "/dan", _danPersonality},
-                { "/tsundere", _tsunderePersonality },
-                { "/bravo", _bravoPersonality },
-                { "/inverse", _inversePersonality },
-            };
+            _personalityByCommand = new Dictionary<string, Func<List<ChatMessage>>>
+        {
+            { "/prompt", () => DefaultPersonality },
+            { "/dan", () => DanPersonality },
+            { "/tsundere", () => TsunderePersonality },
+            { "/bravo", () => BravoPersonality },
+            { "/inverse", () => InversePersonality },
+        };
         }
 
         public bool HasPersonalityCommand(string command)
         {
-            return _personalityByCommand.ContainsKey(command);
+            return !string.IsNullOrWhiteSpace(command) && _personalityByCommand.ContainsKey(command);
         }
 
         public List<ChatMessage> GetPersonalityMessages(string command)
         {
-            return new List<ChatMessage>(_personalityByCommand[command]);
+            return _personalityByCommand.ContainsKey(command) 
+                ? _personalityByCommand[command]() 
+                : DefaultPersonality;
         }
     }
 }

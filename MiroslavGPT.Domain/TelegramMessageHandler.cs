@@ -15,6 +15,7 @@ namespace MiroslavGPT.Domain
             ChatType.Group,
             ChatType.Private,
         }.ToImmutableArray();
+
         private readonly IBot _bot;
         private readonly ITelegramBotSettings _settings;
         private readonly ITelegramBotClient _telegramBotClient;
@@ -52,11 +53,12 @@ namespace MiroslavGPT.Domain
                 {
                     await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);
                 }
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 await SendTextMessageAsync(update.Message.Chat.Id, "Error handling the command", update.Message.MessageId);
                 throw;
-            }            
+            }
         }
 
         private async Task SendTextMessageAsync(long chatId, string response, int replyToMessageId)
