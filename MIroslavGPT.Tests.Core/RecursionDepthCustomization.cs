@@ -1,8 +1,10 @@
 ﻿using AutoFixture.Kernel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace MiroslavGPT.Tests.Core
 {
+    [ExcludeFromCodeCoverage]
     public class RecursionDepthCustomization : ISpecimenBuilder
     {
         private readonly int _maxRecursionDepth;

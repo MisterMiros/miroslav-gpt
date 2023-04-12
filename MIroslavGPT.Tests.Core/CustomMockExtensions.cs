@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MiroslavGPT.Tests.Core
 {
+    [ExcludeFromCodeCoverage]
     public static class CustomMockExtensions
     {
         public static void VerifyLogError<T>(this Mock<ILogger<T>> mockLogger, string message)
