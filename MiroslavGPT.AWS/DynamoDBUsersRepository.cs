@@ -1,5 +1,7 @@
 ﻿using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 using MiroslavGPT.AWS.Factories;
 using MiroslavGPT.AWS.Settings;
 using MiroslavGPT.Domain.Interfaces;
@@ -19,19 +21,18 @@ namespace MiroslavGPT.AWS
 
         public async Task AuthorizeUserAsync(long chatId)
         {
-            var table = Table.LoadTable(_dynamoDb, _settings.UsersTableName);
             var item = new Document();
             item["ChatId"] = chatId;
             item["Authorized"] = true;
 
-            await table.PutItemAsync(item);
+            await _dynamoDb.PutItemAsync(_settings.UsersTableName, item.ToAttributeMap());
         }
 
         public async Task<bool> IsAuthorizedAsync(long chatId)
         {
-            var table = Table.LoadTable(_dynamoDb, _settings.UsersTableName);
-            var document = await table.GetItemAsync(chatId);
-            return document != null && document["Authorized"].AsBoolean();
+            var item = await _dynamoDb.GetItemAsync(_settings.UsersTableName, new Dictionary<string, AttributeValue> { { "ChatId", new AttributeValue { N = chatId.ToString() }}});
+            var document = Document.FromAttributeMap(item.Item);
+            return document != null && document.ContainsKey("Authorized") && document["Authorized"].AsBoolean();
         }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
-using MiroslavGPT.AWS;
 using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Tests.Core;
 using Newtonsoft.Json;
 using System.Net;
 using Update = Telegram.Bot.Types.Update;
 
-namespace MiroslavGPT.Azure.Tests
+namespace MiroslavGPT.AWS.Tests
 {
     public class TelegramWebhookFunctionTests
     {
@@ -29,6 +28,16 @@ namespace MiroslavGPT.Azure.Tests
             _mockContext= _fixture.Freeze<Mock<ILambdaContext>>();
             _mockContext.Setup(c => c.Logger).Returns(_mockLogger.Object);
             _function = new TelegramWebhookFunction(_mockTelegramMessageHandler.Object);
+        }
+
+        [Test]
+        public void Constructor_WorksFine()
+        {
+            // Arrange
+            // Act
+            // Assert
+            Assert.DoesNotThrow(() => new TelegramWebhookFunction());
+            
         }
 
         [Test]
