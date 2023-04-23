@@ -45,7 +45,6 @@ namespace MiroslavGPT.Domain
                 return;
             }
 
-            var text = update.Message.Text.Replace("@" + _settings.TelegramBotUsername, "").Trim();
             try
             {
                 var response = await _bot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
