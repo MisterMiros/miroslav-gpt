@@ -41,7 +41,7 @@ namespace MiroslavGPT.Domain.Tests
             await _handler.ProcessUpdateAsync(null);
 
             // Assert
-            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<Update>()), Times.Never);
             _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -55,7 +55,7 @@ namespace MiroslavGPT.Domain.Tests
             await _handler.ProcessUpdateAsync(update);
 
             // Assert
-            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<Update>()), Times.Never);
             _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -73,7 +73,7 @@ namespace MiroslavGPT.Domain.Tests
             await _handler.ProcessUpdateAsync(update);
 
             // Assert
-            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<Update>()), Times.Never);
             _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -87,7 +87,7 @@ namespace MiroslavGPT.Domain.Tests
             await _handler.ProcessUpdateAsync(update);
 
             // Assert
-            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<Update>()), Times.Never);
             _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -109,7 +109,7 @@ namespace MiroslavGPT.Domain.Tests
             await _handler.ProcessUpdateAsync(update);
 
             // Assert
-            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<Update>()), Times.Never);
             _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -134,12 +134,12 @@ namespace MiroslavGPT.Domain.Tests
             await _handler.ProcessUpdateAsync(update);
 
             // Assert
-            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockBot.Verify(b => b.ProcessCommandAsync(It.IsAny<Update>()), Times.Never);
             _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Test]
-        public async Task ProcessUpdateAsync_ShouldSendMessage_WnenSuccessfullyProcessed()
+        public async Task ProcessUpdateAsync_ShouldSendMessage_WhenSuccessfullyProcessed()
         {
             // Arrange
             var text = "/command";
@@ -148,8 +148,7 @@ namespace MiroslavGPT.Domain.Tests
             update.Message.Text = text;
             update.Message.Chat.Type = ChatType.Private;
 
-            _mockBot.Setup(b => b.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text))
-                .ReturnsAsync(response);
+            _mockBot.Setup(b => b.ProcessCommandAsync(update)).ReturnsAsync(response);
 
             // Act
             await _handler.ProcessUpdateAsync(update);
@@ -177,7 +176,7 @@ namespace MiroslavGPT.Domain.Tests
             _mockSettings.Setup(s => s.TelegramBotUsername)
                 .Returns("botname");
 
-            _mockBot.Setup(b => b.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, "/command"))
+            _mockBot.Setup(b => b.ProcessCommandAsync(update))
                 .ReturnsAsync(response);
 
             // Act
@@ -204,8 +203,7 @@ namespace MiroslavGPT.Domain.Tests
 
             var ex = new Exception("Failed");
 
-            _mockBot.Setup(b => b.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text))
-                .ThrowsAsync(ex);
+            _mockBot.Setup(b => b.ProcessCommandAsync(update)).ThrowsAsync(ex);
 
             // Act
             // Assert

@@ -47,7 +47,7 @@ namespace MiroslavGPT.Domain
 
             try
             {
-                var response = await _bot.ProcessCommandAsync(update.Message.Chat.Id, update.Message.From.Username, text);
+                var response = await _bot.ProcessCommandAsync(update);
                 if (!string.IsNullOrWhiteSpace(response))
                 {
                     await SendTextMessageAsync(update.Message.Chat.Id, response, update.Message.MessageId);

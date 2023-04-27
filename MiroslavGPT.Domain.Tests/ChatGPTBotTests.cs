@@ -1,7 +1,11 @@
-﻿using MiroslavGPT.Domain.Factories;
+﻿using MiroslavGPT.Domain.Extensions;
+using MiroslavGPT.Domain.Factories;
 using MiroslavGPT.Domain.Interfaces;
+using MiroslavGPT.Domain.Models;
 using MiroslavGPT.Domain.Settings;
+using MiroslavGPT.Tests.Core;
 using OpenAI_API.Chat;
+using Telegram.Bot.Types;
 
 namespace MiroslavGPT.Domain.Tests
 {
@@ -14,6 +18,7 @@ namespace MiroslavGPT.Domain.Tests
         private Mock<IChatGptBotSettings> _mockSettings;
         private Mock<IOpenAiClientFactory> _mockOpenAiClientFactory;
         private Mock<IChatEndpoint> _mockChatClient;
+        private Mock<IThreadRepository> _mockThreadRepository;
         private ChatGPTBot _chatGptBot;
 
         [SetUp]
@@ -21,30 +26,37 @@ namespace MiroslavGPT.Domain.Tests
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoMoqCustomization());
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
             _mockUserRepository = _fixture.Freeze<Mock<IUsersRepository>>();
             _mockPersonalityProvider = _fixture.Freeze<Mock<IPersonalityProvider>>();
             _mockSettings = _fixture.Freeze<Mock<IChatGptBotSettings>>();
             _mockOpenAiClientFactory = _fixture.Freeze<Mock<IOpenAiClientFactory>>();
             _mockChatClient = _fixture.Create<Mock<IChatEndpoint>>();
+            _mockThreadRepository = _fixture.Freeze<Mock<IThreadRepository>>();
             _mockOpenAiClientFactory.Setup(f => f.CreateChatClient(It.IsAny<string>()))
                 .Returns(_mockChatClient.Object);
             _chatGptBot = _fixture.Create<ChatGPTBot>();
         }
 
         [Test]
-        public async Task ProcessCommandAsync_ShouldReturnUnkownCommand()
+        public async Task ProcessCommandAsync_ShouldReturnUnknownCommand()
         {
             // Arrange
             var chatId = _fixture.Create<long>();
             var username = _fixture.Create<string>();
             var text = $"/command {_fixture.Create<string>()}";
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
 
             _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("command"))
                 .Returns(false);
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
             // Assert
             result.Should().Be("Unknown command. Please use /init or /prompt.");
@@ -58,9 +70,14 @@ namespace MiroslavGPT.Domain.Tests
             // Arrange
             var chatId = _fixture.Create<long>();
             var username = _fixture.Create<string>();
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
             // Assert
             result.Should().Be(null);
@@ -77,11 +94,16 @@ namespace MiroslavGPT.Domain.Tests
             var chatId = _fixture.Create<long>();
             var username = _fixture.Create<string>();
             var text = $"/init {wrongKey}";
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
 
             _mockSettings.Setup(s => s.SecretKey).Returns(_fixture.Create<string>());
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
             // Assert
             result.Should().Be("Incorrect secret key. Please try again.");
@@ -99,11 +121,16 @@ namespace MiroslavGPT.Domain.Tests
             var chatId = _fixture.Create<long>();
             var username = _fixture.Create<string>();
             var text = $"/init {secretKey}";
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
 
             _mockSettings.Setup(s => s.SecretKey).Returns(secretKey.Trim());
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
             // Assert
             result.Should().Be("Authorization successful! You can now use /prompt command.");
@@ -118,6 +145,11 @@ namespace MiroslavGPT.Domain.Tests
             var chatId = _fixture.Create<long>();
             var username = _fixture.Create<string>();
             var text = $"/prompt {_fixture.Create<string>()}";
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
 
             _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
                 .Returns(true);
@@ -126,7 +158,7 @@ namespace MiroslavGPT.Domain.Tests
                 .ReturnsAsync(false);
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
 
             // Assert
@@ -143,6 +175,11 @@ namespace MiroslavGPT.Domain.Tests
             var chatId = _fixture.Create<long>();
             var username = _fixture.Create<string>();
             var text = $"/prompt{prompt}";
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
 
             _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
                 .Returns(true);
@@ -151,7 +188,7 @@ namespace MiroslavGPT.Domain.Tests
                 .ReturnsAsync(true);
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
 
             // Assert
@@ -169,6 +206,12 @@ namespace MiroslavGPT.Domain.Tests
             var prompt = _fixture.Create<string>();
             var text = $"/prompt{spaces}{prompt}";
             var maxTokens = _fixture.Create<int>();
+            var threadId = _fixture.Create<Guid>();
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
 
             _mockSettings.Setup(r => r.MaxTokens)
                 .Returns(maxTokens);
@@ -182,8 +225,23 @@ namespace MiroslavGPT.Domain.Tests
             var personality = _fixture.CreateMany<ChatMessage>().ToList();
             _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages("/prompt"))
                 .Returns(personality);
+            
+            _mockThreadRepository.Setup(r => r.CreateThread(chatId))
+                .ReturnsAsync(threadId);
 
-            ChatRequest sentRequest = null;
+            var threadMessages = new List<ThreadMessage>
+            {
+                _fixture.Build<ThreadMessage>()
+                    .With(m => m.MessageId, update.Message.MessageId)
+                    .With(m => m.IsAssistant, false)
+                    .With(m => m.Username, username)
+                    .With(m => m.Text, prompt)
+                    .Create()
+            };
+            _mockThreadRepository.Setup(r => r.GetMessages(threadId))
+                .ReturnsAsync(threadMessages);
+
+            ChatRequest? sentRequest = null;
             var chatResult = _fixture.Create<ChatResult>();
             var response = string.Join("\n", chatResult.Choices.Select(c => c.Message.Content.Trim()));
             _mockChatClient.Setup(c => c.CreateChatCompletionAsync(It.IsAny<ChatRequest>()))
@@ -194,7 +252,7 @@ namespace MiroslavGPT.Domain.Tests
                 .ReturnsAsync(chatResult);
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
             // Assert
             result.Should().Be($"*Response from ChatGPT API for prompt '{prompt}':*\n\n{response}");
@@ -225,6 +283,13 @@ namespace MiroslavGPT.Domain.Tests
             var prompt = _fixture.Create<string>();
             var text = $"/prompt {prompt}";
             var maxTokens = _fixture.Create<int>();
+            var threadId = _fixture.Create<Guid>();
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
+            update.Message.ReplyToMessage = null;
 
             _mockSettings.Setup(r => r.MaxTokens)
                 .Returns(maxTokens);
@@ -238,6 +303,21 @@ namespace MiroslavGPT.Domain.Tests
             var personality = _fixture.CreateMany<ChatMessage>().ToList();
             _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages("/prompt"))
                 .Returns(personality);
+            
+            _mockThreadRepository.Setup(r => r.CreateThread(chatId))
+                .ReturnsAsync(threadId);
+
+            var threadMessages = new List<ThreadMessage>
+            {
+                _fixture.Build<ThreadMessage>()
+                    .With(m => m.MessageId, update.Message.MessageId)
+                    .With(m => m.IsAssistant, false)
+                    .Without(m => m.Username)
+                    .With(m => m.Text, prompt)
+                    .Create()
+            };
+            _mockThreadRepository.Setup(r => r.GetMessages(threadId))
+                .ReturnsAsync(threadMessages);
 
             ChatRequest sentRequest = null;
             var chatResult = _fixture.Create<ChatResult>();
@@ -250,7 +330,7 @@ namespace MiroslavGPT.Domain.Tests
                 .ReturnsAsync(chatResult);
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
             // Assert
             result.Should().Be($"*Response from ChatGPT API for prompt '{prompt}':*\n\n{response}");
@@ -270,9 +350,9 @@ namespace MiroslavGPT.Domain.Tests
             sentRequest.PresencePenalty.Should().Be(0);
             _mockChatClient.Verify(c => c.CreateChatCompletionAsync(It.IsAny<ChatRequest>()), Times.Once);
         }
-
+        
         [Test]
-        public async Task ProcessCommandAsync_Prompt_ShouldReturnError_WhenFailedApiRequest()
+        public async Task ProcessCommandAsync_Prompt_ShouldSendRequest_WhenThreadExists()
         {
             // Arrange
             var chatId = _fixture.Create<long>();
@@ -280,6 +360,12 @@ namespace MiroslavGPT.Domain.Tests
             var prompt = _fixture.Create<string>();
             var text = $"/prompt {prompt}";
             var maxTokens = _fixture.Create<int>();
+            var threadId = _fixture.Create<Guid>();
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = _fixture.Create<Message>();
 
             _mockSettings.Setup(r => r.MaxTokens)
                 .Returns(maxTokens);
@@ -294,6 +380,178 @@ namespace MiroslavGPT.Domain.Tests
             _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages("/prompt"))
                 .Returns(personality);
 
+            _mockThreadRepository.Setup(r => r.GetThreadByMessage(chatId, update.Message.ReplyToMessage.MessageId))
+                .ReturnsAsync(threadId);
+
+            var threadMessages = new List<ThreadMessage>
+            {
+                _fixture.Build<ThreadMessage>().With(m => m.IsAssistant, false).Create(),
+                _fixture.Build<ThreadMessage>().With(m => m.IsAssistant, true).Create(),
+                _fixture.Build<ThreadMessage>()
+                    .With(m => m.MessageId, update.Message.MessageId)
+                    .With(m => m.IsAssistant, false)
+                    .With(m => m.Username, username)
+                    .With(m => m.Text, prompt)
+                    .Create()
+            };
+            _mockThreadRepository.Setup(r => r.GetMessages(threadId))
+                .ReturnsAsync(threadMessages);
+
+            ChatRequest sentRequest = null;
+            var chatResult = _fixture.Create<ChatResult>();
+            var response = string.Join("\n", chatResult.Choices.Select(c => c.Message.Content.Trim()));
+            _mockChatClient.Setup(c => c.CreateChatCompletionAsync(It.IsAny<ChatRequest>()))
+                .Callback((ChatRequest r) =>
+                {
+                    sentRequest = r;
+                })
+                .ReturnsAsync(chatResult);
+
+            // Act
+            var result = await _chatGptBot.ProcessCommandAsync(update);
+
+            // Assert
+            result.Should().Be($"*Response from ChatGPT API for prompt '{prompt}':*\n\n{response}");
+            sentRequest.Should().NotBeNull();
+            sentRequest.Messages.Should().NotBeEmpty();
+            sentRequest.Messages.Take(personality.Count).Should().BeEquivalentTo(personality);
+            sentRequest.Messages.Skip(personality.Count).Take(3).Should().BeEquivalentTo(threadMessages.Select(m => m.ToChatMessage()));
+            sentRequest.MaxTokens.Should().Be(maxTokens);
+            sentRequest.Model.Should().Be(OpenAI_API.Models.Model.ChatGPTTurbo.ModelID);
+            sentRequest.Temperature.Should().Be(0.7);
+            sentRequest.TopP.Should().Be(1);
+            sentRequest.FrequencyPenalty.Should().Be(0);
+            sentRequest.PresencePenalty.Should().Be(0);
+            
+            _mockChatClient.Verify(c => c.CreateChatCompletionAsync(It.IsAny<ChatRequest>()), Times.Once);
+            _mockThreadRepository.Verify(r => r.GetThreadByMessage(chatId, update.Message.ReplyToMessage.MessageId), Times.Once);
+            _mockThreadRepository.Verify(r => r.AddThreadMessage(threadId, update.Message.Chat.Id, prompt, username), Times.Never);
+        }
+        
+        [Test]
+        public async Task ProcessCommandAsync_Prompt_ShouldSendRequest_WhenThreadNotExists()
+        {
+            // Arrange
+            var chatId = _fixture.Create<long>();
+            var username = _fixture.Create<string>();
+            var prompt = _fixture.Create<string>();
+            var text = $"/prompt {prompt}";
+            var maxTokens = _fixture.Create<int>();
+            var threadId = _fixture.Create<Guid>();
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = _fixture.Create<Message>();
+
+            _mockSettings.Setup(r => r.MaxTokens)
+                .Returns(maxTokens);
+
+            _mockUserRepository.Setup(r => r.IsAuthorizedAsync(chatId))
+                .ReturnsAsync(true);
+
+            _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
+                .Returns(true);
+
+            var personality = _fixture.CreateMany<ChatMessage>().ToList();
+            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages("/prompt"))
+                .Returns(personality);
+
+            _mockThreadRepository.Setup(r => r.GetThreadByMessage(chatId, update.Message.ReplyToMessage.MessageId))
+                .ReturnsAsync((Guid?)null);
+            
+            _mockThreadRepository.Setup(r => r.CreateThread(chatId))
+                .ReturnsAsync(threadId);
+
+            var threadMessages = new List<ThreadMessage>
+            {
+                _fixture.Build<ThreadMessage>().With(m => m.IsAssistant, false).Create(),
+                _fixture.Build<ThreadMessage>().With(m => m.IsAssistant, true).Create(),
+                _fixture.Build<ThreadMessage>()
+                    .With(m => m.MessageId, update.Message.MessageId)
+                    .With(m => m.IsAssistant, false)
+                    .With(m => m.Username, username)
+                    .With(m => m.Text, prompt)
+                    .Create()
+            };
+            _mockThreadRepository.Setup(r => r.GetMessages(threadId))
+                .ReturnsAsync(threadMessages);
+
+            ChatRequest sentRequest = null;
+            var chatResult = _fixture.Create<ChatResult>();
+            var response = string.Join("\n", chatResult.Choices.Select(c => c.Message.Content.Trim()));
+            _mockChatClient.Setup(c => c.CreateChatCompletionAsync(It.IsAny<ChatRequest>()))
+                .Callback((ChatRequest r) =>
+                {
+                    sentRequest = r;
+                })
+                .ReturnsAsync(chatResult);
+
+            // Act
+            var result = await _chatGptBot.ProcessCommandAsync(update);
+
+            // Assert
+            result.Should().Be($"*Response from ChatGPT API for prompt '{prompt}':*\n\n{response}");
+            sentRequest.Should().NotBeNull();
+            sentRequest.Messages.Should().NotBeEmpty();
+            sentRequest.Messages.Take(personality.Count).Should().BeEquivalentTo(personality);
+            sentRequest.Messages.Skip(personality.Count).Take(3).Should().BeEquivalentTo(threadMessages.Select(m => m.ToChatMessage()));
+            sentRequest.MaxTokens.Should().Be(maxTokens);
+            sentRequest.Model.Should().Be(OpenAI_API.Models.Model.ChatGPTTurbo.ModelID);
+            sentRequest.Temperature.Should().Be(0.7);
+            sentRequest.TopP.Should().Be(1);
+            sentRequest.FrequencyPenalty.Should().Be(0);
+            sentRequest.PresencePenalty.Should().Be(0);
+            
+            _mockChatClient.Verify(c => c.CreateChatCompletionAsync(It.IsAny<ChatRequest>()), Times.Once);
+            _mockThreadRepository.Verify(r => r.GetThreadByMessage(chatId, update.Message.ReplyToMessage.MessageId), Times.Once);
+            _mockThreadRepository.Verify(r => r.AddThreadMessage(threadId, update.Message.Chat.Id, prompt, username), Times.Never);
+        }
+
+        [Test]
+        public async Task ProcessCommandAsync_Prompt_ShouldReturnError_WhenFailedApiRequest()
+        {
+            // Arrange
+            var chatId = _fixture.Create<long>();
+            var username = _fixture.Create<string>();
+            var prompt = _fixture.Create<string>();
+            var text = $"/prompt {prompt}";
+            var maxTokens = _fixture.Create<int>();
+            var threadId = _fixture.Create<Guid>();
+            var update = _fixture.Create<Update>();
+            update.Message.Chat.Id = chatId;
+            update.Message.From.Username = username;
+            update.Message.Text = text;
+            update.Message.ReplyToMessage = null;
+
+            _mockSettings.Setup(r => r.MaxTokens)
+                .Returns(maxTokens);
+
+            _mockUserRepository.Setup(r => r.IsAuthorizedAsync(chatId))
+                .ReturnsAsync(true);
+
+            _mockPersonalityProvider.Setup(p => p.HasPersonalityCommand("/prompt"))
+                .Returns(true);
+
+            var personality = _fixture.CreateMany<ChatMessage>().ToList();
+            _mockPersonalityProvider.Setup(p => p.GetPersonalityMessages("/prompt"))
+                .Returns(personality);
+            
+            _mockThreadRepository.Setup(r => r.CreateThread(chatId))
+                .ReturnsAsync(threadId);
+            
+            var threadMessages = new List<ThreadMessage>
+            {
+                _fixture.Build<ThreadMessage>()
+                    .With(m => m.MessageId, update.Message.MessageId)
+                    .With(m => m.IsAssistant, false)
+                    .With(m => m.Username, username)
+                    .With(m => m.Text, prompt)
+                    .Create()
+            };
+            _mockThreadRepository.Setup(r => r.GetMessages(threadId))
+                .ReturnsAsync(threadMessages);
+
             ChatRequest sentRequest = null;
             _mockChatClient.Setup(c => c.CreateChatCompletionAsync(It.IsAny<ChatRequest>()))
                 .Callback((ChatRequest r) =>
@@ -303,7 +561,7 @@ namespace MiroslavGPT.Domain.Tests
                 .ThrowsAsync(new Exception("I failed"));
 
             // Act
-            var result = await _chatGptBot.ProcessCommandAsync(chatId, username, text);
+            var result = await _chatGptBot.ProcessCommandAsync(update);
 
             // Assert
             result.Should().Be($"Error while fetching response from ChatGPT API: I failed");

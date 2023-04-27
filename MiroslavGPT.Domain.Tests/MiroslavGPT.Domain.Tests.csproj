@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MiroslavGPT.Domain\MiroslavGPT.Domain.csproj" />
+    <ProjectReference Include="..\MIroslavGPT.Tests.Core\MIroslavGPT.Tests.Core.csproj" />
   </ItemGroup>
 
 </Project>

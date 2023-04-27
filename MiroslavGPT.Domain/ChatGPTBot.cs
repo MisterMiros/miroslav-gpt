@@ -38,7 +38,7 @@ namespace MiroslavGPT.Domain
             var username = update.Message.From.Username;
             var messageId = update.Message.MessageId;
             var replyToId = update.Message.ReplyToMessage?.MessageId;
-            var text = update.Message.Text.Replace("@" + _telegramBotSettings.TelegramBotUsername, "").Trim();
+            var text = update.Message.Text?.Replace("@" + _telegramBotSettings.TelegramBotUsername, "").Trim();
             if (string.IsNullOrWhiteSpace(text))
             {
                 return null;
@@ -84,10 +84,9 @@ namespace MiroslavGPT.Domain
                 return "Please provide a prompt after the /prompt command.";
             }
 
-            var threadId = await (replyToId.HasValue 
-                    ? _threadRepository.GetThreadByMessage(chatId, replyToId.Value) 
-                    : _threadRepository.CreateThread(chatId)
-                );
+            var threadId = replyToId.HasValue
+                ? await _threadRepository.GetThreadByMessage(chatId, replyToId.Value) ?? await _threadRepository.CreateThread(chatId)
+                : await _threadRepository.CreateThread(chatId);
 
             await _threadRepository.AddThreadMessage(threadId, messageId, prompt, username);
 
@@ -97,11 +96,11 @@ namespace MiroslavGPT.Domain
                 .Concat(threadMessages.Select(m => m.ToChatMessage()))
                 .ToList();
 
-            string response = await GetChatGPTResponse(messages);
+            var response = await GetChatGPTResponse(prompt, messages);
             return response;
         }
 
-        private async Task<string> GetChatGPTResponse(List<ChatMessage> messages)
+        private async Task<string> GetChatGPTResponse(string prompt, List<ChatMessage> messages)
         {
             var request = new ChatRequest
             {
@@ -118,7 +117,7 @@ namespace MiroslavGPT.Domain
             {
                 var result = await _chatClient.CreateChatCompletionAsync(request);
                 var combinedResponse = string.Join("\n", result.Choices.Select(c => c.Message.Content.Trim()));
-                return $"*Response from ChatGPT API for prompt '{messages.Last().Content}':*\n\n{combinedResponse}";
+                return $"*Response from ChatGPT API for prompt '{prompt}':*\n\n{combinedResponse}";
             }
             catch (Exception e)
             {
