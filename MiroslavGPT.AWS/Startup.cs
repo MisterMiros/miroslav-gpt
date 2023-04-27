@@ -1,10 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MiroslavGPT.AWS.Factories;
 using MiroslavGPT.AWS.Settings;
-using MiroslavGPT.Domain;
-using MiroslavGPT.Domain.Factories;
+using MiroslavGPT.Domain.Extensions;
 using MiroslavGPT.Domain.Interfaces;
-using MiroslavGPT.Domain.Personalities;
 using MiroslavGPT.Domain.Settings;
 
 namespace MiroslavGPT.AWS
@@ -32,11 +30,7 @@ namespace MiroslavGPT.AWS
             services.AddSingleton<IUsersRepository, DynamoDBUsersRepository>();
             services.AddSingleton<IDynamoDBClientFactory, DynamoDBClientFactory>();
 
-            services.AddSingleton<ITelegramClientFactory, TelegramClientFactory>();
-            services.AddSingleton<IOpenAiClientFactory, OpenAiClientFactory>();
-            services.AddSingleton<IPersonalityProvider, PersonalityProvider>();
-            services.AddSingleton<IBot, ChatGPTBot>();
-            services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
+            services.AddDomainServices();
         }
     }
 }

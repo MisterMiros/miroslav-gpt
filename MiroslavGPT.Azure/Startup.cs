@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MiroslavGPT.Azure.Factories;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Domain;
+using MiroslavGPT.Domain.Extensions;
 using MiroslavGPT.Domain.Factories;
 using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Personalities;
@@ -38,11 +39,7 @@ namespace MiroslavGPT.Azure
             builder.Services.AddSingleton<IUsersRepository, CosmosDBUsersRepository>();
             builder.Services.AddSingleton<ICosmosClientFactory, CosmosClientFactory>();
 
-            builder.Services.AddSingleton<ITelegramClientFactory, TelegramClientFactory>();
-            builder.Services.AddSingleton<IOpenAiClientFactory, OpenAiClientFactory>();
-            builder.Services.AddSingleton<IPersonalityProvider, PersonalityProvider>();
-            builder.Services.AddSingleton<IBot, ChatGPTBot>();
-            builder.Services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
+            builder.Services.AddDomainServices();
         }
     }
 }
