@@ -1,9 +1,9 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using MiroslavGPT.Azure.Factories;
 using MiroslavGPT.Azure.Settings;
+using MiroslavGPT.Azure.Users;
 using MiroslavGPT.Domain.Extensions;
-using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Interfaces.Users;
 using MiroslavGPT.Domain.Settings;
 
@@ -31,11 +31,13 @@ public class Startup : FunctionsStartup
 
         builder.Services.AddSingleton<ITelegramBotSettings>(azureSettings);
         builder.Services.AddSingleton<IChatGptBotSettings>(azureSettings);
-        builder.Services.AddSingleton<ICosmosDbSettings>(azureSettings);
-        builder.Services.AddSingleton<ICosmosDbUsersSettings>(azureSettings);
+        builder.Services.AddSingleton<ICosmosSettings>(azureSettings);
+        builder.Services.AddSingleton<ICosmosUsersSettings>(azureSettings);
+        builder.Services.AddSingleton<ICosmosThreadsSettings>(azureSettings);
 
-        builder.Services.AddSingleton<IUsersRepository, CosmosDbUsersRepository>();
-        builder.Services.AddSingleton<ICosmosClientFactory, CosmosClientFactory>();
+        builder.Services.AddSingleton(s => new CosmosClient(s.GetService<ICosmosSettings>()!.ConnectionString));
+        
+        builder.Services.AddSingleton<IUsersRepository, CosmosUsersRepository>();
 
         builder.Services.AddDomainServices();
     }

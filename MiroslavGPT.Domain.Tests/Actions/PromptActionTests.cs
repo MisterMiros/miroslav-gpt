@@ -16,7 +16,7 @@ public class PromptActionTests
 {
     private Fixture _fixture;
     private Mock<IUsersRepository> _mockUserRepository;
-    private Mock<IThreadRepository> _mockThreadRepository;
+    private Mock<IThreadsRepository> _mockThreadRepository;
     private Mock<IPersonalityProvider> _mockPersonalityProvider;
     private Mock<IChatClient> _mockChatClient;
     private Mock<ITelegramClient> _mockTelegramClient;
@@ -30,7 +30,7 @@ public class PromptActionTests
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         
         _mockUserRepository = _fixture.Freeze<Mock<IUsersRepository>>();
-        _mockThreadRepository = _fixture.Freeze<Mock<IThreadRepository>>();
+        _mockThreadRepository = _fixture.Freeze<Mock<IThreadsRepository>>();
         _mockPersonalityProvider = _fixture.Freeze<Mock<IPersonalityProvider>>();
         _mockChatClient = _fixture.Freeze<Mock<IChatClient>>();
         _mockTelegramClient = _fixture.Freeze<Mock<ITelegramClient>>();
@@ -190,8 +190,8 @@ public class PromptActionTests
         }
         
         _mockThreadRepository.Verify(r => r.GetMessagesAsync(threadId), Times.Once);
-        _mockThreadRepository.Verify(r => r.AddThreadMessageAsync(threadId, command.MessageId, command.Prompt, command.Username), Times.Once);
-        _mockThreadRepository.Verify(r => r.AddThreadMessageAsync(threadId, message.MessageId, response, null), Times.Once);
+        _mockThreadRepository.Verify(r => r.AddThreadMessageAsync(threadId, command.MessageId, command.Prompt, command.Username, false), Times.Once);
+        _mockThreadRepository.Verify(r => r.AddThreadMessageAsync(threadId, message.MessageId, response, null, true), Times.Once);
         _mockThreadRepository.VerifyNoOtherCalls();
         
         _mockTelegramClient.Verify(c => c.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId), Times.Once);

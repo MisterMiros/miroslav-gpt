@@ -1,10 +1,9 @@
 ﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MiroslavGPT.Azure.Factories;
 using MiroslavGPT.Azure.Settings;
+using MiroslavGPT.Azure.Users;
 using MiroslavGPT.Domain;
-using MiroslavGPT.Domain.Factories;
 using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Interfaces.Personality;
 using MiroslavGPT.Domain.Interfaces.Users;
@@ -79,36 +78,20 @@ public class StartupTests
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosDbSettings))
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosSettings))
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosDbUsersSettings))
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosUsersSettings))
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IUsersRepository) &&
-                                                 d.ImplementationType == typeof(CosmosDbUsersRepository) &&
-                                                 d.Lifetime == ServiceLifetime.Singleton);
-
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosClientFactory) &&
-                                                 d.ImplementationType == typeof(CosmosClientFactory) &&
-                                                 d.Lifetime == ServiceLifetime.Singleton);
-
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ITelegramClientFactory) &&
-                                                 d.ImplementationType == typeof(TelegramClientFactory) &&
-                                                 d.Lifetime == ServiceLifetime.Singleton);
-
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IOpenAiClientFactory) &&
-                                                 d.ImplementationType == typeof(OpenAiClientFactory) &&
+                                                 d.ImplementationType == typeof(CosmosUsersRepository) &&
                                                  d.Lifetime == ServiceLifetime.Singleton);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IPersonalityProvider) &&
                                                  d.ImplementationType == typeof(PersonalityProvider) &&
-                                                 d.Lifetime == ServiceLifetime.Singleton);
-
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IBot) &&
-                                                 d.ImplementationType == typeof(ChatGPTBot) &&
                                                  d.Lifetime == ServiceLifetime.Singleton);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ITelegramMessageHandler) &&

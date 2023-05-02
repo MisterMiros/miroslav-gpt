@@ -13,7 +13,7 @@ namespace MiroslavGPT.Domain.Actions;
 
 public class PromptAction : BaseAction<PromptCommand>
 {
-    private readonly IThreadRepository _threadRepository;
+    private readonly IThreadsRepository _threadsRepository;
     private readonly IChatClient _chatClient;
     private readonly IPersonalityProvider _personalityProvider;
     private readonly ITelegramBotSettings _settings;
@@ -21,13 +21,13 @@ public class PromptAction : BaseAction<PromptCommand>
 
     public PromptAction(
         IUsersRepository usersRepository,
-        IThreadRepository threadRepository,
+        IThreadsRepository threadsRepository,
         IPersonalityProvider personalityProvider,
         ITelegramBotSettings settings,
         IChatClient chatClient,
         ITelegramClient telegramClient) : base(telegramClient)
     {
-        _threadRepository = threadRepository;
+        _threadsRepository = threadsRepository;
         _chatClient = chatClient;
         _personalityProvider = personalityProvider;
         _settings = settings;
@@ -69,9 +69,9 @@ public class PromptAction : BaseAction<PromptCommand>
 
         var threadId = await GetThreadIdAsync(command.ChatId, command.ReplyToId);
 
-        await _threadRepository.AddThreadMessageAsync(threadId, command.MessageId, command.Prompt, command.Username);
+        await _threadsRepository.AddThreadMessageAsync(threadId, command.MessageId, command.Prompt, command.Username, false);
 
-        var threadMessages = await _threadRepository.GetMessagesAsync(threadId);
+        var threadMessages = await _threadsRepository.GetMessagesAsync(threadId);
         var messages = _personalityProvider
             .GetPersonalityMessages(command.Personality)
             .Concat(threadMessages.Select(m => m.ToChatMessage()))
@@ -83,20 +83,20 @@ public class PromptAction : BaseAction<PromptCommand>
 
         var message = await TelegramClient.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId);
 
-        await _threadRepository.AddThreadMessageAsync(threadId, message.MessageId, response, null);
+        await _threadsRepository.AddThreadMessageAsync(threadId, message.MessageId, response, null, true);
     }
 
     private async Task<Guid> GetThreadIdAsync(long chatId, int? replyToId)
     {
         if (replyToId.HasValue)
         {
-            var threadId = await _threadRepository.GetThreadByMessageAsync(chatId, replyToId.Value);
+            var threadId = await _threadsRepository.GetThreadByMessageAsync(chatId, replyToId.Value);
             if (threadId.HasValue)
             {
                 return threadId.Value;
             }
         }
 
-        return await _threadRepository.CreateThreadAsync(chatId);
+        return await _threadsRepository.CreateThreadAsync(chatId);
     }
 }

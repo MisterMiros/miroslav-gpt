@@ -1,22 +1,20 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using MiroslavGPT.Azure.Factories;
 using MiroslavGPT.Azure.Settings;
-using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Interfaces.Users;
 
-namespace MiroslavGPT.Azure;
+namespace MiroslavGPT.Azure.Users;
 
-public class CosmosDbUsersRepository : IUsersRepository
+public class CosmosUsersRepository : IUsersRepository
 {
     private readonly CosmosClient _client;
     private readonly Container _container;
 
-    public CosmosDbUsersRepository(ICosmosDbSettings cosmosDbSettings, ICosmosDbUsersSettings cosmosDbUsersSettings, ICosmosClientFactory cosmosClientFactory)
+    public CosmosUsersRepository(CosmosClient client, ICosmosUsersSettings cosmosUsersSettings)
     {
-        _client = cosmosClientFactory.CreateCosmosClient(cosmosDbSettings.ConnectionString);
-        _container = _client.GetContainer(cosmosDbUsersSettings.UsersDatabaseName, cosmosDbUsersSettings.UsersContainerName);
+        _client = client;
+        _container = _client.GetContainer(cosmosUsersSettings.UsersDatabaseName, cosmosUsersSettings.UsersContainerName);
     }
 
     public async Task<bool> IsAuthorizedAsync(long userId)
@@ -34,7 +32,7 @@ public class CosmosDbUsersRepository : IUsersRepository
                 var user = response.FirstOrDefault();
                 return user?.IsAuthorized == true;
             }
-
+            
             return false;
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
