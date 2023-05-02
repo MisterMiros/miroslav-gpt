@@ -4,10 +4,10 @@ using MiroslavGPT.Azure.Users;
 
 namespace MiroslavGPT.Azure.Tests.Users;
 
-public class CosmosDbUsersRepositoryTests
+public class CosmosUserRepositoryTests
 {
     private Fixture _fixture;
-    private Mock<ICosmosUserSettings> _mockCosmosDbUsersSettings;
+    private Mock<ICosmosUserSettings> _mockSettings;
     private Mock<CosmosClient> _mockCosmosClient;
     private Mock<Container> _mockContainer;
     private CosmosUserRepository _repository;
@@ -22,9 +22,9 @@ public class CosmosDbUsersRepositoryTests
         _mockCosmosClient = _fixture.Freeze<Mock<CosmosClient>>();
         _mockCosmosClient.Setup(c => c.GetContainer(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(_mockContainer.Object);
-        _mockCosmosDbUsersSettings = _fixture.Freeze<Mock<ICosmosUserSettings>>();
+        _mockSettings = _fixture.Freeze<Mock<ICosmosUserSettings>>();
 
-        _repository = new CosmosUserRepository(_mockCosmosClient.Object, _mockCosmosDbUsersSettings.Object);
+        _repository = new CosmosUserRepository(_mockCosmosClient.Object, _mockSettings.Object);
     }
 
     [Test]
