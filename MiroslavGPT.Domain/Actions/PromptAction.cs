@@ -81,7 +81,7 @@ public class PromptAction : BaseAction<PromptCommand>
         var usernames = threadMessages.Select(m => m.Username).Distinct();
         response = response.EscapeUsernames(usernames);
 
-        var message = await TelegramClient.SendTextMessageAsync(command.ChatId, response, command.MessageId);
+        var message = await TelegramClient.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId);
 
         await _threadRepository.AddThreadMessageAsync(threadId, message.MessageId, response, null);
     }

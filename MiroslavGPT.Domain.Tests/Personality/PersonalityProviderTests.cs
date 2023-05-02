@@ -1,71 +1,71 @@
 ﻿using MiroslavGPT.Domain.Personality;
 
-namespace MiroslavGPT.Domain.Tests.Personality
+namespace MiroslavGPT.Domain.Tests.Personality;
+
+[TestFixture]
+public class PersonalityProviderTests
 {
-    public class PersonalityProviderTests
+    private PersonalityProvider _provider;
+
+    [SetUp]
+    public void SetUp()
     {
-        private PersonalityProvider _provider;
+        _provider = new PersonalityProvider();
+    }
 
-        [SetUp]
-        public void SetUp()
-        {
-            _provider = new PersonalityProvider();
-        }
+    [TestCase("/prompt")]
+    [TestCase("/dan")]
+    [TestCase("/tsundere")]
+    [TestCase("/bravo")]
+    [TestCase("/inverse")]
+    public void HasPersonalityCommand_ShouldReturnTrue_WithExistingPersonality(string command)
+    {
+        // Arrange
+        // Act
+        var result = _provider.HasPersonalityCommand(command);
 
-        [TestCase("/prompt")]
-        [TestCase("/dan")]
-        [TestCase("/tsundere")]
-        [TestCase("/bravo")]
-        [TestCase("/inverse")]
-        public void HasPersonalityCommand_ShouldReturnTrue_WithExistingPersonality(string command)
-        {
-            // Arrange
-            // Act
-            var result = _provider.HasPersonalityCommand(command);
+        // Assert
+        result.Should().BeTrue();
+    }
 
-            // Assert
-            result.Should().BeTrue();
-        }
+    [TestCase("/command")]
+    [TestCase("ABCDEF")]
+    [TestCase("")]
+    [TestCase("   ")]
+    [TestCase(null)]
+    public void HasPersonalityCommand_ShouldReturnFalse_WithNotExistingPersonality(string command)
+    {
+        // Arrange
+        // Act
+        var result = _provider.HasPersonalityCommand(command);
 
-        [TestCase("/command")]
-        [TestCase("ABCDEF")]
-        [TestCase("")]
-        [TestCase("   ")]
-        [TestCase(null)]
-        public void HasPersonalityCommand_ShouldReturnFalse_WithNotExistingPersonality(string command)
-        {
-            // Arrange
-            // Act
-            var result = _provider.HasPersonalityCommand(command);
+        // Assert
+        result.Should().BeFalse();
+    }
 
-            // Assert
-            result.Should().BeFalse();
-        }
+    [TestCase("/dan")]
+    [TestCase("/tsundere")]
+    [TestCase("/bravo")]
+    [TestCase("/inverse")]
+    public void GetPersonalityMessages_ShouldReturnMessages_WithExistingPersonality(string command)
+    {
+        // Arrange
+        // Act
+        var result = _provider.GetPersonalityMessages(command);
 
-        [TestCase("/dan")]
-        [TestCase("/tsundere")]
-        [TestCase("/bravo")]
-        [TestCase("/inverse")]
-        public void GetPersonalityMessages_ShouldReturnMessages_WithExistingPersonality(string command)
-        {
-            // Arrange
-            // Act
-            var result = _provider.GetPersonalityMessages(command);
+        // Assert
+        result.Should().NotBeNull().And.NotBeEmpty();
+    }
 
-            // Assert
-            result.Should().NotBeNull().And.NotBeEmpty();
-        }
+    [TestCase("/prompt")]
+    [TestCase("/command")]
+    public void GetPersonalityMessages_ShouldReturnEmptyList_WithDefaultOrNonExistingPersonality(string command)
+    {
+        // Arrange
+        // Act
+        var result = _provider.GetPersonalityMessages(command);
 
-        [TestCase("/prompt")]
-        [TestCase("/command")]
-        public void GetPersonalityMessages_ShouldReturnEmptyList_WithDefaultOrNonExistingPersonality(string command)
-        {
-            // Arrange
-            // Act
-            var result = _provider.GetPersonalityMessages(command);
-
-            // Assert
-            result.Should().NotBeNull().And.BeEmpty();
-        }
+        // Assert
+        result.Should().NotBeNull().And.BeEmpty();
     }
 }

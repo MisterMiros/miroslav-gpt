@@ -158,7 +158,7 @@ public class PromptActionTests
         _mockThreadRepository.Setup(r => r.GetMessagesAsync(threadId))
             .ReturnsAsync(threadMessages);
         
-        _mockTelegramClient.Setup(c => c.SendTextMessageAsync(command.ChatId, response, command.MessageId))
+        _mockTelegramClient.Setup(c => c.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId))
             .ReturnsAsync(message);
 
         var chatMessages = new List<ChatMessage>();
@@ -194,7 +194,7 @@ public class PromptActionTests
         _mockThreadRepository.Verify(r => r.AddThreadMessageAsync(threadId, message.MessageId, response, null), Times.Once);
         _mockThreadRepository.VerifyNoOtherCalls();
         
-        _mockTelegramClient.Verify(c => c.SendTextMessageAsync(command.ChatId, response, command.MessageId), Times.Once);
+        _mockTelegramClient.Verify(c => c.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId), Times.Once);
         _mockTelegramClient.VerifyNoOtherCalls();
         
         _mockChatClient.Verify(c => c.GetChatGptResponseAsync(command.Prompt, It.IsAny<List<ChatMessage>>()), Times.Once);

@@ -30,7 +30,6 @@ public class ChatClient: IChatClient
         };
 
         var result = await _chatEndpoint.CreateChatCompletionAsync(request);
-        var combinedResponse = string.Join("\n", result.Choices.Select(c => c.Message.Content.Trim()));
-        return $"*Response from ChatGPT API for prompt '{prompt}':*\n\n{combinedResponse}";
+        return string.Join("\n", result.Choices.Select(c => c.Message.Content.Trim()));
     }
 }

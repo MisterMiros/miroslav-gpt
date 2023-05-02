@@ -9,9 +9,9 @@ namespace MiroslavGPT.Domain.Clients;
 public class TelegramClient: ITelegramClient
 {
     private readonly ITelegramBotClient _telegramBotClient;
-    public TelegramClient(ITelegramBotSettings telegramBotSettings)
+    public TelegramClient(ITelegramBotClient telegramBotClient)
     {
-        _telegramBotClient = new TelegramBotClient(telegramBotSettings.TelegramBotToken);
+        _telegramBotClient = telegramBotClient;
     }
     
     public async Task<Message> SendTextMessageAsync(long chatId, string response, int? replyToMessageId = null)
