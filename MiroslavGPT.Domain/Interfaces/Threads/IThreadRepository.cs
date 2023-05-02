@@ -2,7 +2,7 @@
 
 namespace MiroslavGPT.Domain.Interfaces.Threads
 {
-    public interface IThreadsRepository
+    public interface IThreadRepository
     {
         public Task<Guid> CreateThreadAsync(long chatId);
         public Task<Guid?> GetThreadByMessageAsync(long chatId, long messageId);

@@ -15,8 +15,8 @@ namespace MiroslavGPT.Domain.Tests.Actions;
 public class PromptActionTests
 {
     private Fixture _fixture;
-    private Mock<IUsersRepository> _mockUserRepository;
-    private Mock<IThreadsRepository> _mockThreadRepository;
+    private Mock<IUserRepository> _mockUserRepository;
+    private Mock<IThreadRepository> _mockThreadRepository;
     private Mock<IPersonalityProvider> _mockPersonalityProvider;
     private Mock<IChatClient> _mockChatClient;
     private Mock<ITelegramClient> _mockTelegramClient;
@@ -29,8 +29,8 @@ public class PromptActionTests
         _fixture.Customize(new AutoMoqCustomization());
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         
-        _mockUserRepository = _fixture.Freeze<Mock<IUsersRepository>>();
-        _mockThreadRepository = _fixture.Freeze<Mock<IThreadsRepository>>();
+        _mockUserRepository = _fixture.Freeze<Mock<IUserRepository>>();
+        _mockThreadRepository = _fixture.Freeze<Mock<IThreadRepository>>();
         _mockPersonalityProvider = _fixture.Freeze<Mock<IPersonalityProvider>>();
         _mockChatClient = _fixture.Freeze<Mock<IChatClient>>();
         _mockTelegramClient = _fixture.Freeze<Mock<ITelegramClient>>();

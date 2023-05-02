@@ -8,12 +8,12 @@ using MiroslavGPT.Domain.Interfaces.Users;
 
 namespace MiroslavGPT.AWS;
 
-public class DynamoDbUsersRepository : IUsersRepository
+public class DynamoDbUserRepository : IUserRepository
 {
     private readonly IAmazonDynamoDB _dynamoDb;
     private readonly IDynamoDbUsersSettings _settings;
 
-    public DynamoDbUsersRepository(IDynamoDbClientFactory clientFactory, IRegionSettings regionSettings, IDynamoDbUsersSettings dynamoDbUsersSettings)
+    public DynamoDbUserRepository(IDynamoDbClientFactory clientFactory, IRegionSettings regionSettings, IDynamoDbUsersSettings dynamoDbUsersSettings)
     {
         _dynamoDb = clientFactory.CreateClient(regionSettings.RegionName);
         _settings = dynamoDbUsersSettings;

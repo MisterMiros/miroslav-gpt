@@ -2,7 +2,7 @@
 
 namespace MiroslavGPT.Azure.Settings
 {
-    public class AzureSettings : ITelegramBotSettings, IChatGptBotSettings, ICosmosSettings, ICosmosUsersSettings, ICosmosThreadsSettings
+    public class AzureSettings : ITelegramBotSettings, IChatGptBotSettings, ICosmosSettings, ICosmosUserSettings, ICosmosThreadSettings
     {
         public string TelegramBotUsername { get; set; }
         public string TelegramBotToken { get; set; }
@@ -10,10 +10,10 @@ namespace MiroslavGPT.Azure.Settings
         public string OpenAiApiKey { get; set; }
         public int MaxTokens { get; set; }
         public string ConnectionString { get; set; }
-        public string UsersDatabaseName { get; set; }
-        public string UsersContainerName { get; set; }
-        public string ThreadsDatabaseName { get; set; }
-        public string ThreadsContainerName { get; set; }
+        public string UserDatabaseName { get; set; }
+        public string UserContainerName { get; set; }
+        public string ThreadDatabaseName { get; set; }
+        public string ThreadContainerName { get; set; }
         public int ThreadLengthLimit { get; set; }
     }
 }

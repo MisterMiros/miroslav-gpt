@@ -68,8 +68,8 @@ public class StartupTests
             .Which.ImplementationInstance.Should().BeOfType<AmazonSettings>()
             .Which.Should().BeEquivalentTo(amazonSettings);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IUsersRepository) &&
-                                                 d.ImplementationType == typeof(DynamoDbUsersRepository) &&
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IUserRepository) &&
+                                                 d.ImplementationType == typeof(DynamoDbUserRepository) &&
                                                  d.Lifetime == ServiceLifetime.Singleton);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IDynamoDbClientFactory) &&

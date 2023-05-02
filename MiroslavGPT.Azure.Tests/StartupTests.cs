@@ -56,9 +56,9 @@ public class StartupTests
         _mockConfiguration.Setup(c => c["COSMOSDB_CONNECTION_STRING"])
             .Returns(azureSettings.ConnectionString);
         _mockConfiguration.Setup(c => c["COSMOSDB_DATABASE_NAME"])
-            .Returns(azureSettings.UsersDatabaseName);
+            .Returns(azureSettings.UserDatabaseName);
         _mockConfiguration.Setup(c => c["COSMOSDB_CONTAINER_NAME"])
-            .Returns(azureSettings.UsersContainerName);
+            .Returns(azureSettings.UserContainerName);
 
         // Act
         _startup.Configure(new WebJobsBuilderContext
@@ -82,12 +82,12 @@ public class StartupTests
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosUsersSettings))
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosUserSettings))
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IUsersRepository) &&
-                                                 d.ImplementationType == typeof(CosmosUsersRepository) &&
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IUserRepository) &&
+                                                 d.ImplementationType == typeof(CosmosUserRepository) &&
                                                  d.Lifetime == ServiceLifetime.Singleton);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IPersonalityProvider) &&
@@ -122,9 +122,9 @@ public class StartupTests
         _mockConfiguration.Setup(c => c["COSMOSDB_CONNECTION_STRING"])
             .Returns(azureSettings.ConnectionString);
         _mockConfiguration.Setup(c => c["COSMOSDB_DATABASE_NAME"])
-            .Returns(azureSettings.UsersDatabaseName);
+            .Returns(azureSettings.UserDatabaseName);
         _mockConfiguration.Setup(c => c["COSMOSDB_CONTAINER_NAME"])
-            .Returns(azureSettings.UsersContainerName);
+            .Returns(azureSettings.UserContainerName);
 
         // Act
         _startup.Configure(new WebJobsBuilderContext

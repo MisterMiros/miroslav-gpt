@@ -6,15 +6,15 @@ using MiroslavGPT.Domain.Interfaces.Users;
 
 namespace MiroslavGPT.Azure.Users;
 
-public class CosmosUsersRepository : IUsersRepository
+public class CosmosUserRepository : IUserRepository
 {
     private readonly CosmosClient _client;
     private readonly Container _container;
 
-    public CosmosUsersRepository(CosmosClient client, ICosmosUsersSettings cosmosUsersSettings)
+    public CosmosUserRepository(CosmosClient client, ICosmosUserSettings cosmosUserSettings)
     {
         _client = client;
-        _container = _client.GetContainer(cosmosUsersSettings.UsersDatabaseName, cosmosUsersSettings.UsersContainerName);
+        _container = _client.GetContainer(cosmosUserSettings.UserDatabaseName, cosmosUserSettings.UserContainerName);
     }
 
     public async Task<bool> IsAuthorizedAsync(long userId)

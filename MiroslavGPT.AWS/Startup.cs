@@ -28,7 +28,7 @@ public class Startup
         services.AddSingleton<IRegionSettings>(amazonSettings);
         services.AddSingleton<IDynamoDbUsersSettings>(amazonSettings);
 
-        services.AddSingleton<IUsersRepository, DynamoDbUsersRepository>();
+        services.AddSingleton<IUserRepository, DynamoDbUserRepository>();
         services.AddSingleton<IDynamoDbClientFactory, DynamoDbClientFactory>();
 
         services.AddDomainServices();

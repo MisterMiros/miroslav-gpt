@@ -25,19 +25,19 @@ public class Startup : FunctionsStartup
             OpenAiApiKey = config["OPENAI_API_KEY"],
             MaxTokens = int.Parse(config["MAX_TOKENS"] ?? "100"),
             ConnectionString = config["COSMOSDB_CONNECTION_STRING"],
-            UsersDatabaseName = config["COSMOSDB_DATABASE_NAME"],
-            UsersContainerName = config["COSMOSDB_CONTAINER_NAME"],
+            UserDatabaseName = config["COSMOSDB_DATABASE_NAME"],
+            UserContainerName = config["COSMOSDB_CONTAINER_NAME"],
         };
 
         builder.Services.AddSingleton<ITelegramBotSettings>(azureSettings);
         builder.Services.AddSingleton<IChatGptBotSettings>(azureSettings);
         builder.Services.AddSingleton<ICosmosSettings>(azureSettings);
-        builder.Services.AddSingleton<ICosmosUsersSettings>(azureSettings);
-        builder.Services.AddSingleton<ICosmosThreadsSettings>(azureSettings);
+        builder.Services.AddSingleton<ICosmosUserSettings>(azureSettings);
+        builder.Services.AddSingleton<ICosmosThreadSettings>(azureSettings);
 
         builder.Services.AddSingleton(s => new CosmosClient(s.GetService<ICosmosSettings>()!.ConnectionString));
         
-        builder.Services.AddSingleton<IUsersRepository, CosmosUsersRepository>();
+        builder.Services.AddSingleton<IUserRepository, CosmosUserRepository>();
 
         builder.Services.AddDomainServices();
     }

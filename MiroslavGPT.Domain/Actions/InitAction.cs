@@ -11,15 +11,15 @@ namespace MiroslavGPT.Domain.Actions;
 public class InitAction : BaseAction<InitCommand>
 {
     private readonly IChatGptBotSettings _chatGptBotSettings;
-    private readonly IUsersRepository _usersRepository;
+    private readonly IUserRepository _userRepository;
 
     public InitAction(
         IChatGptBotSettings chatGptBotSettings,
-        IUsersRepository usersRepository,
+        IUserRepository userRepository,
         ITelegramClient telegramClient) : base(telegramClient)
     {
         _chatGptBotSettings = chatGptBotSettings;
-        _usersRepository = usersRepository;
+        _userRepository = userRepository;
     }
 
     public override InitCommand TryGetCommand(Update update)
@@ -42,7 +42,7 @@ public class InitAction : BaseAction<InitCommand>
     {
         if (command.Secret == _chatGptBotSettings.SecretKey)
         {
-            await _usersRepository.AuthorizeUserAsync(command.ChatId);
+            await _userRepository.AuthorizeUserAsync(command.ChatId);
             await TelegramClient.SendTextMessageAsync(command.ChatId, "Authorization successful! You can now use prompt commands.", command.MessageId);
         }
         else

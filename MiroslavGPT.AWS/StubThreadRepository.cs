@@ -5,11 +5,11 @@ using MiroslavGPT.Domain.Models;
 
 namespace MiroslavGPT.AWS;
 
-public class StubThreadsRepository: IThreadsRepository
+public class StubThreadRepository: IThreadRepository
 {
     private ConcurrentDictionary<Guid, ThreadMessage> Threads { get; set; }
     
-    public StubThreadsRepository()
+    public StubThreadRepository()
     {
         Threads = new ConcurrentDictionary<Guid, ThreadMessage>();
     }

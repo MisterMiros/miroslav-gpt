@@ -12,7 +12,7 @@ namespace MiroslavGPT.AWS.Tests
         private Mock<IAmazonDynamoDB> _mockDynamoDbClient;
         private Mock<IRegionSettings> _mockRegionSettings;
         private Mock<IDynamoDbUsersSettings> _mockDynamoDbUsersSettings;
-        private DynamoDbUsersRepository _repository;
+        private DynamoDbUserRepository _repository;
 
         [SetUp]
         public void SetUp()
@@ -26,7 +26,7 @@ namespace MiroslavGPT.AWS.Tests
             _mockDynamoDbClientFactory.Setup(x => x.CreateClient(_mockRegionSettings.Object.RegionName))
                 .Returns(_mockDynamoDbClient.Object);
 
-            _repository = _fixture.Create<DynamoDbUsersRepository>();
+            _repository = _fixture.Create<DynamoDbUserRepository>();
         }
 
         [Test]

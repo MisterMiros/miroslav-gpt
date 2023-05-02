@@ -7,10 +7,10 @@ namespace MiroslavGPT.Azure.Tests.Users;
 public class CosmosDbUsersRepositoryTests
 {
     private Fixture _fixture;
-    private Mock<ICosmosUsersSettings> _mockCosmosDbUsersSettings;
+    private Mock<ICosmosUserSettings> _mockCosmosDbUsersSettings;
     private Mock<CosmosClient> _mockCosmosClient;
     private Mock<Container> _mockContainer;
-    private CosmosUsersRepository _repository;
+    private CosmosUserRepository _repository;
 
     [SetUp]
     public void SetUp()
@@ -22,9 +22,9 @@ public class CosmosDbUsersRepositoryTests
         _mockCosmosClient = _fixture.Freeze<Mock<CosmosClient>>();
         _mockCosmosClient.Setup(c => c.GetContainer(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(_mockContainer.Object);
-        _mockCosmosDbUsersSettings = _fixture.Freeze<Mock<ICosmosUsersSettings>>();
+        _mockCosmosDbUsersSettings = _fixture.Freeze<Mock<ICosmosUserSettings>>();
 
-        _repository = new CosmosUsersRepository(_mockCosmosClient.Object, _mockCosmosDbUsersSettings.Object);
+        _repository = new CosmosUserRepository(_mockCosmosClient.Object, _mockCosmosDbUsersSettings.Object);
     }
 
     [Test]
@@ -32,7 +32,7 @@ public class CosmosDbUsersRepositoryTests
     {
         // Arrange
         var userId = _fixture.Create<long>();
-        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosUserRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Throws(new CosmosException("Not found", System.Net.HttpStatusCode.NotFound, 0, "", 0));
 
         // Act
@@ -46,10 +46,10 @@ public class CosmosDbUsersRepositoryTests
     {
         // Arrange
         var userId = _fixture.Create<long>();
-        var iterator = _fixture.Create<Mock<FeedIterator<CosmosUsersRepository.User>>>();
+        var iterator = _fixture.Create<Mock<FeedIterator<CosmosUserRepository.User>>>();
         iterator.Setup(i => i.HasMoreResults).Returns(false);
 
-        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosUserRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Returns(iterator.Object);
 
         // Act
@@ -65,17 +65,17 @@ public class CosmosDbUsersRepositoryTests
     {
         // Arrange
         var userId = _fixture.Create<long>();
-        var user = new CosmosUsersRepository.User(userId.ToString(), isAuthorized);
-        var users = new List<CosmosUsersRepository.User> { user };
-        var feedResponse = _fixture.Create<Mock<FeedResponse<CosmosUsersRepository.User>>>();
+        var user = new CosmosUserRepository.User(userId.ToString(), isAuthorized);
+        var users = new List<CosmosUserRepository.User> { user };
+        var feedResponse = _fixture.Create<Mock<FeedResponse<CosmosUserRepository.User>>>();
         feedResponse.Setup(r => r.GetEnumerator())
             .Returns(users.GetEnumerator());
-        var iterator = _fixture.Create<Mock<FeedIterator<CosmosUsersRepository.User>>>();
+        var iterator = _fixture.Create<Mock<FeedIterator<CosmosUserRepository.User>>>();
         iterator.Setup(i => i.HasMoreResults).Returns(true);
         iterator.Setup(i => i.ReadNextAsync(default))
             .ReturnsAsync(feedResponse.Object);
 
-        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosUserRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Returns(iterator.Object);
 
         // Act
@@ -96,7 +96,7 @@ public class CosmosDbUsersRepositoryTests
 
         // Assert
         _mockContainer.Verify(c => c.UpsertItemAsync(
-            It.Is<CosmosUsersRepository.User>(u => u.Id == userId.ToString() && u.IsAuthorized),
+            It.Is<CosmosUserRepository.User>(u => u.Id == userId.ToString() && u.IsAuthorized),
             It.Is<PartitionKey>(k => k == new PartitionKey(userId.ToString())),
             It.IsAny<ItemRequestOptions>(),
             default), Times.Once);

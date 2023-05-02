@@ -13,25 +13,25 @@ namespace MiroslavGPT.Domain.Actions;
 
 public class PromptAction : BaseAction<PromptCommand>
 {
-    private readonly IThreadsRepository _threadsRepository;
+    private readonly IThreadRepository _threadRepository;
     private readonly IChatClient _chatClient;
     private readonly IPersonalityProvider _personalityProvider;
     private readonly ITelegramBotSettings _settings;
-    private readonly IUsersRepository _usersRepository;
+    private readonly IUserRepository _userRepository;
 
     public PromptAction(
-        IUsersRepository usersRepository,
-        IThreadsRepository threadsRepository,
+        IUserRepository userRepository,
+        IThreadRepository threadRepository,
         IPersonalityProvider personalityProvider,
         ITelegramBotSettings settings,
         IChatClient chatClient,
         ITelegramClient telegramClient) : base(telegramClient)
     {
-        _threadsRepository = threadsRepository;
+        _threadRepository = threadRepository;
         _chatClient = chatClient;
         _personalityProvider = personalityProvider;
         _settings = settings;
-        _usersRepository = usersRepository;
+        _userRepository = userRepository;
     }
 
     public override PromptCommand TryGetCommand(Update update)
@@ -57,7 +57,7 @@ public class PromptAction : BaseAction<PromptCommand>
 
     public override async Task ExecuteAsync(PromptCommand command)
     {
-        if (!await _usersRepository.IsAuthorizedAsync(command.ChatId))
+        if (!await _userRepository.IsAuthorizedAsync(command.ChatId))
         {
             await TelegramClient.SendTextMessageAsync(command.ChatId, "You are not authorized. Please use /init command with the correct secret key.", command.MessageId);
         }
@@ -69,9 +69,9 @@ public class PromptAction : BaseAction<PromptCommand>
 
         var threadId = await GetThreadIdAsync(command.ChatId, command.ReplyToId);
 
-        await _threadsRepository.AddThreadMessageAsync(threadId, command.MessageId, command.Prompt, command.Username, false);
+        await _threadRepository.AddThreadMessageAsync(threadId, command.MessageId, command.Prompt, command.Username, false);
 
-        var threadMessages = await _threadsRepository.GetMessagesAsync(threadId);
+        var threadMessages = await _threadRepository.GetMessagesAsync(threadId);
         var messages = _personalityProvider
             .GetPersonalityMessages(command.Personality)
             .Concat(threadMessages.Select(m => m.ToChatMessage()))
@@ -83,20 +83,20 @@ public class PromptAction : BaseAction<PromptCommand>
 
         var message = await TelegramClient.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId);
 
-        await _threadsRepository.AddThreadMessageAsync(threadId, message.MessageId, response, null, true);
+        await _threadRepository.AddThreadMessageAsync(threadId, message.MessageId, response, null, true);
     }
 
     private async Task<Guid> GetThreadIdAsync(long chatId, int? replyToId)
     {
         if (replyToId.HasValue)
         {
-            var threadId = await _threadsRepository.GetThreadByMessageAsync(chatId, replyToId.Value);
+            var threadId = await _threadRepository.GetThreadByMessageAsync(chatId, replyToId.Value);
             if (threadId.HasValue)
             {
                 return threadId.Value;
             }
         }
 
-        return await _threadsRepository.CreateThreadAsync(chatId);
+        return await _threadRepository.CreateThreadAsync(chatId);
     }
 }

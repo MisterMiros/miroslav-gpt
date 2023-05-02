@@ -9,17 +9,17 @@ using MiroslavGPT.Domain.Models;
 
 namespace MiroslavGPT.Azure.Threads;
 
-public class CosmosThreadsRepository : IThreadsRepository
+public class CosmosThreadRepository : IThreadRepository
 {
     private readonly CosmosClient _client;
-    private readonly ICosmosThreadsSettings _settings;
+    private readonly ICosmosThreadSettings _settings;
     private readonly Container _threadsContainer;
 
-    public CosmosThreadsRepository(CosmosClient client, ICosmosThreadsSettings settings)
+    public CosmosThreadRepository(CosmosClient client, ICosmosThreadSettings settings)
     {
         _client = client;
         _settings = settings;
-        _threadsContainer = _client.GetContainer(settings.ThreadsDatabaseName, settings.ThreadsContainerName);
+        _threadsContainer = _client.GetContainer(settings.ThreadDatabaseName, settings.ThreadContainerName);
     }
 
     public async Task<Guid> CreateThreadAsync(long chatId)
