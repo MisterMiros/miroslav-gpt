@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Azure.Threads;
-using MiroslavGPT.Azure.Users;
+using Thread = MiroslavGPT.Domain.Models.Threads.Thread;
 
 namespace MiroslavGPT.Azure.Tests.Threads;
 
@@ -34,11 +34,11 @@ public class CosmosThreadsRepositoryTests
     {
         // Arrange
         // Act
-        var id = await _repository.CreateThreadAsync(chatId);
+        var thread = await _repository.CreateThreadAsync(chatId);
         // Assert
         _mockContainer.Verify(c => c.CreateItemAsync(
-            It.Is<CosmosThreadRepository.CosmosThread>(t => t.ChatId == chatId && t.Id == id && t.Messages != null && t.Messages.Count == 0),
-            It.Is<PartitionKey>(k => k == new PartitionKey(id.ToString())),
+            thread,
+            It.Is<PartitionKey>(k => k == new PartitionKey(thread.Id.ToString())),
             It.IsAny<ItemRequestOptions>(),
             It.IsAny<CancellationToken>()));
     }
@@ -47,7 +47,7 @@ public class CosmosThreadsRepositoryTests
     public async Task GetThreadByMessage_ShouldReturnNull_WhenNotFoundException(long chatId, int messageId)
     {
         // Arrange
-        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosThreadRepository.CosmosThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<Thread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Throws(new CosmosException("Not found", System.Net.HttpStatusCode.NotFound, 0, "", 0));
 
         // Act
@@ -60,10 +60,10 @@ public class CosmosThreadsRepositoryTests
     public async Task GetThreadByMessage_ShouldReturnNull_WhenNoValuesInIterator(long chatId, int messageId)
     {
         // Arrange
-        var iterator = _fixture.Create<Mock<FeedIterator<CosmosUserRepository.User>>>();
+        var iterator = _fixture.Create<Mock<FeedIterator<Thread>>>();
         iterator.Setup(i => i.HasMoreResults).Returns(false);
 
-        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosUserRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<Thread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Returns(iterator.Object);
 
         // Act
@@ -73,73 +73,47 @@ public class CosmosThreadsRepositoryTests
     }
 
     [Test, AutoData]
-    public async Task GetThreadByMessage_ShouldReturnId(long chatId, int messageId, CosmosThreadRepository.CosmosThread thread)
+    public async Task GetThreadByMessage_ShouldReturnThread(long chatId, int messageId, Thread thread)
     {
         // Arrange
-        var threads = new List<CosmosThreadRepository.CosmosThread> { thread };
+        var threads = new List<Thread> { thread };
 
-        var feedResponse = _fixture.Create<Mock<FeedResponse<CosmosThreadRepository.CosmosThread>>>();
+        var feedResponse = _fixture.Create<Mock<FeedResponse<Thread>>>();
         feedResponse.Setup(r => r.GetEnumerator())
             .Returns(threads.GetEnumerator());
 
-        var iterator = _fixture.Create<Mock<FeedIterator<CosmosThreadRepository.CosmosThread>>>();
+        var iterator = _fixture.Create<Mock<FeedIterator<Thread>>>();
         iterator.Setup(i => i.HasMoreResults).Returns(true);
         iterator.Setup(i => i.ReadNextAsync(default))
             .ReturnsAsync(feedResponse.Object);
 
-        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosThreadRepository.CosmosThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<Thread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Returns(iterator.Object);
 
         // Act
         var result = await _repository.GetThreadByMessageAsync(chatId, messageId);
 
         // Assert
-        result.Should().Be(thread.Id);
+        result.Should().Be(thread);
     }
 
     [Test, AutoData]
-    public async Task AddThreadMessageAsync_ShouldAdd(Guid id, long messageId, string text, string username, bool isAssistant, CosmosThreadRepository.CosmosThread thread)
+    public async Task UpdateThreadAsync_ShouldUpdate(Thread thread)
     {
         // Arrange
-        thread.Id = id;
-        var mockItemResponse = new Mock<ItemResponse<CosmosThreadRepository.CosmosThread>>();
-        mockItemResponse.Setup(r => r.Resource).Returns(thread);
-        _mockContainer.Setup(c => c.ReadItemAsync<CosmosThreadRepository.CosmosThread>(id.ToString(), new PartitionKey(id.ToString()), It.IsAny<ItemRequestOptions>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mockItemResponse.Object);
+        
         // Act
-        await _repository.AddThreadMessageAsync(id, messageId, text, username, isAssistant);
+        await _repository.UpdateThreadAsync(thread);
 
         // Assert
-        _mockContainer.Verify(c => c.ReadItemAsync<CosmosThreadRepository.CosmosThread>(
-                id.ToString(),
-                It.Is<PartitionKey>(k => k == new PartitionKey(id.ToString())),
-                It.IsAny<ItemRequestOptions>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once());
         _mockContainer.Verify(c => c.ReplaceItemAsync(
                 thread,
-                id.ToString(),
-                It.Is<PartitionKey>(k => k == new PartitionKey(id.ToString())),
+                thread.Id.ToString(),
+                It.Is<PartitionKey>(k => k == new PartitionKey(thread.Id.ToString())),
                 It.IsAny<ItemRequestOptions>(),
                 It.IsAny<CancellationToken>()),
             Times.Once()
         );
         _mockContainer.VerifyNoOtherCalls();
-    }
-
-    [Test, AutoData]
-    public async Task GetMessagesAsync_ReturnsMessages(CosmosThreadRepository.CosmosThread thread)
-    {
-        // Arrange
-        var mockItemResponse = new Mock<ItemResponse<CosmosThreadRepository.CosmosThread>>();
-        mockItemResponse.Setup(r => r.Resource).Returns(thread);
-        _mockContainer.Setup(c => c.ReadItemAsync<CosmosThreadRepository.CosmosThread>(thread.Id.ToString(), new PartitionKey(thread.Id.ToString()), It.IsAny<ItemRequestOptions>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mockItemResponse.Object);
-        
-        // Act
-        var messages = await _repository.GetMessagesAsync(thread.Id);
-        
-        // Assert
-        messages.Should().BeEquivalentTo(thread.Messages);
     }
 }

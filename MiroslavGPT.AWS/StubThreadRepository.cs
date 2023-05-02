@@ -2,6 +2,7 @@
 using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Interfaces.Threads;
 using MiroslavGPT.Domain.Models;
+using MiroslavGPT.Domain.Models.Threads;
 
 namespace MiroslavGPT.AWS;
 

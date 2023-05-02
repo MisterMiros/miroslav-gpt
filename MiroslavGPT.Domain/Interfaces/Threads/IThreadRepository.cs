@@ -1,12 +1,13 @@
 ﻿using MiroslavGPT.Domain.Models;
+using MiroslavGPT.Domain.Models.Threads;
+using Thread = MiroslavGPT.Domain.Models.Threads.Thread;
 
 namespace MiroslavGPT.Domain.Interfaces.Threads
 {
     public interface IThreadRepository
     {
-        public Task<Guid> CreateThreadAsync(long chatId);
-        public Task<Guid?> GetThreadByMessageAsync(long chatId, long messageId);
-        public Task AddThreadMessageAsync(Guid id, long messageId, string text, string username, bool isAssistant);
-        public Task<List<ThreadMessage>> GetMessagesAsync(Guid id);
+        public Task<Thread> CreateThreadAsync(long chatId);
+        public Task<Thread?> GetThreadByMessageAsync(long chatId, long messageId);
+        public Task UpdateThreadAsync(Thread thread);
     }
 }

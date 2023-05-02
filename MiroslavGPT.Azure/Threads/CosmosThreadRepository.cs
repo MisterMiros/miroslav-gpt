@@ -6,6 +6,7 @@ using Microsoft.Azure.Cosmos;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Domain.Interfaces.Threads;
 using MiroslavGPT.Domain.Models;
+using MiroslavGPT.Domain.Models.Threads;
 
 namespace MiroslavGPT.Azure.Threads;
 
@@ -22,33 +23,33 @@ public class CosmosThreadRepository : IThreadRepository
         _threadsContainer = _client.GetContainer(settings.ThreadDatabaseName, settings.ThreadContainerName);
     }
 
-    public async Task<Guid> CreateThreadAsync(long chatId)
+    public async Task<Thread> CreateThreadAsync(long chatId)
     {
-        var thread = new CosmosThread
+        var thread = new Thread
         {
             ChatId = chatId,
             Id = Guid.NewGuid(),
             Messages = new List<ThreadMessage>(),
         };
         await _threadsContainer.CreateItemAsync(thread, new PartitionKey(thread.Id.ToString()));
-        return thread.Id;
+        return thread;
     }
 
-    public async Task<Guid?> GetThreadByMessageAsync(long chatId, long messageId)
+    public async Task<Thread?> GetThreadByMessageAsync(long chatId, long messageId)
     {
         try
         {
             var query = new QueryDefinition("SELECT * FROM c WHERE c.chatId = @chatId AND ARRAY_CONTAINS(c.messages, { messageId: @messageId }, true)")
                 .WithParameter("@chatId", chatId)
                 .WithParameter("@messageId", messageId);
-            var iterator = _threadsContainer.GetItemQueryIterator<CosmosThread>(query);
+            var iterator = _threadsContainer.GetItemQueryIterator<Thread>(query);
             if (!iterator.HasMoreResults)
             {
                 return null;
             }
 
             var response = await iterator.ReadNextAsync();
-            return response.FirstOrDefault()?.Id;
+            return response.FirstOrDefault();
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
@@ -56,31 +57,9 @@ public class CosmosThreadRepository : IThreadRepository
         }
     }
 
-    public async Task AddThreadMessageAsync(Guid id, long messageId, string text, string username, bool isAssistant)
+    public async Task UpdateThreadAsync(Thread thread)
     {
-        var thread = (await _threadsContainer.ReadItemAsync<CosmosThread>(id.ToString(), new PartitionKey(id.ToString()))).Resource;
-        var threadMessage = new ThreadMessage
-        {
-            MessageId = messageId,
-            Text = text,
-            Username = username,
-            IsAssistant = isAssistant,
-        };
-        thread.Messages = thread.Messages.TakeLast(_settings.ThreadLengthLimit - 1).Append(threadMessage).ToList();
-        thread.Messages.Add(threadMessage);
+        thread.Messages = thread.Messages.TakeLast(_settings.ThreadLengthLimit).ToList();
         await _threadsContainer.ReplaceItemAsync(thread, thread.Id.ToString(), new PartitionKey(thread.Id.ToString()));
-    }
-
-    public async Task<List<ThreadMessage>> GetMessagesAsync(Guid id)
-    {
-        var thread = (await _threadsContainer.ReadItemAsync<CosmosThread>(id.ToString(), new PartitionKey(id.ToString()))).Resource;
-        return thread.Messages;
-    }
-
-    public record CosmosThread
-    {
-        public long ChatId { get; set; }
-        public Guid Id { get; set; }
-        public List<ThreadMessage> Messages { get; set; }
     }
 }
