@@ -1,7 +1,8 @@
 ﻿using MiroslavGPT.Domain.Interfaces;
+using MiroslavGPT.Domain.Interfaces.Personality;
 using OpenAI_API.Chat;
 
-namespace MiroslavGPT.Domain.Personalities
+namespace MiroslavGPT.Domain.Personality
 {
     public class PersonalityProvider : IPersonalityProvider
     {

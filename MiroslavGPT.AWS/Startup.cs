@@ -3,34 +3,34 @@ using MiroslavGPT.AWS.Factories;
 using MiroslavGPT.AWS.Settings;
 using MiroslavGPT.Domain.Extensions;
 using MiroslavGPT.Domain.Interfaces;
+using MiroslavGPT.Domain.Interfaces.Users;
 using MiroslavGPT.Domain.Settings;
 
-namespace MiroslavGPT.AWS
+namespace MiroslavGPT.AWS;
+
+public class Startup
 {
-    public class Startup
+    public static void ConfigureServices(IServiceCollection services)
     {
-        public static void ConfigureServices(IServiceCollection services)
+        var amazonSettings = new AmazonSettings
         {
-            var amazonSettings = new AmazonSettings
-            {
-                SecretKey = Environment.GetEnvironmentVariable("SECRET_KEY"),
-                OpenAiApiKey= Environment.GetEnvironmentVariable("OPENAI_API_KEY"),
-                TelegramBotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN"),
-                TelegramBotUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME"),
-                MaxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS") ?? "100"),
-                RegionName = Environment.GetEnvironmentVariable("AWS_REGION"),
-                UsersTableName = Environment.GetEnvironmentVariable("DYNAMODB_USERS_TABLE_NAME"),
-            };
+            SecretKey = Environment.GetEnvironmentVariable("SECRET_KEY"),
+            OpenAiApiKey= Environment.GetEnvironmentVariable("OPENAI_API_KEY"),
+            TelegramBotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN"),
+            TelegramBotUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME"),
+            MaxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS") ?? "100"),
+            RegionName = Environment.GetEnvironmentVariable("AWS_REGION"),
+            UsersTableName = Environment.GetEnvironmentVariable("DYNAMODB_USERS_TABLE_NAME"),
+        };
 
-            services.AddSingleton<ITelegramBotSettings>(amazonSettings);
-            services.AddSingleton<IChatGptBotSettings>(amazonSettings);
-            services.AddSingleton<IRegionSettings>(amazonSettings);
-            services.AddSingleton<IDynamoDBUsersSettings>(amazonSettings);
+        services.AddSingleton<ITelegramBotSettings>(amazonSettings);
+        services.AddSingleton<IChatGptBotSettings>(amazonSettings);
+        services.AddSingleton<IRegionSettings>(amazonSettings);
+        services.AddSingleton<IDynamoDBUsersSettings>(amazonSettings);
 
-            services.AddSingleton<IUsersRepository, DynamoDBUsersRepository>();
-            services.AddSingleton<IDynamoDBClientFactory, DynamoDBClientFactory>();
+        services.AddSingleton<IUsersRepository, DynamoDBUsersRepository>();
+        services.AddSingleton<IDynamoDBClientFactory, DynamoDBClientFactory>();
 
-            services.AddDomainServices();
-        }
+        services.AddDomainServices();
     }
 }

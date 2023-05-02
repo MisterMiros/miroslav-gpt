@@ -1,6 +1,6 @@
 ﻿using OpenAI_API.Chat;
 
-namespace MiroslavGPT.Domain.Interfaces
+namespace MiroslavGPT.Domain.Interfaces.Personality
 {
     public interface IPersonalityProvider
     {

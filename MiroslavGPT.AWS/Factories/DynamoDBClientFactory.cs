@@ -1,5 +1,4 @@
 ﻿using Amazon.DynamoDBv2;
-using MiroslavGPT.AWS.Settings;
 
 namespace MiroslavGPT.AWS.Factories
 {

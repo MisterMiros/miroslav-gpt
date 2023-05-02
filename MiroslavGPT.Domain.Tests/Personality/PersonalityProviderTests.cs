@@ -1,6 +1,6 @@
-﻿using MiroslavGPT.Domain.Personalities;
+﻿using MiroslavGPT.Domain.Personality;
 
-namespace MiroslavGPT.Domain.Tests
+namespace MiroslavGPT.Domain.Tests.Personality
 {
     public class PersonalityProviderTests
     {
