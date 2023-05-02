@@ -1,6 +1,6 @@
 ﻿namespace MiroslavGPT.Azure.Settings
 {
-    public interface ICosmosDBSettings
+    public interface ICosmosDbSettings
     {
         public string ConnectionString { get; set; }
     }

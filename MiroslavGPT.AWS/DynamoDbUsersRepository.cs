@@ -8,15 +8,15 @@ using MiroslavGPT.Domain.Interfaces.Users;
 
 namespace MiroslavGPT.AWS;
 
-public class DynamoDBUsersRepository : IUsersRepository
+public class DynamoDbUsersRepository : IUsersRepository
 {
     private readonly IAmazonDynamoDB _dynamoDb;
-    private readonly IDynamoDBUsersSettings _settings;
+    private readonly IDynamoDbUsersSettings _settings;
 
-    public DynamoDBUsersRepository(IDynamoDBClientFactory clientFactory, IRegionSettings regionSettings, IDynamoDBUsersSettings dynamoDBUsersSettings)
+    public DynamoDbUsersRepository(IDynamoDbClientFactory clientFactory, IRegionSettings regionSettings, IDynamoDbUsersSettings dynamoDbUsersSettings)
     {
         _dynamoDb = clientFactory.CreateClient(regionSettings.RegionName);
-        _settings = dynamoDBUsersSettings;
+        _settings = dynamoDbUsersSettings;
     }
 
     public async Task AuthorizeUserAsync(long chatId)

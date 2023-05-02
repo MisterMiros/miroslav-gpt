@@ -31,10 +31,10 @@ public class Startup : FunctionsStartup
 
         builder.Services.AddSingleton<ITelegramBotSettings>(azureSettings);
         builder.Services.AddSingleton<IChatGptBotSettings>(azureSettings);
-        builder.Services.AddSingleton<ICosmosDBSettings>(azureSettings);
-        builder.Services.AddSingleton<ICosmosDBUsersSettings>(azureSettings);
+        builder.Services.AddSingleton<ICosmosDbSettings>(azureSettings);
+        builder.Services.AddSingleton<ICosmosDbUsersSettings>(azureSettings);
 
-        builder.Services.AddSingleton<IUsersRepository, CosmosDBUsersRepository>();
+        builder.Services.AddSingleton<IUsersRepository, CosmosDbUsersRepository>();
         builder.Services.AddSingleton<ICosmosClientFactory, CosmosClientFactory>();
 
         builder.Services.AddDomainServices();

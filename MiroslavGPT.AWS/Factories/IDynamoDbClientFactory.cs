@@ -2,7 +2,7 @@
 
 namespace MiroslavGPT.AWS.Factories
 {
-    public interface IDynamoDBClientFactory
+    public interface IDynamoDbClientFactory
     {
         public IAmazonDynamoDB CreateClient(string region);
     }

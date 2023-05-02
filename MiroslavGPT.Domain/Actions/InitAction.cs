@@ -43,11 +43,11 @@ public class InitAction : BaseAction<InitCommand>
         if (command.Secret == _chatGptBotSettings.SecretKey)
         {
             await _usersRepository.AuthorizeUserAsync(command.ChatId);
-            await _telegramClient.SendTextMessageAsync(command.ChatId, "Authorization successful! You can now use prompt commands.", command.MessageId);
+            await TelegramClient.SendTextMessageAsync(command.ChatId, "Authorization successful! You can now use prompt commands.", command.MessageId);
         }
         else
         {
-            await _telegramClient.SendTextMessageAsync(command.ChatId, "Incorrect secret key. Please try again.", command.MessageId);
+            await TelegramClient.SendTextMessageAsync(command.ChatId, "Incorrect secret key. Please try again.", command.MessageId);
         }
     }
 }

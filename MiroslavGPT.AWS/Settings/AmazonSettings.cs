@@ -2,7 +2,7 @@
 
 namespace MiroslavGPT.AWS.Settings
 {
-    public class AmazonSettings : ITelegramBotSettings, IChatGptBotSettings, IRegionSettings, IDynamoDBUsersSettings
+    public class AmazonSettings : ITelegramBotSettings, IChatGptBotSettings, IRegionSettings, IDynamoDbUsersSettings
     {
         public string TelegramBotUsername { get; set; }
         public string TelegramBotToken { get; set; }

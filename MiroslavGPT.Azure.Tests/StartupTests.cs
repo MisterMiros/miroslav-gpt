@@ -79,16 +79,16 @@ public class StartupTests
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosDBSettings))
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosDbSettings))
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosDBUsersSettings))
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosDbUsersSettings))
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IUsersRepository) &&
-                                                 d.ImplementationType == typeof(CosmosDBUsersRepository) &&
+                                                 d.ImplementationType == typeof(CosmosDbUsersRepository) &&
                                                  d.Lifetime == ServiceLifetime.Singleton);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosClientFactory) &&

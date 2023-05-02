@@ -60,7 +60,7 @@ public class StartupTests
             .Which.ImplementationInstance.Should().BeOfType<AmazonSettings>()
             .Which.Should().BeEquivalentTo(amazonSettings);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IDynamoDBUsersSettings))
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IDynamoDbUsersSettings))
             .Which.ImplementationInstance.Should().BeOfType<AmazonSettings>()
             .Which.Should().BeEquivalentTo(amazonSettings);
 
@@ -69,11 +69,11 @@ public class StartupTests
             .Which.Should().BeEquivalentTo(amazonSettings);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IUsersRepository) &&
-                                                 d.ImplementationType == typeof(DynamoDBUsersRepository) &&
+                                                 d.ImplementationType == typeof(DynamoDbUsersRepository) &&
                                                  d.Lifetime == ServiceLifetime.Singleton);
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IDynamoDBClientFactory) &&
-                                                 d.ImplementationType == typeof(DynamoDBClientFactory) &&
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IDynamoDbClientFactory) &&
+                                                 d.ImplementationType == typeof(DynamoDbClientFactory) &&
                                                  d.Lifetime == ServiceLifetime.Singleton);
 
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ITelegramClientFactory) &&

@@ -22,6 +22,6 @@ public class UnknownAction : BaseAction<UnknownCommand>
 
     public override async Task ExecuteAsync(UnknownCommand command)
     {
-        await _telegramClient.SendTextMessageAsync(command.ChatId, "Unknown command. Please use /init or one of the personality commands.", command.MessageId);
+        await TelegramClient.SendTextMessageAsync(command.ChatId, "Unknown command. Please use /init or one of the personality commands.", command.MessageId);
     }
 }

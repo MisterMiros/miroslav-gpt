@@ -5,28 +5,28 @@ using MiroslavGPT.AWS.Settings;
 
 namespace MiroslavGPT.AWS.Tests
 {
-    public class DynamoDBUsersRepositoryTests
+    public class DynamoDbUsersRepositoryTests
     {
         private Fixture _fixture = new Fixture();
-        private Mock<IDynamoDBClientFactory> _mockDynamoDBClientFactory;
-        private Mock<IAmazonDynamoDB> _mockDynamoDBClient;
+        private Mock<IDynamoDbClientFactory> _mockDynamoDbClientFactory;
+        private Mock<IAmazonDynamoDB> _mockDynamoDbClient;
         private Mock<IRegionSettings> _mockRegionSettings;
-        private Mock<IDynamoDBUsersSettings> _mockDynamoDBUsersSettings;
-        private DynamoDBUsersRepository _repository;
+        private Mock<IDynamoDbUsersSettings> _mockDynamoDbUsersSettings;
+        private DynamoDbUsersRepository _repository;
 
         [SetUp]
         public void SetUp()
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoMoqCustomization());
-            _mockDynamoDBClientFactory = _fixture.Freeze<Mock<IDynamoDBClientFactory>>();
-            _mockDynamoDBClient = _fixture.Freeze<Mock<IAmazonDynamoDB>>();
+            _mockDynamoDbClientFactory = _fixture.Freeze<Mock<IDynamoDbClientFactory>>();
+            _mockDynamoDbClient = _fixture.Freeze<Mock<IAmazonDynamoDB>>();
             _mockRegionSettings = _fixture.Freeze<Mock<IRegionSettings>>();
-            _mockDynamoDBUsersSettings = _fixture.Freeze<Mock<IDynamoDBUsersSettings>>();
-            _mockDynamoDBClientFactory.Setup(x => x.CreateClient(_mockRegionSettings.Object.RegionName))
-                .Returns(_mockDynamoDBClient.Object);
+            _mockDynamoDbUsersSettings = _fixture.Freeze<Mock<IDynamoDbUsersSettings>>();
+            _mockDynamoDbClientFactory.Setup(x => x.CreateClient(_mockRegionSettings.Object.RegionName))
+                .Returns(_mockDynamoDbClient.Object);
 
-            _repository = _fixture.Create<DynamoDBUsersRepository>();
+            _repository = _fixture.Create<DynamoDbUsersRepository>();
         }
 
         [Test]
@@ -39,9 +39,9 @@ namespace MiroslavGPT.AWS.Tests
                 .Without(r => r.Item)
                 .Create();
             itemResponse.Item = null;
-            _mockDynamoDBUsersSettings.Setup(s => s.UsersTableName)
+            _mockDynamoDbUsersSettings.Setup(s => s.UsersTableName)
                 .Returns(tableName);
-            _mockDynamoDBClient.Setup(c => c.GetItemAsync(tableName, It.Is<Dictionary<string, AttributeValue>>(d => d.ContainsKey("ChatId") && d["ChatId"].N == chatId.ToString()), default))
+            _mockDynamoDbClient.Setup(c => c.GetItemAsync(tableName, It.Is<Dictionary<string, AttributeValue>>(d => d.ContainsKey("ChatId") && d["ChatId"].N == chatId.ToString()), default))
                 .ReturnsAsync(itemResponse);
             
             // Act
@@ -61,9 +61,9 @@ namespace MiroslavGPT.AWS.Tests
                 .Without(r => r.Item)
                 .Create();
             itemResponse.Item = new Dictionary<string, AttributeValue>();
-            _mockDynamoDBUsersSettings.Setup(s => s.UsersTableName)
+            _mockDynamoDbUsersSettings.Setup(s => s.UsersTableName)
                 .Returns(tableName);
-            _mockDynamoDBClient.Setup(c => c.GetItemAsync(tableName, It.Is<Dictionary<string, AttributeValue>>(d => d.ContainsKey("ChatId") && d["ChatId"].N == chatId.ToString()), default))
+            _mockDynamoDbClient.Setup(c => c.GetItemAsync(tableName, It.Is<Dictionary<string, AttributeValue>>(d => d.ContainsKey("ChatId") && d["ChatId"].N == chatId.ToString()), default))
                 .ReturnsAsync(itemResponse);
 
             // Act
@@ -87,9 +87,9 @@ namespace MiroslavGPT.AWS.Tests
             {
                 { "Authorized", new AttributeValue { BOOL = isAuthorized } }
             };
-            _mockDynamoDBUsersSettings.Setup(s => s.UsersTableName)
+            _mockDynamoDbUsersSettings.Setup(s => s.UsersTableName)
                 .Returns(tableName);
-            _mockDynamoDBClient.Setup(c => c.GetItemAsync(tableName, It.Is<Dictionary<string, AttributeValue>>(d => d.ContainsKey("ChatId") && d["ChatId"].N == chatId.ToString()), default))
+            _mockDynamoDbClient.Setup(c => c.GetItemAsync(tableName, It.Is<Dictionary<string, AttributeValue>>(d => d.ContainsKey("ChatId") && d["ChatId"].N == chatId.ToString()), default))
                 .ReturnsAsync(itemResponse);
 
             // Act
@@ -105,10 +105,10 @@ namespace MiroslavGPT.AWS.Tests
             // Arrange
             var chatId = _fixture.Create<long>();
             var tableName = _fixture.Create<string>();
-            _mockDynamoDBUsersSettings.Setup(s => s.UsersTableName)
+            _mockDynamoDbUsersSettings.Setup(s => s.UsersTableName)
                 .Returns(tableName);
             Dictionary<string, AttributeValue> expectedAuthorizedValue = null;
-            _mockDynamoDBClient.Setup(c => c.PutItemAsync(tableName, It.IsAny<Dictionary<string, AttributeValue>>(), default))
+            _mockDynamoDbClient.Setup(c => c.PutItemAsync(tableName, It.IsAny<Dictionary<string, AttributeValue>>(), default))
                 .Callback((string n, Dictionary<string, AttributeValue> v, CancellationToken t) =>
                 {
                     expectedAuthorizedValue = v;

@@ -26,10 +26,10 @@ public class Startup
         services.AddSingleton<ITelegramBotSettings>(amazonSettings);
         services.AddSingleton<IChatGptBotSettings>(amazonSettings);
         services.AddSingleton<IRegionSettings>(amazonSettings);
-        services.AddSingleton<IDynamoDBUsersSettings>(amazonSettings);
+        services.AddSingleton<IDynamoDbUsersSettings>(amazonSettings);
 
-        services.AddSingleton<IUsersRepository, DynamoDBUsersRepository>();
-        services.AddSingleton<IDynamoDBClientFactory, DynamoDBClientFactory>();
+        services.AddSingleton<IUsersRepository, DynamoDbUsersRepository>();
+        services.AddSingleton<IDynamoDbClientFactory, DynamoDbClientFactory>();
 
         services.AddDomainServices();
     }

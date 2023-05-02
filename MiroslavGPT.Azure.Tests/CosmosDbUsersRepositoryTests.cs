@@ -4,15 +4,15 @@ using MiroslavGPT.Azure.Settings;
 
 namespace MiroslavGPT.Azure.Tests
 {
-    public class CosmosDBUsersRepositoryTests
+    public class CosmosDbUsersRepositoryTests
     {
         private Fixture _fixture;
         private Mock<ICosmosClientFactory> _mockCosmosClientFactory;
-        private Mock<ICosmosDBSettings> _mockCosmosDBSettings;
-        private Mock<ICosmosDBUsersSettings> _mockCosmosDBUsersSettings;
+        private Mock<ICosmosDbSettings> _mockCosmosDbSettings;
+        private Mock<ICosmosDbUsersSettings> _mockCosmosDbUsersSettings;
         private Mock<CosmosClient> _mockCosmosClient;
         private Mock<Container> _mockContainer;
-        private CosmosDBUsersRepository _repository;
+        private CosmosDbUsersRepository _repository;
 
         [SetUp]
         public void SetUp()
@@ -28,10 +28,10 @@ namespace MiroslavGPT.Azure.Tests
             _mockCosmosClientFactory = _fixture.Freeze<Mock<ICosmosClientFactory>>();
             _mockCosmosClientFactory.Setup(x => x.CreateCosmosClient(It.IsAny<string>()))
                 .Returns(_mockCosmosClient.Object);
-            _mockCosmosDBSettings = _fixture.Freeze<Mock<ICosmosDBSettings>>();
-            _mockCosmosDBUsersSettings = _fixture.Freeze<Mock<ICosmosDBUsersSettings>>();
+            _mockCosmosDbSettings = _fixture.Freeze<Mock<ICosmosDbSettings>>();
+            _mockCosmosDbUsersSettings = _fixture.Freeze<Mock<ICosmosDbUsersSettings>>();
 
-            _repository = _fixture.Create<CosmosDBUsersRepository>();
+            _repository = _fixture.Create<CosmosDbUsersRepository>();
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace MiroslavGPT.Azure.Tests
         {
             // Arrange
             var userId = _fixture.Create<long>();
-            _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosDBUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+            _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosDbUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
                 .Throws(new CosmosException("Not found", System.Net.HttpStatusCode.NotFound, 0, "", 0));
 
             // Act
@@ -53,10 +53,10 @@ namespace MiroslavGPT.Azure.Tests
         {
             // Arrange
             var userId = _fixture.Create<long>();
-            var iterator = _fixture.Create<Mock<FeedIterator<CosmosDBUsersRepository.User>>>();
+            var iterator = _fixture.Create<Mock<FeedIterator<CosmosDbUsersRepository.User>>>();
             iterator.Setup(i => i.HasMoreResults).Returns(false);
 
-            _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosDBUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+            _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosDbUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
                 .Returns(iterator.Object);
 
             // Act
@@ -72,17 +72,17 @@ namespace MiroslavGPT.Azure.Tests
         {
             // Arrange
             var userId = _fixture.Create<long>();
-            var user = new CosmosDBUsersRepository.User(userId.ToString(), isAuthorized);
-            var users = new List<CosmosDBUsersRepository.User> { user };
-            var feedResponse = _fixture.Create<Mock<FeedResponse<CosmosDBUsersRepository.User>>>();
+            var user = new CosmosDbUsersRepository.User(userId.ToString(), isAuthorized);
+            var users = new List<CosmosDbUsersRepository.User> { user };
+            var feedResponse = _fixture.Create<Mock<FeedResponse<CosmosDbUsersRepository.User>>>();
             feedResponse.Setup(r => r.GetEnumerator())
                 .Returns(users.GetEnumerator());
-            var iterator = _fixture.Create<Mock<FeedIterator<CosmosDBUsersRepository.User>>>();
+            var iterator = _fixture.Create<Mock<FeedIterator<CosmosDbUsersRepository.User>>>();
             iterator.Setup(i => i.HasMoreResults).Returns(true);
             iterator.Setup(i => i.ReadNextAsync(default))
                 .ReturnsAsync(feedResponse.Object);
 
-            _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosDBUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+            _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosDbUsersRepository.User>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
                 .Returns(iterator.Object);
 
             // Act
@@ -103,7 +103,7 @@ namespace MiroslavGPT.Azure.Tests
 
             // Assert
             _mockContainer.Verify(c => c.UpsertItemAsync(
-                It.Is<CosmosDBUsersRepository.User>(u => u.id == userId.ToString() && u.isAuthorized), 
+                It.Is<CosmosDbUsersRepository.User>(u => u.Id == userId.ToString() && u.IsAuthorized), 
                 It.Is<PartitionKey>(k => k == new PartitionKey(userId.ToString())), 
                 It.IsAny<ItemRequestOptions>(), 
                 default), Times.Once);

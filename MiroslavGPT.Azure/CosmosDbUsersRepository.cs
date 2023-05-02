@@ -8,15 +8,15 @@ using MiroslavGPT.Domain.Interfaces.Users;
 
 namespace MiroslavGPT.Azure;
 
-public class CosmosDBUsersRepository : IUsersRepository
+public class CosmosDbUsersRepository : IUsersRepository
 {
     private readonly CosmosClient _client;
     private readonly Container _container;
 
-    public CosmosDBUsersRepository(ICosmosDBSettings cosmosDBSettings, ICosmosDBUsersSettings cosmosDBUsersSettings, ICosmosClientFactory cosmosClientFactory)
+    public CosmosDbUsersRepository(ICosmosDbSettings cosmosDbSettings, ICosmosDbUsersSettings cosmosDbUsersSettings, ICosmosClientFactory cosmosClientFactory)
     {
-        _client = cosmosClientFactory.CreateCosmosClient(cosmosDBSettings.ConnectionString);
-        _container = _client.GetContainer(cosmosDBUsersSettings.UsersDatabaseName, cosmosDBUsersSettings.UsersContainerName);
+        _client = cosmosClientFactory.CreateCosmosClient(cosmosDbSettings.ConnectionString);
+        _container = _client.GetContainer(cosmosDbUsersSettings.UsersDatabaseName, cosmosDbUsersSettings.UsersContainerName);
     }
 
     public async Task<bool> IsAuthorizedAsync(long userId)
@@ -32,7 +32,7 @@ public class CosmosDBUsersRepository : IUsersRepository
             {
                 var response = await iterator.ReadNextAsync();
                 var user = response.FirstOrDefault();
-                return user.isAuthorized;
+                return user?.IsAuthorized == true;
             }
 
             return false;
@@ -50,5 +50,5 @@ public class CosmosDBUsersRepository : IUsersRepository
         await _container.UpsertItemAsync(user, new PartitionKey(userId.ToString()));
     }
 
-    public record User(string id, bool isAuthorized);
+    public record User(string Id, bool IsAuthorized);
 }

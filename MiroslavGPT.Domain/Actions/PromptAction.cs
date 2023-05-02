@@ -59,12 +59,12 @@ public class PromptAction : BaseAction<PromptCommand>
     {
         if (!await _usersRepository.IsAuthorizedAsync(command.ChatId))
         {
-            await _telegramClient.SendTextMessageAsync(command.ChatId, "You are not authorized. Please use /init command with the correct secret key.", command.MessageId);
+            await TelegramClient.SendTextMessageAsync(command.ChatId, "You are not authorized. Please use /init command with the correct secret key.", command.MessageId);
         }
 
         if (string.IsNullOrWhiteSpace(command.Prompt))
         {
-            await _telegramClient.SendTextMessageAsync(command.ChatId, "Please provide a prompt after the personality command.", command.MessageId);
+            await TelegramClient.SendTextMessageAsync(command.ChatId, "Please provide a prompt after the personality command.", command.MessageId);
         }
 
         var threadId = await GetThreadIdAsync(command.ChatId, command.ReplyToId);
@@ -81,7 +81,7 @@ public class PromptAction : BaseAction<PromptCommand>
         var usernames = threadMessages.Select(m => m.Username).Distinct();
         response = response.EscapeUsernames(usernames);
 
-        var message = await _telegramClient.SendTextMessageAsync(command.ChatId, response, command.MessageId);
+        var message = await TelegramClient.SendTextMessageAsync(command.ChatId, response, command.MessageId);
 
         await _threadRepository.AddThreadMessageAsync(threadId, message.MessageId, response, null);
     }

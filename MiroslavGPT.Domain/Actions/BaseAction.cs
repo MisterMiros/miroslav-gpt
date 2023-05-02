@@ -8,11 +8,11 @@ namespace MiroslavGPT.Domain.Actions;
 
 public abstract class BaseAction<TCommand> : IAction<TCommand> where TCommand : ICommand
 {
-    protected readonly ITelegramClient _telegramClient;
+    protected readonly ITelegramClient TelegramClient;
 
     protected BaseAction(ITelegramClient telegramClient)
     {
-        _telegramClient = telegramClient;
+        TelegramClient = telegramClient;
     }
 
     public abstract TCommand TryGetCommand(Update update);

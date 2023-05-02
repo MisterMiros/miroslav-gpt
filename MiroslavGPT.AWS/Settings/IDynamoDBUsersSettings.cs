@@ -1,6 +1,6 @@
 ﻿namespace MiroslavGPT.AWS.Settings
 {
-    public interface IDynamoDBUsersSettings
+    public interface IDynamoDbUsersSettings
     {
         public string UsersTableName { get; set; }
     }
