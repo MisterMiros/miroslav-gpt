@@ -1,8 +1,7 @@
-﻿namespace MiroslavGPT.Domain.Settings
+﻿namespace MiroslavGPT.Domain.Settings;
+
+public interface ITelegramBotSettings
 {
-    public interface ITelegramBotSettings
-    {
-        public string TelegramBotUsername { get; set; }
-        public string TelegramBotToken { get; set; }
-    }
+    public string TelegramBotUsername { get; set; }
+    public string TelegramBotToken { get; set; }
 }

@@ -12,28 +12,27 @@ using OpenAI_API;
 using OpenAI_API.Chat;
 using Telegram.Bot;
 
-namespace MiroslavGPT.Domain.Extensions
+namespace MiroslavGPT.Domain.Extensions;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddDomainServices(this IServiceCollection services)
     {
-        public static IServiceCollection AddDomainServices(this IServiceCollection services)
-        {
-            services.AddSingleton<IChatEndpoint>(s => new OpenAIAPI(s.GetService<IChatGptBotSettings>()!.OpenAiApiKey).Chat);
-            services.AddSingleton<ITelegramBotClient>(s => new TelegramBotClient(s.GetService<ITelegramBotSettings>()!.TelegramBotToken));
+        services.AddSingleton<IChatEndpoint>(s => new OpenAIAPI(s.GetService<IChatGptBotSettings>()!.OpenAiApiKey).Chat);
+        services.AddSingleton<ITelegramBotClient>(s => new TelegramBotClient(s.GetService<ITelegramBotSettings>()!.TelegramBotToken));
             
-            services.AddSingleton<ITelegramClient, TelegramClient>();
-            services.AddSingleton<IChatClient, ChatClient>();
+        services.AddSingleton<ITelegramClient, TelegramClient>();
+        services.AddSingleton<IChatClient, ChatClient>();
             
-            services.AddSingleton<IPersonalityProvider, PersonalityProvider>();
+        services.AddSingleton<IPersonalityProvider, PersonalityProvider>();
             
-            services.AddSingleton<IAction<InitCommand>, InitAction>();
-            services.AddSingleton<IAction<PromptCommand>, PromptAction>();
-            services.AddSingleton<IAction<UnknownCommand>, UnknownAction>();
-            services.AddSingleton<IExceptionAction, ExceptionAction>();
+        services.AddSingleton<IAction<InitCommand>, InitAction>();
+        services.AddSingleton<IAction<PromptCommand>, PromptAction>();
+        services.AddSingleton<IAction<UnknownCommand>, UnknownAction>();
+        services.AddSingleton<IExceptionAction, ExceptionAction>();
             
-            services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
+        services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
             
-            return services;
-        }
+        return services;
     }
 }

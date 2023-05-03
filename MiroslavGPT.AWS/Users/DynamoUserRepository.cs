@@ -1,7 +1,4 @@
-﻿using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
-using Amazon.DynamoDBv2.Model;
+﻿using Amazon.DynamoDBv2.DataModel;
 using MiroslavGPT.AWS.Settings;
 using MiroslavGPT.Domain.Interfaces.Users;
 

@@ -7,7 +7,7 @@ namespace MiroslavGPT.Azure.Tests.Users;
 public class CosmosUserRepositoryTests
 {
     private Fixture _fixture;
-    private Mock<ICosmosUserSettings> _mockSettings;
+    private Mock<IUserSettings> _mockSettings;
     private Mock<CosmosClient> _mockCosmosClient;
     private Mock<Container> _mockContainer;
     private CosmosUserRepository _repository;
@@ -22,7 +22,7 @@ public class CosmosUserRepositoryTests
         _mockCosmosClient = _fixture.Freeze<Mock<CosmosClient>>();
         _mockCosmosClient.Setup(c => c.GetContainer(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(_mockContainer.Object);
-        _mockSettings = _fixture.Freeze<Mock<ICosmosUserSettings>>();
+        _mockSettings = _fixture.Freeze<Mock<IUserSettings>>();
 
         _repository = new CosmosUserRepository(_mockCosmosClient.Object, _mockSettings.Object);
     }

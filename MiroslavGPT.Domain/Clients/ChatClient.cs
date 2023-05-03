@@ -1,6 +1,5 @@
 ﻿using MiroslavGPT.Domain.Interfaces.Clients;
 using MiroslavGPT.Domain.Settings;
-using OpenAI_API;
 using OpenAI_API.Chat;
 
 namespace MiroslavGPT.Domain.Clients;

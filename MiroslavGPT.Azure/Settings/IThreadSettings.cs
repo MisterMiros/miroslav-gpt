@@ -1,6 +1,6 @@
 ﻿namespace MiroslavGPT.Azure.Settings;
 
-public interface ICosmosThreadSettings
+public interface IThreadSettings
 {
     public string ThreadDatabaseName { get; set; }
     public string ThreadContainerName { get; set; }

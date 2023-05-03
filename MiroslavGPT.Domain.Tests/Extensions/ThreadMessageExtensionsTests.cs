@@ -1,5 +1,4 @@
 ﻿using MiroslavGPT.Domain.Extensions;
-using MiroslavGPT.Domain.Models;
 using MiroslavGPT.Domain.Models.Threads;
 using OpenAI_API.Chat;
 

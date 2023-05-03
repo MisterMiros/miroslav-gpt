@@ -9,7 +9,7 @@ namespace MiroslavGPT.Azure.Tests.Threads;
 public class CosmosThreadsRepositoryTests
 {
     private Fixture _fixture;
-    private Mock<ICosmosThreadSettings> _mockSettings;
+    private Mock<IThreadSettings> _mockSettings;
     private Mock<CosmosClient> _mockCosmosClient;
     private Mock<Container> _mockContainer;
     private CosmosThreadRepository _repository;
@@ -24,7 +24,7 @@ public class CosmosThreadsRepositoryTests
         _mockCosmosClient = _fixture.Freeze<Mock<CosmosClient>>();
         _mockCosmosClient.Setup(c => c.GetContainer(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(_mockContainer.Object);
-        _mockSettings = _fixture.Freeze<Mock<ICosmosThreadSettings>>();
+        _mockSettings = _fixture.Freeze<Mock<IThreadSettings>>();
 
         _repository = new CosmosThreadRepository(_mockCosmosClient.Object, _mockSettings.Object);
     }

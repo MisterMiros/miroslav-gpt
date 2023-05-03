@@ -1,10 +1,9 @@
 ﻿using OpenAI_API.Chat;
 
-namespace MiroslavGPT.Domain.Interfaces.Personality
+namespace MiroslavGPT.Domain.Interfaces.Personality;
+
+public interface IPersonalityProvider
 {
-    public interface IPersonalityProvider
-    {
-        bool HasPersonalityCommand(string command);
-        List<ChatMessage> GetPersonalityMessages(string command);
-    }
+    bool HasPersonalityCommand(string command);
+    List<ChatMessage> GetPersonalityMessages(string command);
 }

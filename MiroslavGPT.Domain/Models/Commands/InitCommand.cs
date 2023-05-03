@@ -1,6 +1,4 @@
-﻿using MiroslavGPT.Domain.Interfaces;
-
-namespace MiroslavGPT.Domain.Models.Commands;
+﻿namespace MiroslavGPT.Domain.Models.Commands;
 
 public record InitCommand: ICommand
 {

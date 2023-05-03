@@ -37,8 +37,8 @@ public class Startup : FunctionsStartup
         builder.Services.AddSingleton<ITelegramBotSettings>(azureSettings);
         builder.Services.AddSingleton<IChatGptBotSettings>(azureSettings);
         builder.Services.AddSingleton<ICosmosSettings>(azureSettings);
-        builder.Services.AddSingleton<ICosmosUserSettings>(azureSettings);
-        builder.Services.AddSingleton<ICosmosThreadSettings>(azureSettings);
+        builder.Services.AddSingleton<IUserSettings>(azureSettings);
+        builder.Services.AddSingleton<IThreadSettings>(azureSettings);
 
         builder.Services.AddSingleton(s => new CosmosClient(s.GetService<ICosmosSettings>()!.ConnectionString));
         

@@ -45,6 +45,7 @@ public class DynamoThreadRepositoryTests
                 It.Is<DynamoDBOperationConfig>(c => c.OverrideTableName == tableName),
                 It.IsAny<CancellationToken>()),
             Times.Once);
+        _mockContext.VerifyNoOtherCalls();
     }
 
     [Test, AutoData]
@@ -96,6 +97,6 @@ public class DynamoThreadRepositoryTests
                 It.Is<DynamoDBOperationConfig>(c => c.OverrideTableName == tableName),
                 It.IsAny<CancellationToken>()),
             Times.Once);
-        
+        _mockContext.VerifyNoOtherCalls();
     }
 }

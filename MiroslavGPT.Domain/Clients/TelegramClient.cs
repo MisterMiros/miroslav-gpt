@@ -1,5 +1,4 @@
 ﻿using MiroslavGPT.Domain.Interfaces.Clients;
-using MiroslavGPT.Domain.Settings;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;

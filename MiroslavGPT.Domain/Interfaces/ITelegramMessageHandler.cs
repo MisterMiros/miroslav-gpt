@@ -1,9 +1,8 @@
 ﻿using Telegram.Bot.Types;
 
-namespace MiroslavGPT.Domain.Interfaces
+namespace MiroslavGPT.Domain.Interfaces;
+
+public interface ITelegramMessageHandler
 {
-    public interface ITelegramMessageHandler
-    {
-        Task ProcessUpdateAsync(Update update);
-    }
+    Task ProcessUpdateAsync(Update update);
 }

@@ -1,7 +1,5 @@
-﻿using MiroslavGPT.Domain.Interfaces;
-using MiroslavGPT.Domain.Interfaces.Clients;
+﻿using MiroslavGPT.Domain.Interfaces.Clients;
 using MiroslavGPT.Domain.Interfaces.Users;
-using MiroslavGPT.Domain.Models;
 using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Settings;
 using Telegram.Bot.Types;

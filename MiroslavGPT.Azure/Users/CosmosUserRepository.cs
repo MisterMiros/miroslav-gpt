@@ -11,10 +11,10 @@ public class CosmosUserRepository : IUserRepository
     private readonly CosmosClient _client;
     private readonly Container _container;
 
-    public CosmosUserRepository(CosmosClient client, ICosmosUserSettings cosmosUserSettings)
+    public CosmosUserRepository(CosmosClient client, IUserSettings userSettings)
     {
         _client = client;
-        _container = _client.GetContainer(cosmosUserSettings.UserDatabaseName, cosmosUserSettings.UserContainerName);
+        _container = _client.GetContainer(userSettings.UserDatabaseName, userSettings.UserContainerName);
     }
 
     public async Task<bool> IsAuthorizedAsync(long userId)

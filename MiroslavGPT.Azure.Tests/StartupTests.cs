@@ -6,12 +6,19 @@ using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Azure.Threads;
 using MiroslavGPT.Azure.Users;
 using MiroslavGPT.Domain;
+using MiroslavGPT.Domain.Actions;
+using MiroslavGPT.Domain.Clients;
 using MiroslavGPT.Domain.Interfaces;
+using MiroslavGPT.Domain.Interfaces.Actions;
+using MiroslavGPT.Domain.Interfaces.Clients;
 using MiroslavGPT.Domain.Interfaces.Personality;
 using MiroslavGPT.Domain.Interfaces.Threads;
 using MiroslavGPT.Domain.Interfaces.Users;
+using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Personality;
 using MiroslavGPT.Domain.Settings;
+using OpenAI_API.Chat;
+using Telegram.Bot;
 
 namespace MiroslavGPT.Azure.Tests;
 
@@ -40,11 +47,11 @@ public class StartupTests
     public void Startup_WorksFine(AzureSettings azureSettings)
     {
         // Arrange
-        List<ServiceDescriptor> serviceDescriptors = new List<ServiceDescriptor>();
+        List<ServiceDescriptor> services = new List<ServiceDescriptor>();
         _mockServiceCollection.Setup(c => c.Add(It.IsAny<ServiceDescriptor>()))
             .Callback((ServiceDescriptor d) =>
             {
-                serviceDescriptors.Add(d);
+                services.Add(d);
             });
         _mockConfiguration.Setup(c => c["TELEGRAM_BOT_USERNAME"])
             .Returns(azureSettings.TelegramBotUsername);
@@ -77,29 +84,25 @@ public class StartupTests
 
 
         // Assert
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ITelegramBotSettings))
-            .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
-            .Which.Should().BeEquivalentTo(azureSettings);
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(ITelegramBotSettings), azureSettings));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IChatGptBotSettings), azureSettings));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(ICosmosSettings), azureSettings));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IUserSettings), azureSettings));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IThreadSettings), azureSettings));
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IChatGptBotSettings))
-            .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
-            .Which.Should().BeEquivalentTo(azureSettings);
+        services.Should().Contain(d => d.Lifetime == ServiceLifetime.Singleton && d.ServiceType == typeof(CosmosClient) && d.ImplementationFactory != null);
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IUserRepository), typeof(CosmosUserRepository), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IThreadRepository), typeof(CosmosThreadRepository), ServiceLifetime.Singleton));
 
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosSettings))
-            .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
-            .Which.Should().BeEquivalentTo(azureSettings);
-
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosUserSettings))
-            .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
-            .Which.Should().BeEquivalentTo(azureSettings);
-        
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosThreadSettings))
-            .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
-            .Which.Should().BeEquivalentTo(azureSettings);
-
-        serviceDescriptors.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IUserRepository), typeof(CosmosUserRepository), ServiceLifetime.Singleton));
-        serviceDescriptors.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IThreadRepository), typeof(CosmosThreadRepository), ServiceLifetime.Singleton));
-        
-        serviceDescriptors.Should().Contain(d => d.Lifetime == ServiceLifetime.Singleton && d.ServiceType == typeof(CosmosClient) && d.ImplementationFactory != null);
+        services.Should().Contain(d => d.Lifetime == ServiceLifetime.Singleton && d.ServiceType == typeof(IChatEndpoint) && d.ImplementationFactory != null);
+        services.Should().Contain(d => d.Lifetime == ServiceLifetime.Singleton && d.ServiceType == typeof(ITelegramBotClient) && d.ImplementationFactory != null);
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(ITelegramClient), typeof(TelegramClient), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IChatClient), typeof(ChatClient), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IPersonalityProvider), typeof(PersonalityProvider), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction<InitCommand>), typeof(InitAction), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction<PromptCommand>), typeof(PromptAction), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction<UnknownCommand>), typeof(UnknownAction), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IExceptionAction), typeof(ExceptionAction), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(ITelegramMessageHandler), typeof(TelegramMessageHandler), ServiceLifetime.Singleton));
     }
 }

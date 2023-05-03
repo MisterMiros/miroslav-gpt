@@ -8,8 +8,6 @@ using MiroslavGPT.Domain.Interfaces.Clients;
 using MiroslavGPT.Domain.Interfaces.Personality;
 using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Personality;
-using MiroslavGPT.Domain.Settings;
-using OpenAI_API;
 using OpenAI_API.Chat;
 using Telegram.Bot;
 

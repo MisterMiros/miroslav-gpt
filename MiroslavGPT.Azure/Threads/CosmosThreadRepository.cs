@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Domain.Interfaces.Threads;
-using MiroslavGPT.Domain.Models;
 using MiroslavGPT.Domain.Models.Threads;
 
 namespace MiroslavGPT.Azure.Threads;
@@ -13,10 +12,10 @@ namespace MiroslavGPT.Azure.Threads;
 public class CosmosThreadRepository : IThreadRepository
 {
     private readonly CosmosClient _client;
-    private readonly ICosmosThreadSettings _settings;
+    private readonly IThreadSettings _settings;
     private readonly Container _threadsContainer;
 
-    public CosmosThreadRepository(CosmosClient client, ICosmosThreadSettings settings)
+    public CosmosThreadRepository(CosmosClient client, IThreadSettings settings)
     {
         _client = client;
         _settings = settings;
