@@ -1,6 +1,6 @@
 ﻿namespace MiroslavGPT.Domain.Models.Threads;
 
-public class Thread
+public class MessageThread
 {
     public Guid Id { get; set; }
     public long ChatId { get; set; }

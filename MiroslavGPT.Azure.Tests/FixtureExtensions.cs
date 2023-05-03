@@ -6,7 +6,8 @@ namespace MiroslavGPT.Azure.Tests;
 
 public static class FixtureExtensions
 {
-    public static HttpRequest CreateMockHttpRequest<TBody>(this Fixture fixture, TBody body) {
+    public static HttpRequest CreateMockHttpRequest<TBody>(this Fixture fixture, TBody body)
+    {
         var json = JsonConvert.SerializeObject(body);
         var byteArray = Encoding.UTF8.GetBytes(json);
 

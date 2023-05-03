@@ -9,7 +9,6 @@ using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Models.Threads;
 using MiroslavGPT.Domain.Settings;
 using Telegram.Bot.Types;
-using Thread = MiroslavGPT.Domain.Models.Threads.Thread;
 
 namespace MiroslavGPT.Domain.Actions;
 
@@ -100,7 +99,7 @@ public class PromptAction : BaseAction<PromptCommand>
         await _threadRepository.UpdateThreadAsync(thread);
     }
 
-    private async Task<Thread> GetThreadAsync(long chatId, int? replyToId)
+    private async Task<MessageThread> GetThreadAsync(long chatId, int? replyToId)
     {
         if (replyToId.HasValue)
         {

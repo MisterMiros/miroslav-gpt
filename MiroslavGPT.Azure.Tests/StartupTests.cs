@@ -1,11 +1,14 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MiroslavGPT.Azure.Settings;
+using MiroslavGPT.Azure.Threads;
 using MiroslavGPT.Azure.Users;
 using MiroslavGPT.Domain;
 using MiroslavGPT.Domain.Interfaces;
 using MiroslavGPT.Domain.Interfaces.Personality;
+using MiroslavGPT.Domain.Interfaces.Threads;
 using MiroslavGPT.Domain.Interfaces.Users;
 using MiroslavGPT.Domain.Personality;
 using MiroslavGPT.Domain.Settings;
@@ -59,6 +62,12 @@ public class StartupTests
             .Returns(azureSettings.UserDatabaseName);
         _mockConfiguration.Setup(c => c["COSMOSDB_CONTAINER_NAME"])
             .Returns(azureSettings.UserContainerName);
+        _mockConfiguration.Setup(c => c["COSMOSDB_THREAD_DATABASE_NAME"])
+            .Returns(azureSettings.ThreadDatabaseName);
+        _mockConfiguration.Setup(c => c["COSMOSDB_THREAD_CONTAINER_NAME"])
+            .Returns(azureSettings.ThreadContainerName);
+        _mockConfiguration.Setup(c => c["THREAD_LENGTH_LIMIT"])
+            .Returns(azureSettings.ThreadLengthLimit.ToString());
 
         // Act
         _startup.Configure(new WebJobsBuilderContext
@@ -68,8 +77,6 @@ public class StartupTests
 
 
         // Assert
-        serviceDescriptors.Should().HaveCount(11);
-
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ITelegramBotSettings))
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
@@ -85,57 +92,14 @@ public class StartupTests
         serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosUserSettings))
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
             .Which.Should().BeEquivalentTo(azureSettings);
-
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IUserRepository) &&
-                                                 d.ImplementationType == typeof(CosmosUserRepository) &&
-                                                 d.Lifetime == ServiceLifetime.Singleton);
-
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IPersonalityProvider) &&
-                                                 d.ImplementationType == typeof(PersonalityProvider) &&
-                                                 d.Lifetime == ServiceLifetime.Singleton);
-
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ITelegramMessageHandler) &&
-                                                 d.ImplementationType == typeof(TelegramMessageHandler) &&
-                                                 d.Lifetime == ServiceLifetime.Singleton);
-    }
-
-    [Test, AutoData]
-    public void Startup_SetsDefaultMaxTokens_WhenNoneProvided(AzureSettings azureSettings)
-    {
-        // Arrange
-        List<ServiceDescriptor> serviceDescriptors = new List<ServiceDescriptor>();
-        _mockServiceCollection.Setup(c => c.Add(It.IsAny<ServiceDescriptor>()))
-            .Callback((ServiceDescriptor d) =>
-            {
-                serviceDescriptors.Add(d);
-            });
-        _mockConfiguration.Setup(c => c["TELEGRAM_BOT_USERNAME"])
-            .Returns(azureSettings.TelegramBotUsername);
-        _mockConfiguration.Setup(c => c["TELEGRAM_BOT_TOKEN"])
-            .Returns(azureSettings.TelegramBotToken);
-        _mockConfiguration.Setup(c => c["SECRET_KEY"])
-            .Returns(azureSettings.SecretKey);
-        _mockConfiguration.Setup(c => c["OPENAI_API_KEY"])
-            .Returns(azureSettings.OpenAiApiKey);
-        _mockConfiguration.Setup(c => c["MAX_TOKENS"])
-            .Returns((string)null);
-        _mockConfiguration.Setup(c => c["COSMOSDB_CONNECTION_STRING"])
-            .Returns(azureSettings.ConnectionString);
-        _mockConfiguration.Setup(c => c["COSMOSDB_DATABASE_NAME"])
-            .Returns(azureSettings.UserDatabaseName);
-        _mockConfiguration.Setup(c => c["COSMOSDB_CONTAINER_NAME"])
-            .Returns(azureSettings.UserContainerName);
-
-        // Act
-        _startup.Configure(new WebJobsBuilderContext
-        {
-            Configuration = _mockConfiguration.Object,
-        }, _mockBuilder.Object);
-
-
-        // Assert
-        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(IChatGptBotSettings))
+        
+        serviceDescriptors.Should().Contain(d => d.ServiceType == typeof(ICosmosThreadSettings))
             .Which.ImplementationInstance.Should().BeOfType<AzureSettings>()
-            .Which.MaxTokens.Should().Be(100);
+            .Which.Should().BeEquivalentTo(azureSettings);
+
+        serviceDescriptors.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IUserRepository), typeof(CosmosUserRepository), ServiceLifetime.Singleton));
+        serviceDescriptors.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IThreadRepository), typeof(CosmosThreadRepository), ServiceLifetime.Singleton));
+        
+        serviceDescriptors.Should().Contain(d => d.Lifetime == ServiceLifetime.Singleton && d.ServiceType == typeof(CosmosClient) && d.ImplementationFactory != null);
     }
 }

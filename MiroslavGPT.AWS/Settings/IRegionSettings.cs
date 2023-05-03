@@ -1,7 +1,6 @@
-﻿namespace MiroslavGPT.AWS.Settings
+﻿namespace MiroslavGPT.AWS.Settings;
+
+public interface IRegionSettings
 {
-    public interface IRegionSettings
-    {
-        public string RegionName { get; set; }
-    }
+    public string RegionName { get; set; }
 }

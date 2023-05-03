@@ -23,9 +23,9 @@ public class CosmosThreadRepository : IThreadRepository
         _threadsContainer = _client.GetContainer(settings.ThreadDatabaseName, settings.ThreadContainerName);
     }
 
-    public async Task<Thread> CreateThreadAsync(long chatId)
+    public async Task<MessageThread> CreateThreadAsync(long chatId)
     {
-        var thread = new Thread
+        var thread = new MessageThread
         {
             ChatId = chatId,
             Id = Guid.NewGuid(),
@@ -35,14 +35,14 @@ public class CosmosThreadRepository : IThreadRepository
         return thread;
     }
 
-    public async Task<Thread?> GetThreadByMessageAsync(long chatId, long messageId)
+    public async Task<MessageThread> GetThreadByMessageAsync(long chatId, int messageId)
     {
         try
         {
             var query = new QueryDefinition("SELECT * FROM c WHERE c.chatId = @chatId AND ARRAY_CONTAINS(c.messages, { messageId: @messageId }, true)")
                 .WithParameter("@chatId", chatId)
                 .WithParameter("@messageId", messageId);
-            var iterator = _threadsContainer.GetItemQueryIterator<Thread>(query);
+            var iterator = _threadsContainer.GetItemQueryIterator<MessageThread>(query);
             if (!iterator.HasMoreResults)
             {
                 return null;
@@ -57,9 +57,9 @@ public class CosmosThreadRepository : IThreadRepository
         }
     }
 
-    public async Task UpdateThreadAsync(Thread thread)
+    public async Task UpdateThreadAsync(MessageThread messageThread)
     {
-        thread.Messages = thread.Messages.TakeLast(_settings.ThreadLengthLimit).ToList();
-        await _threadsContainer.ReplaceItemAsync(thread, thread.Id.ToString(), new PartitionKey(thread.Id.ToString()));
+        messageThread.Messages = messageThread.Messages.TakeLast(_settings.ThreadLengthLimit).ToList();
+        await _threadsContainer.ReplaceItemAsync(messageThread, messageThread.Id.ToString(), new PartitionKey(messageThread.Id.ToString()));
     }
 }

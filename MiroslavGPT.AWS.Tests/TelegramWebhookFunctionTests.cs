@@ -1,7 +1,6 @@
 ﻿using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using MiroslavGPT.Domain.Interfaces;
-using MiroslavGPT.Tests.Core;
 using Newtonsoft.Json;
 using System.Net;
 using Update = Telegram.Bot.Types.Update;
@@ -21,7 +20,6 @@ namespace MiroslavGPT.AWS.Tests
         {
             _fixture = new Fixture();
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            _fixture.Customizations.Add(new RecursionDepthCustomization(1));
             _fixture.Customize(new AutoMoqCustomization());
             _mockTelegramMessageHandler = _fixture.Freeze<Mock<ITelegramMessageHandler>>();
             _mockLogger = _fixture.Freeze<Mock<ILambdaLogger>>();

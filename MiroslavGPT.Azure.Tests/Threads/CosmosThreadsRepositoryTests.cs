@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Azure.Threads;
-using Thread = MiroslavGPT.Domain.Models.Threads.Thread;
+using MiroslavGPT.Domain.Models.Threads;
 
 namespace MiroslavGPT.Azure.Tests.Threads;
 
@@ -47,7 +47,7 @@ public class CosmosThreadsRepositoryTests
     public async Task GetThreadByMessage_ShouldReturnNull_WhenNotFoundException(long chatId, int messageId)
     {
         // Arrange
-        _mockContainer.Setup(c => c.GetItemQueryIterator<Thread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<MessageThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Throws(new CosmosException("Not found", System.Net.HttpStatusCode.NotFound, 0, "", 0));
 
         // Act
@@ -60,10 +60,10 @@ public class CosmosThreadsRepositoryTests
     public async Task GetThreadByMessage_ShouldReturnNull_WhenNoValuesInIterator(long chatId, int messageId)
     {
         // Arrange
-        var iterator = _fixture.Create<Mock<FeedIterator<Thread>>>();
+        var iterator = _fixture.Create<Mock<FeedIterator<MessageThread>>>();
         iterator.Setup(i => i.HasMoreResults).Returns(false);
 
-        _mockContainer.Setup(c => c.GetItemQueryIterator<Thread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<MessageThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Returns(iterator.Object);
 
         // Act
@@ -73,43 +73,43 @@ public class CosmosThreadsRepositoryTests
     }
 
     [Test, AutoData]
-    public async Task GetThreadByMessage_ShouldReturnThread(long chatId, int messageId, Thread thread)
+    public async Task GetThreadByMessage_ShouldReturnThread(long chatId, int messageId, MessageThread messageThread)
     {
         // Arrange
-        var threads = new List<Thread> { thread };
+        var threads = new List<MessageThread> { messageThread };
 
-        var feedResponse = _fixture.Create<Mock<FeedResponse<Thread>>>();
+        var feedResponse = _fixture.Create<Mock<FeedResponse<MessageThread>>>();
         feedResponse.Setup(r => r.GetEnumerator())
             .Returns(threads.GetEnumerator());
 
-        var iterator = _fixture.Create<Mock<FeedIterator<Thread>>>();
+        var iterator = _fixture.Create<Mock<FeedIterator<MessageThread>>>();
         iterator.Setup(i => i.HasMoreResults).Returns(true);
         iterator.Setup(i => i.ReadNextAsync(default))
             .ReturnsAsync(feedResponse.Object);
 
-        _mockContainer.Setup(c => c.GetItemQueryIterator<Thread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<MessageThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Returns(iterator.Object);
 
         // Act
         var result = await _repository.GetThreadByMessageAsync(chatId, messageId);
 
         // Assert
-        result.Should().Be(thread);
+        result.Should().Be(messageThread);
     }
 
     [Test, AutoData]
-    public async Task UpdateThreadAsync_ShouldUpdate(Thread thread)
+    public async Task UpdateThreadAsync_ShouldUpdate(MessageThread messageThread)
     {
         // Arrange
         
         // Act
-        await _repository.UpdateThreadAsync(thread);
+        await _repository.UpdateThreadAsync(messageThread);
 
         // Assert
         _mockContainer.Verify(c => c.ReplaceItemAsync(
-                thread,
-                thread.Id.ToString(),
-                It.Is<PartitionKey>(k => k == new PartitionKey(thread.Id.ToString())),
+                messageThread,
+                messageThread.Id.ToString(),
+                It.Is<PartitionKey>(k => k == new PartitionKey(messageThread.Id.ToString())),
                 It.IsAny<ItemRequestOptions>(),
                 It.IsAny<CancellationToken>()),
             Times.Once()

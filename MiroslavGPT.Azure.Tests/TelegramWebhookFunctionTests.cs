@@ -29,7 +29,7 @@ public class TelegramWebhookFunctionTests
     public async Task Run_ReturnsOk()
     {
         // Arrange
-        var update = _fixture.Create<Update>();
+        var update = new Update();
         var req = _fixture.CreateMockHttpRequest(update);
 
         // Act
@@ -62,10 +62,10 @@ public class TelegramWebhookFunctionTests
     }
 
     [Test]
-    public async Task Run_ReturnsInternalError_WhenProccessThrowsException()
+    public async Task Run_ReturnsInternalError_WhenProcessThrowsException()
     {
         // Arrange
-        var update = _fixture.Create<Update>();
+        var update = new Update();
         var req = _fixture.CreateMockHttpRequest(update);
         var ex = new Exception("Failed");
 

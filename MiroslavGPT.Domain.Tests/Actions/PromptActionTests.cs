@@ -9,7 +9,6 @@ using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Models.Threads;
 using OpenAI_API.Chat;
 using Telegram.Bot.Types;
-using Thread = MiroslavGPT.Domain.Models.Threads.Thread;
 
 namespace MiroslavGPT.Domain.Tests.Actions;
 
@@ -124,7 +123,7 @@ public class PromptActionTests
     {
         // Arrange
         var command = _fixture.Create<PromptCommand>();
-        var thread = _fixture.Create<Thread>();
+        var thread = _fixture.Create<MessageThread>();
         var response = _fixture.Create<string>();
         var message = _fixture.Create<Message>();
         if (!hasReplyTo)

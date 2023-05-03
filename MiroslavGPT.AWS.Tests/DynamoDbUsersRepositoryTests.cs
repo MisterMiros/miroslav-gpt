@@ -1,32 +1,28 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
-using MiroslavGPT.AWS.Factories;
 using MiroslavGPT.AWS.Settings;
+using MiroslavGPT.AWS.Users;
 
 namespace MiroslavGPT.AWS.Tests
 {
     public class DynamoDbUsersRepositoryTests
     {
         private Fixture _fixture = new Fixture();
-        private Mock<IDynamoDbClientFactory> _mockDynamoDbClientFactory;
         private Mock<IAmazonDynamoDB> _mockDynamoDbClient;
         private Mock<IRegionSettings> _mockRegionSettings;
-        private Mock<IDynamoDbUsersSettings> _mockDynamoDbUsersSettings;
-        private DynamoDbUserRepository _repository;
+        private Mock<IUserSettings> _mockDynamoDbUsersSettings;
+        private DynamoUserRepository _repository;
 
         [SetUp]
         public void SetUp()
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoMoqCustomization());
-            _mockDynamoDbClientFactory = _fixture.Freeze<Mock<IDynamoDbClientFactory>>();
             _mockDynamoDbClient = _fixture.Freeze<Mock<IAmazonDynamoDB>>();
             _mockRegionSettings = _fixture.Freeze<Mock<IRegionSettings>>();
-            _mockDynamoDbUsersSettings = _fixture.Freeze<Mock<IDynamoDbUsersSettings>>();
-            _mockDynamoDbClientFactory.Setup(x => x.CreateClient(_mockRegionSettings.Object.RegionName))
-                .Returns(_mockDynamoDbClient.Object);
+            _mockDynamoDbUsersSettings = _fixture.Freeze<Mock<IUserSettings>>();
 
-            _repository = _fixture.Create<DynamoDbUserRepository>();
+            _repository = _fixture.Create<DynamoUserRepository>();
         }
 
         [Test]
