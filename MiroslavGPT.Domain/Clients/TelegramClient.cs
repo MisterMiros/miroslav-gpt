@@ -19,7 +19,7 @@ public class TelegramClient: ITelegramClient
     
     public async Task<Message> SendTextMessageAsync(long chatId, string response, int? replyToMessageId = null)
     {
-        _logger.LogInformation("Sending message to chat {chatId}: {response}", chatId, response);
+        _logger.LogDebug("Sending message to chat {chatId}: {response}", chatId, response);
         return await _telegramBotClient.SendTextMessageAsync(
             chatId: chatId,
             text: response,

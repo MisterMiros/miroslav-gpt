@@ -39,17 +39,17 @@ public class PromptAction : BaseAction
 
     public override ICommand TryGetCommand(Update update)
     {
-        _logger.LogInformation("Trying to get prompt command");
+        _logger.LogDebug("Trying to get prompt command");
         var parts = update!.Message!.Text!.Split(' ', 2);
         var command = parts[0].Replace("@" + _settings.TelegramBotUsername, string.Empty).Trim();
         var argument = parts.Length > 1 ? parts[1].Trim() : string.Empty;
-        _logger.LogInformation("Prompt command is {command} with argument {argument}", command, argument);
+        _logger.LogDebug("Prompt command is {command} with argument {argument}", command, argument);
         if (!_personalityProvider.HasPersonalityCommand(command))
         {
-            _logger.LogInformation("Prompt command {command} is not a valid personality command", command);
+            _logger.LogDebug("Prompt command {command} is not a valid personality command", command);
             return null;
         }
-        _logger.LogInformation("Prompt command {command} is a valid personality command", command);
+        _logger.LogDebug("Prompt command {command} is a valid personality command", command);
         return new PromptCommand
         {
             ChatId = update.Message.Chat.Id,

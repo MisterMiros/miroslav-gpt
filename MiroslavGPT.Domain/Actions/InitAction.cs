@@ -26,10 +26,10 @@ public class InitAction : BaseAction
 
     public override ICommand TryGetCommand(Update update)
     {
-        _logger.LogInformation("Trying to get init command");
+        _logger.LogDebug("Trying to get init command");
         if (update!.Message!.Text!.StartsWith("/init"))
         {
-            _logger.LogInformation("Init command found");
+            _logger.LogDebug("Init command found");
             var parts = update!.Message!.Text!.Split(' ', 2);
             return new InitCommand
             {

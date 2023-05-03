@@ -34,32 +34,32 @@ public class TelegramMessageHandler : ITelegramMessageHandler
     {
         if (update?.Message == null || string.IsNullOrWhiteSpace(update.Message.Text) || !update.Message.Text.StartsWith("/"))
         {
-            _logger.LogInformation("Update is not a command");
+            _logger.LogDebug("Update is not a command");
             return;
         }
 
         if (!_allowedTypes.Contains(update.Message.Chat.Type))
         {
-            _logger.LogInformation("Update is not from supported chat type");
+            _logger.LogDebug("Update is not from supported chat type");
             return;
         }
 
         if (update.Message.Chat.Type != ChatType.Private && !update.Message.Text.Contains("@" + _settings.TelegramBotUsername))
         {
-            _logger.LogInformation("Update is not in private chat or is not a bot command");
+            _logger.LogDebug("Update is not in private chat or is not a bot command");
             return;
         }
 
         try
         {
-            _logger.LogInformation("Choosing the right action for the update");
+            _logger.LogDebug("Choosing the right action for the update");
             foreach (var action in _actions)
             {
-                _logger.LogInformation("Checking action {actionName}", action.GetType().Name);
+                _logger.LogDebug("Checking action {actionName}", action.GetType().Name);
                 var command = action.TryGetCommand(update);
                 if (command != null)
                 {
-                    _logger.LogInformation("Executing action {actionName}", action.GetType().Name);
+                    _logger.LogDebug("Executing action {actionName}", action.GetType().Name);
                     await action.ExecuteAsync(command);
                     return;
                 }
