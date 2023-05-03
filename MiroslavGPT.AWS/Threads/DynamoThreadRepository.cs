@@ -58,7 +58,7 @@ public class DynamoThreadRepository: IThreadRepository
     [DynamoDBTable("thread")]
     public record DynamoThread
     {
-        [DynamoDBHashKey("id")]
+        [DynamoDBHashKey("Id")]
         public Guid Id { get; set; }
         
         [DynamoDBProperty("ChatId")]
