@@ -1,4 +1,5 @@
-﻿using MiroslavGPT.Domain.Extensions;
+﻿using Microsoft.Extensions.Logging;
+using MiroslavGPT.Domain.Extensions;
 using MiroslavGPT.Domain.Interfaces.Clients;
 using MiroslavGPT.Domain.Interfaces.Personality;
 using MiroslavGPT.Domain.Interfaces.Threads;
@@ -10,10 +11,11 @@ using Telegram.Bot.Types;
 
 namespace MiroslavGPT.Domain.Actions;
 
-public class PromptAction : BaseAction<PromptCommand>
+public class PromptAction : BaseAction
 {
     private readonly IThreadRepository _threadRepository;
     private readonly IChatClient _chatClient;
+    private readonly ILogger<PromptAction> _logger;
     private readonly IPersonalityProvider _personalityProvider;
     private readonly ITelegramBotSettings _settings;
     private readonly IUserRepository _userRepository;
@@ -24,25 +26,30 @@ public class PromptAction : BaseAction<PromptCommand>
         IPersonalityProvider personalityProvider,
         ITelegramBotSettings settings,
         IChatClient chatClient,
-        ITelegramClient telegramClient) : base(telegramClient)
+        ITelegramClient telegramClient,
+        ILogger<PromptAction> logger) : base(telegramClient)
     {
         _threadRepository = threadRepository;
         _chatClient = chatClient;
+        _logger = logger;
         _personalityProvider = personalityProvider;
         _settings = settings;
         _userRepository = userRepository;
     }
 
-    public override PromptCommand TryGetCommand(Update update)
+    public override ICommand TryGetCommand(Update update)
     {
+        _logger.LogInformation("Trying to get prompt command");
         var parts = update!.Message!.Text!.Split(' ', 2);
         var command = parts[0].Replace("@" + _settings.TelegramBotUsername, string.Empty).Trim();
         var argument = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+        _logger.LogInformation("Prompt command is {command} with argument {argument}", command, argument);
         if (!_personalityProvider.HasPersonalityCommand(command))
         {
+            _logger.LogInformation("Prompt command {command} is not a valid personality command", command);
             return null;
         }
-
+        _logger.LogInformation("Prompt command {command} is a valid personality command", command);
         return new PromptCommand
         {
             ChatId = update.Message.Chat.Id,
@@ -54,8 +61,9 @@ public class PromptAction : BaseAction<PromptCommand>
         };
     }
 
-    public override async Task ExecuteAsync(PromptCommand command)
+    public override async Task ExecuteAsync(ICommand abstractCommand)
     {
+        var command = (PromptCommand)abstractCommand;
         if (!await _userRepository.IsAuthorizedAsync(command.ChatId))
         {
             await TelegramClient.SendTextMessageAsync(command.ChatId, "You are not authorized. Please use /init command with the correct secret key.", command.MessageId);
@@ -82,7 +90,7 @@ public class PromptAction : BaseAction<PromptCommand>
 
         var response = await _chatClient.GetChatGptResponseAsync(command.Prompt, messages);
         var usernames = thread.Messages.Select(m => m.Username).Distinct();
-        response = response.EscapeUsernames(usernames);
+        response = response.EscapeUsernames(usernames.Where(u => u != null));
 
         var message = await TelegramClient.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId);
 

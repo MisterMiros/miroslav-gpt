@@ -3,8 +3,8 @@ using Telegram.Bot.Types;
 
 namespace MiroslavGPT.Domain.Interfaces.Actions;
 
-public interface IAction<TCommand> where TCommand : ICommand
+public interface IAction
 {
-    TCommand TryGetCommand(Update update);
-    Task ExecuteAsync(TCommand command);
+    ICommand TryGetCommand(Update update);
+    Task ExecuteAsync(ICommand abstractCommand);
 }

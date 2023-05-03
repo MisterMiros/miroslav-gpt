@@ -1,4 +1,5 @@
-﻿using MiroslavGPT.Domain.Interfaces.Actions;
+﻿using Microsoft.Extensions.Logging;
+using MiroslavGPT.Domain.Interfaces.Actions;
 using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Settings;
 using Telegram.Bot.Types;
@@ -10,9 +11,10 @@ namespace MiroslavGPT.Domain.Tests;
 public class TelegramMessageHandlerTests
 {
     private Fixture _fixture;
-    private List<Mock<IAction<ICommand>>> _mockActions;
+    private List<Mock<IAction>> _mockActions;
     private Mock<IExceptionAction> _mockExceptionAction;
     private Mock<ITelegramBotSettings> _mockSettings;
+    private Mock<ILogger<TelegramMessageHandler>> _mockLogger;
     private TelegramMessageHandler _handler;
 
     [SetUp]
@@ -22,7 +24,7 @@ public class TelegramMessageHandlerTests
         _fixture.Customize(new AutoMoqCustomization());
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        _mockActions = new List<Mock<IAction<ICommand>>>
+        _mockActions = new List<Mock<IAction>>
         {
             new(),
             new(),
@@ -30,11 +32,13 @@ public class TelegramMessageHandlerTests
         };
         _mockExceptionAction = _fixture.Freeze<Mock<IExceptionAction>>();
         _mockSettings = _fixture.Freeze<Mock<ITelegramBotSettings>>();
+        _mockLogger = _fixture.Freeze<Mock<ILogger<TelegramMessageHandler>>>();
 
         _handler = new TelegramMessageHandler(
             _mockActions.Select(a => a.Object),
             _mockExceptionAction.Object,
-            _mockSettings.Object);
+            _mockSettings.Object,
+            _mockLogger.Object);
     }
 
     [Test]

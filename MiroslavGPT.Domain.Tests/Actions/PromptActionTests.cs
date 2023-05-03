@@ -73,12 +73,13 @@ public class PromptActionTests
 
         // Assert
         result.Should().NotBeNull();
-        result.ChatId.Should().Be(update.Message.Chat.Id);
-        result.MessageId.Should().Be(update.Message.MessageId);
-        result.Personality.Should().Be("/prompt");
-        result.Username.Should().Be(update.Message.From!.Username);
-        result.Prompt.Should().Be((prompt ?? "").Trim());
-        result.ReplyToId.Should().Be(update.Message.ReplyToMessage!.MessageId);
+        var promptCommand = result.Should().BeOfType<PromptCommand>().Subject;
+        promptCommand.ChatId.Should().Be(update.Message.Chat.Id);
+        promptCommand.MessageId.Should().Be(update.Message.MessageId);
+        promptCommand.Personality.Should().Be("/prompt");
+        promptCommand.Username.Should().Be(update.Message.From!.Username);
+        promptCommand.Prompt.Should().Be((prompt ?? "").Trim());
+        promptCommand.ReplyToId.Should().Be(update.Message.ReplyToMessage!.MessageId);
     }
 
     [Test]

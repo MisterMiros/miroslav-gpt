@@ -1,4 +1,5 @@
-﻿using MiroslavGPT.Domain.Interfaces.Clients;
+﻿using Microsoft.Extensions.Logging;
+using MiroslavGPT.Domain.Interfaces.Clients;
 using MiroslavGPT.Domain.Interfaces.Users;
 using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Settings;
@@ -6,24 +7,29 @@ using Telegram.Bot.Types;
 
 namespace MiroslavGPT.Domain.Actions;
 
-public class InitAction : BaseAction<InitCommand>
+public class InitAction : BaseAction
 {
     private readonly IChatGptBotSettings _chatGptBotSettings;
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<InitAction> _logger;
 
     public InitAction(
         IChatGptBotSettings chatGptBotSettings,
         IUserRepository userRepository,
-        ITelegramClient telegramClient) : base(telegramClient)
+        ITelegramClient telegramClient,
+        ILogger<InitAction> logger) : base(telegramClient)
     {
         _chatGptBotSettings = chatGptBotSettings;
         _userRepository = userRepository;
+        _logger = logger;
     }
 
-    public override InitCommand TryGetCommand(Update update)
+    public override ICommand TryGetCommand(Update update)
     {
+        _logger.LogInformation("Trying to get init command");
         if (update!.Message!.Text!.StartsWith("/init"))
         {
+            _logger.LogInformation("Init command found");
             var parts = update!.Message!.Text!.Split(' ', 2);
             return new InitCommand
             {
@@ -32,12 +38,14 @@ public class InitAction : BaseAction<InitCommand>
                 Secret = (parts[1] ?? "").Trim(),
             };
         }
+        _logger.LogInformation("Init command not found");
 
         return null;
     }
 
-    public override async Task ExecuteAsync(InitCommand command)
+    public override async Task ExecuteAsync(ICommand abstractCommand)
     {
+        var command = (InitCommand)abstractCommand;
         if (command.Secret == _chatGptBotSettings.SecretKey)
         {
             await _userRepository.AuthorizeUserAsync(command.ChatId);

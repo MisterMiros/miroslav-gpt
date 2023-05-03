@@ -1,6 +1,7 @@
 ﻿using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MiroslavGPT.Domain.Interfaces;
 using Newtonsoft.Json.Linq;
 using Telegram.Bot.Types;
@@ -12,6 +13,7 @@ namespace MiroslavGPT.AWS;
 public class TelegramWebhookFunction
 {
     private readonly ITelegramMessageHandler _telegramMessageHandler;
+    private readonly ILogger<TelegramWebhookFunction> _logger;
 
     public TelegramWebhookFunction()
     {
@@ -20,26 +22,29 @@ public class TelegramWebhookFunction
         var serviceProvider = services.BuildServiceProvider();
 
         _telegramMessageHandler = serviceProvider.GetRequiredService<ITelegramMessageHandler>();
+        _logger = serviceProvider.GetRequiredService<ILogger<TelegramWebhookFunction>>();
     }
 
-    public TelegramWebhookFunction(ITelegramMessageHandler messageHandler)
+    public TelegramWebhookFunction(ITelegramMessageHandler messageHandler, ILogger<TelegramWebhookFunction> logger)
     {
         _telegramMessageHandler = messageHandler;
+        _logger = logger;
     }
 
     public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest request, ILambdaContext context)
     {
         try
         {
+            _logger.LogInformation("Processing webhook request");
+            _logger.LogInformation(request.Body);
             var update = JObject.Parse(request.Body).ToObject<Update>();
             await _telegramMessageHandler.ProcessUpdateAsync(update);
-
-            return new APIGatewayProxyResponse { StatusCode = 200 };
         }
         catch (Exception ex)
         {
-            context.Logger.LogError($"Error processing webhook request: {ex}");
-            return new APIGatewayProxyResponse { StatusCode = 500 };
+            _logger.LogError(ex, "Error processing webhook request");
         }
+
+        return new APIGatewayProxyResponse { StatusCode = 200 };
     }
 }

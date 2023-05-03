@@ -32,9 +32,9 @@ public class ServiceCollectionExtensionsTests
         services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(ITelegramClient), typeof(TelegramClient), ServiceLifetime.Singleton));
         services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IChatClient), typeof(ChatClient), ServiceLifetime.Singleton));
         services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IPersonalityProvider), typeof(PersonalityProvider), ServiceLifetime.Singleton));
-        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction<InitCommand>), typeof(InitAction), ServiceLifetime.Singleton));
-        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction<PromptCommand>), typeof(PromptAction), ServiceLifetime.Singleton));
-        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction<UnknownCommand>), typeof(UnknownAction), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction), typeof(InitAction), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction), typeof(PromptAction), ServiceLifetime.Singleton));
+        services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IAction), typeof(UnknownAction), ServiceLifetime.Singleton));
         services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(IExceptionAction), typeof(ExceptionAction), ServiceLifetime.Singleton));
         services.Should().ContainEquivalentOf(new ServiceDescriptor(typeof(ITelegramMessageHandler), typeof(TelegramMessageHandler), ServiceLifetime.Singleton));
     }

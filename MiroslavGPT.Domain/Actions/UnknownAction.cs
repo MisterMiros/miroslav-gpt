@@ -4,13 +4,13 @@ using Telegram.Bot.Types;
 
 namespace MiroslavGPT.Domain.Actions;
 
-public class UnknownAction : BaseAction<UnknownCommand>
+public class UnknownAction : BaseAction
 {
     public UnknownAction(ITelegramClient telegramClient) : base(telegramClient)
     {
     }
 
-    public override UnknownCommand TryGetCommand(Update update)
+    public override ICommand TryGetCommand(Update update)
     {
         return new UnknownCommand
         {
@@ -19,7 +19,7 @@ public class UnknownAction : BaseAction<UnknownCommand>
         };
     }
 
-    public override async Task ExecuteAsync(UnknownCommand command)
+    public override async Task ExecuteAsync(ICommand command)
     {
         await TelegramClient.SendTextMessageAsync(command.ChatId, "Unknown command. Please use /init or one of the personality commands.", command.MessageId);
     }

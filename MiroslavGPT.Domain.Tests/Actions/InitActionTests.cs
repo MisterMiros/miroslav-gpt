@@ -58,9 +58,10 @@ public class InitActionTests
         
         // Assert
         result.Should().NotBeNull();
-        result.ChatId.Should().Be(update.Message.Chat.Id);
-        result.MessageId.Should().Be(update.Message.MessageId);
-        result.Secret.Should().Be((secretKey ?? "").Trim());
+        var initCommand = result.Should().BeOfType<InitCommand>().Subject;
+        initCommand.ChatId.Should().Be(update.Message.Chat.Id);
+        initCommand.MessageId.Should().Be(update.Message.MessageId);
+        initCommand.Secret.Should().Be((secretKey ?? "").Trim());
     }
     
     [Test, AutoData]

@@ -5,6 +5,7 @@ using MiroslavGPT.Domain.Interfaces.Actions;
 using MiroslavGPT.Domain.Models.Commands;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace MiroslavGPT.Domain;
 
@@ -16,41 +17,49 @@ public class TelegramMessageHandler : ITelegramMessageHandler
         ChatType.Private,
     }.ToImmutableArray();
 
-    private readonly IEnumerable<IAction<ICommand>> _actions;
+    private readonly IEnumerable<IAction> _actions;
     private readonly IExceptionAction _exceptionAction;
     private readonly ITelegramBotSettings _settings;
+    private readonly ILogger<TelegramMessageHandler> _logger;
 
-    public TelegramMessageHandler(IEnumerable<IAction<ICommand>> actions, IExceptionAction exceptionAction, ITelegramBotSettings settings)
+    public TelegramMessageHandler(IEnumerable<IAction> actions, IExceptionAction exceptionAction, ITelegramBotSettings settings, ILogger<TelegramMessageHandler> logger)
     {
         _actions = actions;
         _exceptionAction = exceptionAction;
         _settings = settings;
+        _logger = logger;
     }
 
     public async Task ProcessUpdateAsync(Update update)
     {
         if (update?.Message == null || string.IsNullOrWhiteSpace(update.Message.Text) || !update.Message.Text.StartsWith("/"))
         {
+            _logger.LogInformation("Update is not a command");
             return;
         }
 
         if (!_allowedTypes.Contains(update.Message.Chat.Type))
         {
+            _logger.LogInformation("Update is not from supported chat type");
             return;
         }
 
         if (update.Message.Chat.Type != ChatType.Private && !update.Message.Text.Contains("@" + _settings.TelegramBotUsername))
         {
+            _logger.LogInformation("Update is not in private chat or is not a bot command");
             return;
         }
 
         try
         {
+            _logger.LogInformation("Choosing the right action for the update");
             foreach (var action in _actions)
             {
+                _logger.LogInformation("Checking action {actionName}", action.GetType().Name);
                 var command = action.TryGetCommand(update);
                 if (command != null)
                 {
+                    _logger.LogInformation("Executing action {actionName}", action.GetType().Name);
                     await action.ExecuteAsync(command);
                     return;
                 }

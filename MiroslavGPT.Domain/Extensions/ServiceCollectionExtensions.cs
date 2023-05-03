@@ -26,13 +26,13 @@ public static class ServiceCollectionExtensions
             
         services.AddSingleton<IPersonalityProvider, PersonalityProvider>();
             
-        services.AddSingleton<IAction<InitCommand>, InitAction>();
-        services.AddSingleton<IAction<PromptCommand>, PromptAction>();
-        services.AddSingleton<IAction<UnknownCommand>, UnknownAction>();
+        services.AddSingleton<IAction, InitAction>();
+        services.AddSingleton<IAction, PromptAction>();
+        services.AddSingleton<IAction, UnknownAction>();
         services.AddSingleton<IExceptionAction, ExceptionAction>();
             
         services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
-            
+        
         return services;
     }
 }

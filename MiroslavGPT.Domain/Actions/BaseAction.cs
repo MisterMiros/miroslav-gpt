@@ -5,7 +5,7 @@ using Telegram.Bot.Types;
 
 namespace MiroslavGPT.Domain.Actions;
 
-public abstract class BaseAction<TCommand> : IAction<TCommand> where TCommand : ICommand
+public abstract class BaseAction: IAction
 {
     protected readonly ITelegramClient TelegramClient;
 
@@ -14,7 +14,7 @@ public abstract class BaseAction<TCommand> : IAction<TCommand> where TCommand : 
         TelegramClient = telegramClient;
     }
 
-    public abstract TCommand TryGetCommand(Update update);
+    public abstract ICommand TryGetCommand(Update update);
 
-    public abstract Task ExecuteAsync(TCommand command);
+    public abstract Task ExecuteAsync(ICommand abstractCommand);
 }
