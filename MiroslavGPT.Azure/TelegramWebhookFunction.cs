@@ -15,16 +15,17 @@ namespace MiroslavGPT.Azure;
 public class TelegramWebhookFunction
 {
     private readonly ITelegramMessageHandler _telegramMessageHandler;
+    private readonly ILogger<TelegramWebhookFunction> _logger;
 
-    public TelegramWebhookFunction(ITelegramMessageHandler telegramMessageHandler)
+    public TelegramWebhookFunction(ITelegramMessageHandler telegramMessageHandler, ILogger<TelegramWebhookFunction> logger)
     {
         _telegramMessageHandler = telegramMessageHandler;
+        _logger = logger;
     }
 
     [FunctionName("TelegramWebhookFunction")]
     public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequest req,
-        ILogger<TelegramWebhookFunction> logger)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequest req)
     {
         try
         {
@@ -36,8 +37,8 @@ public class TelegramWebhookFunction
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error processing webhook request: {ex.Message}");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            _logger.LogError(ex, "Error processing webhook request {ex}", ex);
+            return new StatusCodeResult(StatusCodes.Status200OK);
         }
     }
 }

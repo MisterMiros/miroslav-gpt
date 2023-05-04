@@ -22,7 +22,7 @@ public class TelegramWebhookFunctionTests
         _fixture.Customize(new AutoMoqCustomization());
         _mockTelegramMessageHandler = _fixture.Freeze<Mock<ITelegramMessageHandler>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<TelegramWebhookFunction>>>();
-        _function = new TelegramWebhookFunction(_mockTelegramMessageHandler.Object);
+        _function = new TelegramWebhookFunction(_mockTelegramMessageHandler.Object, _mockLogger.Object);
     }
 
     [Test]
@@ -33,7 +33,7 @@ public class TelegramWebhookFunctionTests
         var req = _fixture.CreateMockHttpRequest(update);
 
         // Act
-        var result = await _function.Run(req, _mockLogger.Object);
+        var result = await _function.Run(req);
 
         // Assert
         result.Should().BeOfType<OkResult>();
@@ -49,7 +49,7 @@ public class TelegramWebhookFunctionTests
         var req = _fixture.CreateMockHttpRequest("");
 
         // Act
-        var result = await _function.Run(req, _mockLogger.Object);
+        var result = await _function.Run(req);
 
         // Assert
         result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
@@ -73,7 +73,7 @@ public class TelegramWebhookFunctionTests
             .ThrowsAsync(ex);
 
         // Act
-        var result = await _function.Run(req, _mockLogger.Object);
+        var result = await _function.Run(req);
 
         // Assert
         result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);

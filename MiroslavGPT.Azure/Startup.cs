@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Azure.Threads;
 using MiroslavGPT.Azure.Users;
@@ -44,6 +45,8 @@ public class Startup : FunctionsStartup
         
         builder.Services.AddSingleton<IUserRepository, CosmosUserRepository>();
         builder.Services.AddSingleton<IThreadRepository, CosmosThreadRepository>();
+
+        builder.Services.AddLogging();
 
         builder.Services.AddDomainServices();
     }

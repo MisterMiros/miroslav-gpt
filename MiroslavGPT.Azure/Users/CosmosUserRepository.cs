@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Domain.Interfaces.Users;
+using MiroslavGPT.Domain.Models.Threads;
+using Newtonsoft.Json;
 
 namespace MiroslavGPT.Azure.Users;
 
@@ -24,7 +26,7 @@ public class CosmosUserRepository : IUserRepository
             var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @userId")
                 .WithParameter("@userId", userId.ToString());
 
-            var iterator = _container.GetItemQueryIterator<User>(query);
+            var iterator = _container.GetItemQueryIterator<CosmosUser>(query);
 
             if (iterator.HasMoreResults)
             {
@@ -43,10 +45,20 @@ public class CosmosUserRepository : IUserRepository
 
     public async Task AuthorizeUserAsync(long userId)
     {
-        var user = new User(userId.ToString(), true);
+        var user = new CosmosUser
+        {
+            Id = userId.ToString(),
+            IsAuthorized = true,
+        };
 
         await _container.UpsertItemAsync(user, new PartitionKey(userId.ToString()));
     }
 
-    public record User(string Id, bool IsAuthorized);
+    public record CosmosUser
+    {
+        [JsonProperty("id")] 
+        public string Id { get; set; }
+        [JsonProperty("isAuthorized")] 
+        public bool IsAuthorized { get; set; }
+    };
 }
