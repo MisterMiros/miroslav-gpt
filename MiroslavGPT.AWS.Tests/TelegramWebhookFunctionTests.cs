@@ -1,104 +1,111 @@
 ﻿using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using MiroslavGPT.Domain.Interfaces;
-using MiroslavGPT.Tests.Core;
 using Newtonsoft.Json;
 using System.Net;
+using Microsoft.Extensions.Logging;
+using MiroslavGPT.AWS.Settings;
+using MiroslavGPT.Tests.Core;
 using Update = Telegram.Bot.Types.Update;
 
-namespace MiroslavGPT.AWS.Tests
+namespace MiroslavGPT.AWS.Tests;
+
+public class TelegramWebhookFunctionTests
 {
-    public class TelegramWebhookFunctionTests
+    private Fixture _fixture;
+    private Mock<ITelegramMessageHandler> _mockTelegramMessageHandler;
+    private Mock<ILogger<TelegramWebhookFunction>> _mockLogger;
+    private Mock<ILambdaContext> _mockContext;
+    private TelegramWebhookFunction _function;
+
+    [SetUp]
+    public void SetUp()
     {
-        private Fixture _fixture;
-        private Mock<ITelegramMessageHandler> _mockTelegramMessageHandler;
-        private Mock<ILambdaLogger> _mockLogger;
-        private Mock<ILambdaContext> _mockContext;
-        private TelegramWebhookFunction _function;
+        _fixture = new Fixture();
+        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        _fixture.Customize(new AutoMoqCustomization());
+        _mockTelegramMessageHandler = _fixture.Freeze<Mock<ITelegramMessageHandler>>();
+        _mockLogger = _fixture.Freeze<Mock<ILogger<TelegramWebhookFunction>>>();
+        _mockContext = _fixture.Freeze<Mock<ILambdaContext>>();
+        _function = new TelegramWebhookFunction(_mockTelegramMessageHandler.Object, _mockLogger.Object);
+    }
 
-        [SetUp]
-        public void SetUp()
-        {
-            _fixture = new Fixture();
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            _fixture.Customizations.Add(new RecursionDepthCustomization(1));
-            _fixture.Customize(new AutoMoqCustomization());
-            _mockTelegramMessageHandler = _fixture.Freeze<Mock<ITelegramMessageHandler>>();
-            _mockLogger = _fixture.Freeze<Mock<ILambdaLogger>>();
-            _mockContext= _fixture.Freeze<Mock<ILambdaContext>>();
-            _mockContext.Setup(c => c.Logger).Returns(_mockLogger.Object);
-            _function = new TelegramWebhookFunction(_mockTelegramMessageHandler.Object);
-        }
+    [Test, AutoData]
+    public void Constructor_WorksFine(AmazonSettings settings)
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable("AWS_REGION", settings.RegionName);
+        Environment.SetEnvironmentVariable("TELEGRAM_BOT_USERNAME", settings.TelegramBotUsername);
+        Environment.SetEnvironmentVariable("TELEGRAM_BOT_TOKEN", settings.TelegramBotToken);
+        Environment.SetEnvironmentVariable("SECRET_KEY", settings.SecretKey);
+        Environment.SetEnvironmentVariable("OPENAI_API_KEY", settings.OpenAiApiKey);
+        Environment.SetEnvironmentVariable("MAX_TOKENS", settings.MaxTokens.ToString());
+        Environment.SetEnvironmentVariable("DYNAMODB_USERS_TABLE_NAME", settings.UsersTableName);
+        Environment.SetEnvironmentVariable("DYNAMODB_THREAD_TABLE_NAME", settings.ThreadTableName);
+        Environment.SetEnvironmentVariable("THREAD_LENGTH_LIMIT", settings.ThreadLengthLimit.ToString());
+        // Act
+        // Assert
+        Assert.DoesNotThrow(() => new TelegramWebhookFunction());
+    }
 
-        [Test]
-        public void Constructor_WorksFine()
-        {
-            // Arrange
-            // Act
-            // Assert
-            Assert.DoesNotThrow(() => new TelegramWebhookFunction());
-            
-        }
+    [Test]
+    public async Task Run_ReturnsOk()
+    {
+        // Arrange
+        var update = new Update();
+        var req = _fixture.Create<APIGatewayProxyRequest>();
+        req.Body = JsonConvert.SerializeObject(update);
 
-        [Test]
-        public async Task Run_ReturnsOk()
-        {
-            // Arrange
-            var update = _fixture.Create<Update>();
-            var req = _fixture.Create<APIGatewayProxyRequest>();
-            req.Body = JsonConvert.SerializeObject(update);
+        // Act
+        var result = await _function.FunctionHandler(req, _mockContext.Object);
 
-            // Act
-            var result = await _function.FunctionHandler(req, _mockContext.Object);
+        // Assert
+        result.StatusCode.Should().Be((int)HttpStatusCode.OK);
 
-            // Assert
-            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+        _mockTelegramMessageHandler.Verify(h => h.ProcessUpdateAsync(It.Is<Update>(u => u.Id == update.Id)), Times.Once());
+        _mockTelegramMessageHandler.VerifyNoOtherCalls();
+    }
 
-            _mockTelegramMessageHandler.Verify(h => h.ProcessUpdateAsync(It.Is<Update>(u => u.Id == update.Id)), Times.Once());
-            _mockTelegramMessageHandler.VerifyNoOtherCalls();
-        }
+    [Test]
+    public async Task Run_ReturnsOk_WhenNoBody()
+    {
+        // Arrange
+        var req = _fixture.Create<APIGatewayProxyRequest>();
+        req.Body = "";
 
-        [Test]
-        public async Task Run_ReturnsInternalError_WhenNoBody()
-        {
-            // Arrangevar update = _fixture.Create<Update>();
-            var req = _fixture.Create<APIGatewayProxyRequest>();
-            req.Body = "";
+        // Act
+        var result = await _function.FunctionHandler(req, _mockContext.Object);
 
-            // Act
-            var result = await _function.FunctionHandler(req, _mockContext.Object);
+        // Assert
+        result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+        
+        _mockLogger.VerifyLogError("Error processing webhook request");
 
-            // Assert
-            result.StatusCode.Should().Be((int)HttpStatusCode.InternalServerError);
+        _mockTelegramMessageHandler.Verify(h => h.ProcessUpdateAsync(It.IsAny<Update>()), Times.Never);
+        _mockTelegramMessageHandler.VerifyNoOtherCalls();
+    }
 
-            _mockLogger.Verify(l => l.LogError(It.Is<string>(s => s.StartsWith($"Error processing webhook request: Newtonsoft.Json.JsonReaderException: Error reading JObject from JsonReader"))), Times.Once);
+    [Test]
+    public async Task Run_ReturnsOk_WhenProcessThrowsException()
+    {
+        // Arrange
+        var update = new Update();
+        var req = _fixture.Create<APIGatewayProxyRequest>();
+        req.Body = JsonConvert.SerializeObject(update);
+        var ex = new Exception("Failed");
 
-            _mockTelegramMessageHandler.Verify(h => h.ProcessUpdateAsync(It.IsAny<Update>()), Times.Never);
-            _mockTelegramMessageHandler.VerifyNoOtherCalls();
-        }
+        _mockTelegramMessageHandler.Setup(h => h.ProcessUpdateAsync(It.IsAny<Update>()))
+            .ThrowsAsync(ex);
 
-        [Test]
-        public async Task Run_ReturnsInternalError_WhenProccessThrowsException()
-        {
-            // Arrange
-            var update = _fixture.Create<Update>();
-            var req = _fixture.Create<APIGatewayProxyRequest>();
-            req.Body = JsonConvert.SerializeObject(update);
-            var ex = new Exception("Failed");
+        // Act
+        var result = await _function.FunctionHandler(req, _mockContext.Object);
 
-            _mockTelegramMessageHandler.Setup(h => h.ProcessUpdateAsync(It.IsAny<Update>()))
-                .ThrowsAsync(ex);
+        // Assert
+        result.StatusCode.Should().Be((int)HttpStatusCode.OK);
 
-            // Act
-            var result = await _function.FunctionHandler(req, _mockContext.Object);
+        _mockLogger.VerifyLogError(ex, "Error processing webhook request");
 
-            // Assert
-            result.StatusCode.Should().Be((int)HttpStatusCode.InternalServerError);
-
-            _mockLogger.Verify(l => l.LogError($"Error processing webhook request: {ex}"), Times.Once);
-
-            _mockTelegramMessageHandler.Verify(h => h.ProcessUpdateAsync(It.Is<Update>(u => u.Id == update.Id)), Times.Once());
-            _mockTelegramMessageHandler.VerifyNoOtherCalls();
-        }
+        _mockTelegramMessageHandler.Verify(h => h.ProcessUpdateAsync(It.Is<Update>(u => u.Id == update.Id)), Times.Once());
+        _mockTelegramMessageHandler.VerifyNoOtherCalls();
     }
 }

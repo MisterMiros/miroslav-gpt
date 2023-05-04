@@ -1,42 +1,55 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MiroslavGPT.AWS.Factories;
+﻿using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MiroslavGPT.AWS.Settings;
-using MiroslavGPT.Domain;
-using MiroslavGPT.Domain.Factories;
-using MiroslavGPT.Domain.Interfaces;
-using MiroslavGPT.Domain.Personalities;
+using MiroslavGPT.AWS.Threads;
+using MiroslavGPT.AWS.Users;
+using MiroslavGPT.Domain.Extensions;
+using MiroslavGPT.Domain.Interfaces.Threads;
+using MiroslavGPT.Domain.Interfaces.Users;
 using MiroslavGPT.Domain.Settings;
 
-namespace MiroslavGPT.AWS
+namespace MiroslavGPT.AWS;
+
+public class Startup
 {
-    public class Startup
+    public static void ConfigureServices(IServiceCollection services)
     {
-        public static void ConfigureServices(IServiceCollection services)
+        var amazonSettings = new AmazonSettings
         {
-            var amazonSettings = new AmazonSettings
-            {
-                SecretKey = Environment.GetEnvironmentVariable("SECRET_KEY"),
-                OpenAiApiKey= Environment.GetEnvironmentVariable("OPENAI_API_KEY"),
-                TelegramBotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN"),
-                TelegramBotUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME"),
-                MaxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS") ?? "100"),
-                RegionName = Environment.GetEnvironmentVariable("AWS_REGION"),
-                UsersTableName = Environment.GetEnvironmentVariable("DYNAMODB_USERS_TABLE_NAME"),
-            };
+            RegionName = Environment.GetEnvironmentVariable("AWS_REGION"),
+            TelegramBotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN"),
+            TelegramBotUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME"),
+            SecretKey = Environment.GetEnvironmentVariable("SECRET_KEY"),
+            OpenAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY"),
+            MaxTokens = int.Parse(Environment.GetEnvironmentVariable("MAX_TOKENS")!),
+            UsersTableName = Environment.GetEnvironmentVariable("DYNAMODB_USERS_TABLE_NAME"),
+            ThreadTableName = Environment.GetEnvironmentVariable("DYNAMODB_THREAD_TABLE_NAME"),
+            ThreadLengthLimit = int.Parse(Environment.GetEnvironmentVariable("THREAD_LENGTH_LIMIT")!),
+        };
 
-            services.AddSingleton<ITelegramBotSettings>(amazonSettings);
-            services.AddSingleton<IChatGptBotSettings>(amazonSettings);
-            services.AddSingleton<IRegionSettings>(amazonSettings);
-            services.AddSingleton<IDynamoDBUsersSettings>(amazonSettings);
+        services.AddSingleton<ITelegramBotSettings>(amazonSettings);
+        services.AddSingleton<IChatGptBotSettings>(amazonSettings);
+        services.AddSingleton<IRegionSettings>(amazonSettings);
+        services.AddSingleton<IUserSettings>(amazonSettings);
+        services.AddSingleton<IThreadSettings>(amazonSettings);
 
-            services.AddSingleton<IUsersRepository, DynamoDBUsersRepository>();
-            services.AddSingleton<IDynamoDBClientFactory, DynamoDBClientFactory>();
+        services.AddSingleton<IUserRepository, DynamoUserRepository>();
+        services.AddSingleton<IThreadRepository, DynamoThreadRepository>();
 
-            services.AddSingleton<ITelegramClientFactory, TelegramClientFactory>();
-            services.AddSingleton<IOpenAiClientFactory, OpenAiClientFactory>();
-            services.AddSingleton<IPersonalityProvider, PersonalityProvider>();
-            services.AddSingleton<IBot, ChatGPTBot>();
-            services.AddSingleton<ITelegramMessageHandler, TelegramMessageHandler>();
-        }
+        services.AddSingleton<IDynamoDBContext>(s =>
+        {
+            var client = new AmazonDynamoDBClient(RegionEndpoint.GetBySystemName(s.GetService<IRegionSettings>()!.RegionName));
+            return new DynamoDBContext(client);
+        });
+
+        services.AddLogging(b =>
+        {
+            b.AddSimpleConsole();
+        });
+
+        services.AddDomainServices();
     }
 }
