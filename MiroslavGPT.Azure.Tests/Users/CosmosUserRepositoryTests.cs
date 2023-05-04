@@ -65,7 +65,11 @@ public class CosmosUserRepositoryTests
     {
         // Arrange
         var userId = _fixture.Create<long>();
-        var user = new CosmosUserRepository.CosmosUser(userId.ToString(), isAuthorized);
+        var user = new CosmosUserRepository.CosmosUser()
+        {
+            Id = userId.ToString(),
+            IsAuthorized = isAuthorized,
+        };
         var users = new List<CosmosUserRepository.CosmosUser> { user };
         var feedResponse = _fixture.Create<Mock<FeedResponse<CosmosUserRepository.CosmosUser>>>();
         feedResponse.Setup(r => r.GetEnumerator())

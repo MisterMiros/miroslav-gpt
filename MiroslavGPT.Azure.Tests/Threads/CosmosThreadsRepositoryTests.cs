@@ -29,6 +29,19 @@ public class CosmosThreadsRepositoryTests
         _repository = new CosmosThreadRepository(_mockCosmosClient.Object, _mockSettings.Object);
     }
 
+    private static bool ThreadsEqual(CosmosThreadRepository.CosmosMessageThread cosmosThread, MessageThread thread)
+    {
+        return cosmosThread.Id == thread.Id.ToString() &&
+               cosmosThread.ChatId == thread.ChatId &&
+               cosmosThread.Messages.Count == thread.Messages.Count &&
+               cosmosThread.Messages.Zip(thread.Messages).All(pair =>
+                   pair.First.MessageId == pair.Second.MessageId &&
+                   pair.First.Text == pair.Second.Text &&
+                   pair.First.IsAssistant == pair.Second.IsAssistant &&
+                   pair.First.Username == pair.Second.Username
+               );
+    }
+
     [Test, AutoData]
     public async Task CreateThreadAsync_ShouldCreate(long chatId)
     {
@@ -37,7 +50,7 @@ public class CosmosThreadsRepositoryTests
         var thread = await _repository.CreateThreadAsync(chatId);
         // Assert
         _mockContainer.Verify(c => c.CreateItemAsync(
-            thread,
+            It.Is<CosmosThreadRepository.CosmosMessageThread>(t => ThreadsEqual(t, thread)),
             It.Is<PartitionKey>(k => k == new PartitionKey(thread.Id.ToString())),
             It.IsAny<ItemRequestOptions>(),
             It.IsAny<CancellationToken>()));
@@ -73,41 +86,42 @@ public class CosmosThreadsRepositoryTests
     }
 
     [Test, AutoData]
-    public async Task GetThreadByMessage_ShouldReturnThread(long chatId, int messageId, MessageThread messageThread)
+    public async Task GetThreadByMessage_ShouldReturnThread(long chatId, int messageId, CosmosThreadRepository.CosmosMessageThread cosmosThread)
     {
         // Arrange
-        var threads = new List<MessageThread> { messageThread };
+        cosmosThread.Id = Guid.NewGuid().ToString();
+        var threads = new List<CosmosThreadRepository.CosmosMessageThread> { cosmosThread };
 
-        var feedResponse = _fixture.Create<Mock<FeedResponse<MessageThread>>>();
+        var feedResponse = _fixture.Create<Mock<FeedResponse<CosmosThreadRepository.CosmosMessageThread>>>();
         feedResponse.Setup(r => r.GetEnumerator())
             .Returns(threads.GetEnumerator());
 
-        var iterator = _fixture.Create<Mock<FeedIterator<MessageThread>>>();
+        var iterator = _fixture.Create<Mock<FeedIterator<CosmosThreadRepository.CosmosMessageThread>>>();
         iterator.Setup(i => i.HasMoreResults).Returns(true);
         iterator.Setup(i => i.ReadNextAsync(default))
             .ReturnsAsync(feedResponse.Object);
 
-        _mockContainer.Setup(c => c.GetItemQueryIterator<MessageThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosThreadRepository.CosmosMessageThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Returns(iterator.Object);
 
         // Act
         var result = await _repository.GetThreadByMessageAsync(chatId, messageId);
 
         // Assert
-        result.Should().Be(messageThread);
+        result.Should().NotBeNull().And.Match(t => ThreadsEqual(cosmosThread, (MessageThread)t));
     }
 
     [Test, AutoData]
     public async Task UpdateThreadAsync_ShouldUpdate(MessageThread messageThread)
     {
         // Arrange
-        
+
         // Act
         await _repository.UpdateThreadAsync(messageThread);
 
         // Assert
         _mockContainer.Verify(c => c.ReplaceItemAsync(
-                messageThread,
+                It.Is<CosmosThreadRepository.CosmosMessageThread>(t => ThreadsEqual(t, messageThread)),
                 messageThread.Id.ToString(),
                 It.Is<PartitionKey>(k => k == new PartitionKey(messageThread.Id.ToString())),
                 It.IsAny<ItemRequestOptions>(),

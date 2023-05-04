@@ -43,7 +43,7 @@ public class TelegramWebhookFunctionTests
     }
 
     [Test]
-    public async Task Run_ReturnsInternalError_WhenNoBody()
+    public async Task Run_ReturnsSuccess_AndLogsError_WhenNoBody()
     {
         // Arrange
         var req = _fixture.CreateMockHttpRequest("");
@@ -52,17 +52,17 @@ public class TelegramWebhookFunctionTests
         var result = await _function.Run(req);
 
         // Assert
-        result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+        result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(StatusCodes.Status200OK);
 
 
-        _mockLogger.VerifyLogError($"Error processing webhook request: Error reading JObject from JsonReader. Current JsonReader item is not an object: String. Path '', line 1, position 2.");
+        _mockLogger.VerifyLogError("Error processing webhook request");
 
         _mockTelegramMessageHandler.Verify(h => h.ProcessUpdateAsync(It.IsAny<Update>()), Times.Never);
         _mockTelegramMessageHandler.VerifyNoOtherCalls();
     }
 
     [Test]
-    public async Task Run_ReturnsInternalError_WhenProcessThrowsException()
+    public async Task Run_ReturnsSuccess_AngLogsError_WhenProcessThrowsException()
     {
         // Arrange
         var update = new Update();
@@ -76,9 +76,9 @@ public class TelegramWebhookFunctionTests
         var result = await _function.Run(req);
 
         // Assert
-        result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+        result.Should().BeOfType<StatusCodeResult>().Which.StatusCode.Should().Be(StatusCodes.Status200OK);
 
-        _mockLogger.VerifyLogError($"Error processing webhook request: {ex.Message}");
+        _mockLogger.VerifyLogError(ex, "Error processing webhook request");
 
         _mockTelegramMessageHandler.Verify(h => h.ProcessUpdateAsync(It.Is<Update>(u => u.Id == update.Id)), Times.Once());
         _mockTelegramMessageHandler.VerifyNoOtherCalls();

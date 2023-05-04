@@ -37,7 +37,7 @@ public class TelegramWebhookFunction
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing webhook request {ex}", ex);
+            _logger.LogError(ex, "Error processing webhook request");
             return new StatusCodeResult(StatusCodes.Status200OK);
         }
     }
