@@ -7,7 +7,9 @@
             }
         },
         "logLevel": {
-            "default": "Debug"
+            "MiroslavGPT.Domain.*": "Trace",
+            "MiroslavGPT.Azure.*": "Trace",
+            "Function": "Trace"
         }
     }
 }
