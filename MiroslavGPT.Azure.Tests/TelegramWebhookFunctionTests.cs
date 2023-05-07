@@ -17,12 +17,12 @@ public class TelegramWebhookFunctionTests
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _fixture = new();
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         _fixture.Customize(new AutoMoqCustomization());
         _mockTelegramMessageHandler = _fixture.Freeze<Mock<ITelegramMessageHandler>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<TelegramWebhookFunction>>>();
-        _function = new TelegramWebhookFunction(_mockTelegramMessageHandler.Object, _mockLogger.Object);
+        _function = new(_mockTelegramMessageHandler.Object, _mockLogger.Object);
     }
 
     [Test]

@@ -27,7 +27,7 @@ public class CosmosThreadRepository : IThreadRepository
         {
             Id = Guid.NewGuid(),
             ChatId = chatId,
-            Messages = new List<ThreadMessage>(),
+            Messages = new(),
         };
         await _threadsContainer.CreateItemAsync(ToCosmos(thread), new PartitionKey(thread.Id.ToString()));
         return thread;
@@ -57,13 +57,14 @@ public class CosmosThreadRepository : IThreadRepository
 
     public async Task UpdateThreadAsync(MessageThread messageThread)
     {
-        messageThread.Messages = messageThread.Messages.TakeLast(_settings.ThreadLengthLimit).ToList();
-        await _threadsContainer.ReplaceItemAsync(ToCosmos(messageThread), messageThread.Id.ToString(), new PartitionKey(messageThread.Id.ToString()));
+        var cosmosThread = ToCosmos(messageThread);
+        cosmosThread.Messages = cosmosThread.Messages.TakeLast(_settings.ThreadLengthLimit).ToList();
+        await _threadsContainer.ReplaceItemAsync(cosmosThread, cosmosThread.Id, new PartitionKey(messageThread.Id.ToString()));
     }
     
     private static MessageThread FromCosmos(CosmosMessageThread thread)
     {
-        return new MessageThread
+        return new()
         {
             Id = Guid.Parse(thread.Id),
             ChatId = thread.ChatId,
@@ -73,7 +74,7 @@ public class CosmosThreadRepository : IThreadRepository
     
     private static ThreadMessage FromCosmos(CosmosThreadMessage message)
     {
-        return new ThreadMessage
+        return new()
         {
             MessageId = message.MessageId,
             Username = message.Username,
@@ -84,7 +85,7 @@ public class CosmosThreadRepository : IThreadRepository
     
     private static CosmosMessageThread ToCosmos(MessageThread thread)
     {
-        return new CosmosMessageThread
+        return new()
         {
             Id = thread.Id.ToString(),
             ChatId = thread.ChatId,
@@ -94,7 +95,7 @@ public class CosmosThreadRepository : IThreadRepository
 
     private static CosmosThreadMessage ToCosmos(ThreadMessage message)
     {
-        return new CosmosThreadMessage
+        return new()
         {
             MessageId = message.MessageId,
             Username = message.Username,

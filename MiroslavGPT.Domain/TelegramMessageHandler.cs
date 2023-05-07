@@ -63,6 +63,7 @@ public class TelegramMessageHandler : ITelegramMessageHandler
                     return;
                 }
             }
+
             _logger.LogDebug("No action found for processing");
         }
         catch (Exception)

@@ -20,11 +20,11 @@ public class TelegramMessageHandlerTests
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _fixture = new();
         _fixture.Customize(new AutoMoqCustomization());
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        _mockActions = new List<Mock<IAction>>
+        _mockActions = new()
         {
             new(),
             new(),
@@ -34,7 +34,7 @@ public class TelegramMessageHandlerTests
         _mockSettings = _fixture.Freeze<Mock<ITelegramBotSettings>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<TelegramMessageHandler>>>();
 
-        _handler = new TelegramMessageHandler(
+        _handler = new(
             _mockActions.Select(a => a.Object),
             _mockExceptionAction.Object,
             _mockSettings.Object,
@@ -126,7 +126,7 @@ public class TelegramMessageHandlerTests
             .Returns(botName);
 
         // Act
-        await _handler.ProcessUpdateAsync(null);
+        await _handler.ProcessUpdateAsync(update);
 
         // Assert
         foreach (var action in _mockActions)
@@ -154,7 +154,7 @@ public class TelegramMessageHandlerTests
             .Returns(botName);
 
         // Act
-        await _handler.ProcessUpdateAsync(null);
+        await _handler.ProcessUpdateAsync(update);
 
         // Assert
         foreach (var action in _mockActions)
@@ -200,6 +200,25 @@ public class TelegramMessageHandlerTests
 
         foreach (var action in _mockActions.Skip(actionNumber + 1))
         {
+            action.VerifyNoOtherCalls();
+        }
+    }
+
+    [Test]
+    public async Task ProcessUpdateAsync_ShouldSkip_WhenNoSuitableAction()
+    {
+        // Arrange
+        var text = "/command";
+        var update = _fixture.Create<Update>();
+        update.Message!.Text = text;
+        update.Message.Chat.Type = ChatType.Private;
+        // Act
+        await _handler.ProcessUpdateAsync(update);
+            
+        // Assert
+        foreach (var action in _mockActions)
+        { 
+            action.Verify(a => a.TryGetCommand(update), Times.Once);
             action.VerifyNoOtherCalls();
         }
     }
