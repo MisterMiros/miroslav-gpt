@@ -2,34 +2,17 @@ image: mcr.microsoft.com/dotnet/sdk:6.0
 
 stages:
   - build
-  - deploy-aws
   - deploy-azure
 
 build:
   stage: build
   script:
     - dotnet restore
-    - dotnet build MiroslavGPT.AWS --configuration Release --no-restore --runtime linux-x64
     - dotnet build MiroslavGPT.Azure --configuration Release --no-restore
-    - dotnet publish MiroslavGPT.AWS --configuration Release --no-build --output ./publish/aws --runtime linux-x64
     - dotnet publish MiroslavGPT.Azure --configuration Release --no-build --output ./publish/azure
   artifacts:
     paths:
       - ./publish
-
-deploy_aws:
-  stage: deploy-aws
-  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
-  script:
-    - cd publish/aws
-    - zip -r lambda.zip .
-    - aws lambda update-function-code --function-name $FUNCTION_NAME --zip-file fileb://lambda.zip
-    - aws lambda update-function-configuration --function-name $FUNCTION_NAME --environment "Variables={TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN,OPENAI_API_KEY=$OPENAI_API_KEY,SECRET_KEY=$SECRET_KEY,DYNAMODB_USERS_TABLE_NAME=$DYNAMODB_USERS_TABLE_NAME,TELEGRAM_BOT_USERNAME=$TELEGRAM_BOT_USERNAME,MAX_TOKENS=$MAX_TOKENS}"
-  only:
-    - master
-  when: manual
-  environment:
-    name: production
 
 deploy_azure:
   stage: deploy-azure
