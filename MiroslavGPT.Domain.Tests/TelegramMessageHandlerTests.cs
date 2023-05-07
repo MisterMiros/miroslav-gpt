@@ -20,11 +20,11 @@ public class TelegramMessageHandlerTests
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _fixture = new();
         _fixture.Customize(new AutoMoqCustomization());
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        _mockActions = new List<Mock<IAction>>
+        _mockActions = new()
         {
             new(),
             new(),
@@ -34,7 +34,7 @@ public class TelegramMessageHandlerTests
         _mockSettings = _fixture.Freeze<Mock<ITelegramBotSettings>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<TelegramMessageHandler>>>();
 
-        _handler = new TelegramMessageHandler(
+        _handler = new(
             _mockActions.Select(a => a.Object),
             _mockExceptionAction.Object,
             _mockSettings.Object,

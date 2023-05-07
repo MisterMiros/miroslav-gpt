@@ -79,7 +79,7 @@ public class PromptAction : BaseAction
 
         _logger.LogDebug("Getting thread for chat {ChatId} and message {ReplyToId}", command.ChatId, command.ReplyToId);
         var thread = await GetThreadAsync(command.ChatId, command.ReplyToId);
-        thread.Messages.Add(new ThreadMessage
+        thread.Messages.Add(new()
         {
             MessageId = command.MessageId,
             Username = command.Username,
@@ -100,7 +100,7 @@ public class PromptAction : BaseAction
         _logger.LogDebug("Sending response to user {ChatId} for prompt {Prompt}", command.ChatId, command.Prompt);
         var message = await TelegramClient.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId);
 
-        thread.Messages.Add(new ThreadMessage
+        thread.Messages.Add(new()
         {
             MessageId = message.MessageId,
             Username = null,

@@ -10,7 +10,7 @@ public class PersonalityProviderTests
     [SetUp]
     public void SetUp()
     {
-        _provider = new PersonalityProvider();
+        _provider = new();
     }
 
     [TestCase("/prompt")]

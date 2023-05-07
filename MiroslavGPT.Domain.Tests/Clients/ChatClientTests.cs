@@ -15,7 +15,7 @@ public class ChatClientTests
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _fixture = new();
         _fixture.Customize(new AutoMoqCustomization());
 
         _mockChatEndpoint = _fixture.Freeze<Mock<IChatEndpoint>>();

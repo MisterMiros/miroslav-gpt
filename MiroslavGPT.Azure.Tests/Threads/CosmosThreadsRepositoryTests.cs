@@ -17,7 +17,7 @@ public class CosmosThreadsRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _fixture = new();
         _fixture.Customize(new AutoMoqCustomization());
 
         _mockContainer = _fixture.Freeze<Mock<Container>>();
@@ -26,7 +26,7 @@ public class CosmosThreadsRepositoryTests
             .Returns(_mockContainer.Object);
         _mockSettings = _fixture.Freeze<Mock<IThreadSettings>>();
 
-        _repository = new CosmosThreadRepository(_mockCosmosClient.Object, _mockSettings.Object);
+        _repository = new(_mockCosmosClient.Object, _mockSettings.Object);
     }
 
     private static bool ThreadsEqual(CosmosThreadRepository.CosmosMessageThread cosmosThread, MessageThread thread)

@@ -7,7 +7,7 @@ public static class ThreadMessageExtensions
 {
     public static ChatMessage ToChatMessage(this ThreadMessage message)
     {
-        return new ChatMessage
+        return new()
         {
             Role = message.IsAssistant ? ChatMessageRole.Assistant : ChatMessageRole.User,
             Content = string.IsNullOrWhiteSpace(message.Username) ? message.Text : $"@{message.Username}: {message.Text}"

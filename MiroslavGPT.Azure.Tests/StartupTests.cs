@@ -32,21 +32,21 @@ public class StartupTests
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _fixture = new();
         _fixture.Customize(new AutoMoqCustomization());
         _mockServiceCollection = _fixture.Freeze<Mock<IServiceCollection>>();
         _mockConfiguration = _fixture.Freeze<Mock<IConfiguration>>();
         _mockBuilder = _fixture.Freeze<Mock<IWebJobsBuilder>>();
         _mockBuilder.Setup(b => b.Services)
             .Returns(_mockServiceCollection.Object);
-        _startup = new Startup();
+        _startup = new();
     }
 
     [Test, AutoData]
     public void Startup_WorksFine(AzureSettings azureSettings)
     {
         // Arrange
-        List<ServiceDescriptor> services = new List<ServiceDescriptor>();
+        List<ServiceDescriptor> services = new();
         _mockServiceCollection.Setup(c => c.Add(It.IsAny<ServiceDescriptor>()))
             .Callback((ServiceDescriptor d) =>
             {
@@ -76,7 +76,7 @@ public class StartupTests
             .Returns(azureSettings.ThreadLengthLimit.ToString());
 
         // Act
-        _startup.Configure(new WebJobsBuilderContext
+        _startup.Configure(new()
         {
             Configuration = _mockConfiguration.Object,
         }, _mockBuilder.Object);

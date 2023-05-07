@@ -13,7 +13,7 @@ public class ExceptionActionTests
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _fixture = new();
         _fixture.Customize(new AutoMoqCustomization());
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 

@@ -15,7 +15,7 @@ public class CosmosUserRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _fixture = new();
         _fixture.Customize(new AutoMoqCustomization());
 
         _mockContainer = _fixture.Freeze<Mock<Container>>();
@@ -24,7 +24,7 @@ public class CosmosUserRepositoryTests
             .Returns(_mockContainer.Object);
         _mockSettings = _fixture.Freeze<Mock<IUserSettings>>();
 
-        _repository = new CosmosUserRepository(_mockCosmosClient.Object, _mockSettings.Object);
+        _repository = new(_mockCosmosClient.Object, _mockSettings.Object);
     }
 
     [Test]

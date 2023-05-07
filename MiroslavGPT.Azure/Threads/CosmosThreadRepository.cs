@@ -27,7 +27,7 @@ public class CosmosThreadRepository : IThreadRepository
         {
             Id = Guid.NewGuid(),
             ChatId = chatId,
-            Messages = new List<ThreadMessage>(),
+            Messages = new(),
         };
         await _threadsContainer.CreateItemAsync(ToCosmos(thread), new PartitionKey(thread.Id.ToString()));
         return thread;
@@ -63,7 +63,7 @@ public class CosmosThreadRepository : IThreadRepository
     
     private static MessageThread FromCosmos(CosmosMessageThread thread)
     {
-        return new MessageThread
+        return new()
         {
             Id = Guid.Parse(thread.Id),
             ChatId = thread.ChatId,
@@ -73,7 +73,7 @@ public class CosmosThreadRepository : IThreadRepository
     
     private static ThreadMessage FromCosmos(CosmosThreadMessage message)
     {
-        return new ThreadMessage
+        return new()
         {
             MessageId = message.MessageId,
             Username = message.Username,
@@ -84,7 +84,7 @@ public class CosmosThreadRepository : IThreadRepository
     
     private static CosmosMessageThread ToCosmos(MessageThread thread)
     {
-        return new CosmosMessageThread
+        return new()
         {
             Id = thread.Id.ToString(),
             ChatId = thread.ChatId,
@@ -94,7 +94,7 @@ public class CosmosThreadRepository : IThreadRepository
 
     private static CosmosThreadMessage ToCosmos(ThreadMessage message)
     {
-        return new CosmosThreadMessage
+        return new()
         {
             MessageId = message.MessageId,
             Username = message.Username,
