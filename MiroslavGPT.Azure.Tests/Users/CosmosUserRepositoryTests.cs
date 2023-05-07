@@ -6,11 +6,11 @@ namespace MiroslavGPT.Azure.Tests.Users;
 
 public class CosmosUserRepositoryTests
 {
-    private Fixture _fixture;
-    private Mock<IUserSettings> _mockSettings;
-    private Mock<CosmosClient> _mockCosmosClient;
-    private Mock<Container> _mockContainer;
-    private CosmosUserRepository _repository;
+    private Fixture _fixture = null!;
+    private Mock<IUserSettings> _mockSettings = null!;
+    private Mock<CosmosClient> _mockCosmosClient = null!;
+    private Mock<Container> _mockContainer = null!;
+    private CosmosUserRepository _repository = null!;
 
     [SetUp]
     public void SetUp()

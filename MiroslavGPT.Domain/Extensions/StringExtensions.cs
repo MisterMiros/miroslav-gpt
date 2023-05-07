@@ -5,7 +5,7 @@ namespace MiroslavGPT.Domain.Extensions;
 
 public static class StringExtensions
 {
-    private static readonly Regex SpecialMarkdownCharacters = new Regex("([*_{}\\[\\]()#+-.!])", RegexOptions.Compiled);
+    private static readonly Regex SpecialMarkdownCharacters = new("([*_{}\\[\\]()#+-.!])", RegexOptions.Compiled);
 
     public static string EscapeUsernames(this string markdown, IEnumerable<string> usernames)
     {

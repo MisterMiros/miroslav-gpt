@@ -9,9 +9,9 @@ namespace MiroslavGPT.Domain.Tests.Clients;
 [TestFixture]
 public class TelegramClientTests
 {
-    private Fixture _fixture;
-    private Mock<ITelegramBotClient> _mockTelegramBotClient;
-    private TelegramClient _telegramClient;
+    private Fixture _fixture = null!;
+    private Mock<ITelegramBotClient> _mockTelegramBotClient = null!;
+    private TelegramClient _telegramClient = null!;
 
     [SetUp]
     public void SetUp()
@@ -54,7 +54,7 @@ public class TelegramClientTests
             .ReturnsAsync(message);
 
         // Act
-        var result = await _telegramClient.SendTextMessageAsync(chatId, text, null);
+        var result = await _telegramClient.SendTextMessageAsync(chatId, text);
         result.Should().Be(message);
 
         _mockTelegramBotClient.Verify(c => c.MakeRequestAsync(It.Is<SendMessageRequest>(r =>

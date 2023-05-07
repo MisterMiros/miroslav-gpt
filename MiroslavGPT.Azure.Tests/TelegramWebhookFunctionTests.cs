@@ -9,10 +9,10 @@ namespace MiroslavGPT.Azure.Tests;
 
 public class TelegramWebhookFunctionTests
 {
-    private Fixture _fixture;
-    private Mock<ITelegramMessageHandler> _mockTelegramMessageHandler;
-    private Mock<ILogger<TelegramWebhookFunction>> _mockLogger;
-    private TelegramWebhookFunction _function;
+    private Fixture _fixture = null!;
+    private Mock<ITelegramMessageHandler> _mockTelegramMessageHandler = null!;
+    private Mock<ILogger<TelegramWebhookFunction>> _mockLogger = null!;
+    private TelegramWebhookFunction _function = null!;
 
     [SetUp]
     public void SetUp()

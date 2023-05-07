@@ -14,13 +14,13 @@ namespace MiroslavGPT.Domain.Tests.Actions;
 [TestFixture]
 public class PromptActionTests
 {
-    private Fixture _fixture;
-    private Mock<IUserRepository> _mockUserRepository;
-    private Mock<IThreadRepository> _mockThreadRepository;
-    private Mock<IPersonalityProvider> _mockPersonalityProvider;
-    private Mock<IChatClient> _mockChatClient;
-    private Mock<ITelegramClient> _mockTelegramClient;
-    private PromptAction _action;
+    private Fixture _fixture = null!;
+    private Mock<IUserRepository> _mockUserRepository = null!;
+    private Mock<IThreadRepository> _mockThreadRepository = null!;
+    private Mock<IPersonalityProvider> _mockPersonalityProvider = null!;
+    private Mock<IChatClient> _mockChatClient = null!;
+    private Mock<ITelegramClient> _mockTelegramClient = null!;
+    private PromptAction _action = null!;
 
     [SetUp]
     public void SetUp()
@@ -58,7 +58,7 @@ public class PromptActionTests
     [TestCase("some-prompt")]
     [TestCase(" some prompt with spaces ")]
     [TestCase(null)]
-    public void TryGetCommand_ReturnsNull_WhenHasPersonality(string prompt)
+    public void TryGetCommand_ReturnsNull_WhenHasPersonality(string? prompt)
     {
         // Arrange
         var update = _fixture.Create<Update>();
@@ -78,7 +78,7 @@ public class PromptActionTests
         promptCommand.MessageId.Should().Be(update.Message.MessageId);
         promptCommand.Personality.Should().Be("/prompt");
         promptCommand.Username.Should().Be(update.Message.From!.Username);
-        promptCommand.Prompt.Should().Be((prompt ?? "").Trim());
+        promptCommand.Prompt.Should().Be((prompt ?? string.Empty).Trim());
         promptCommand.ReplyToId.Should().Be(update.Message.ReplyToMessage!.MessageId);
     }
 

@@ -37,19 +37,19 @@ public class PromptAction : BaseAction
         _userRepository = userRepository;
     }
 
-    public override ICommand TryGetCommand(Update update)
+    public override ICommand? TryGetCommand(Update update)
     {
         _logger.LogDebug("Trying to get prompt command");
-        var parts = update!.Message!.Text!.Split(' ', 2);
+        var parts = update.Message!.Text!.Split(' ', 2);
         var command = parts[0].Replace("@" + _settings.TelegramBotUsername, string.Empty).Trim();
         var argument = parts.Length > 1 ? parts[1].Trim() : string.Empty;
-        _logger.LogDebug("Prompt command is {command} with argument {argument}", command, argument);
+        _logger.LogDebug("Prompt command is {Command} with argument {Argument}", command, argument);
         if (!_personalityProvider.HasPersonalityCommand(command))
         {
-            _logger.LogDebug("Prompt command {command} is not a valid personality command", command);
+            _logger.LogDebug("Prompt command {Command} is not a valid personality command", command);
             return null;
         }
-        _logger.LogDebug("Prompt command {command} is a valid personality command", command);
+        _logger.LogDebug("Prompt command {Command} is a valid personality command", command);
         return new PromptCommand
         {
             ChatId = update.Message.Chat.Id,
@@ -64,20 +64,20 @@ public class PromptAction : BaseAction
     public override async Task ExecuteAsync(ICommand abstractCommand)
     {
         var command = (PromptCommand)abstractCommand;
-        _logger.LogDebug("Executing prompt command {command} for user {chatId}", command.Personality, command.ChatId);
+        _logger.LogDebug("Executing prompt command {Command} for user {ChatId}", command.Personality, command.ChatId);
         if (!await _userRepository.IsAuthorizedAsync(command.ChatId))
         {
-            _logger.LogDebug("User {chatId} is not authorized", command.ChatId);
+            _logger.LogDebug("User {ChatId} is not authorized", command.ChatId);
             await TelegramClient.SendTextMessageAsync(command.ChatId, "You are not authorized. Please use /init command with the correct secret key.", command.MessageId);
         }
 
         if (string.IsNullOrWhiteSpace(command.Prompt))
         {
-            _logger.LogDebug("Prompt command {command} does not have a prompt for user {chatId}", command.Personality, command.ChatId);
+            _logger.LogDebug("Prompt command {Command} does not have a prompt for user {ChatId}", command.Personality, command.ChatId);
             await TelegramClient.SendTextMessageAsync(command.ChatId, "Please provide a prompt after the personality command.", command.MessageId);
         }
 
-        _logger.LogDebug("Getting thread for chat {chatId} and message {replyToId}", command.ChatId, command.ReplyToId);
+        _logger.LogDebug("Getting thread for chat {ChatId} and message {ReplyToId}", command.ChatId, command.ReplyToId);
         var thread = await GetThreadAsync(command.ChatId, command.ReplyToId);
         thread.Messages.Add(new ThreadMessage
         {
@@ -92,12 +92,12 @@ public class PromptAction : BaseAction
             .Concat(thread.Messages.Select(m => m.ToChatMessage()))
             .ToList();
 
-        _logger.LogDebug("Getting response from ChatGPT API for prompt {prompt} and {messages} messages", command.Prompt, messages.Count);
+        _logger.LogDebug("Getting response from ChatGPT API for prompt {Prompt} and {Messages} messages", command.Prompt, messages.Count);
         var response = await _chatClient.GetChatGptResponseAsync(command.Prompt, messages);
         var usernames = thread.Messages.Select(m => m.Username).Distinct();
-        response = response.EscapeUsernames(usernames.Where(u => u != null));
+        response = response.EscapeUsernames(usernames.Where(u => u != null)!);
 
-        _logger.LogDebug("Sending response to user {chatId} for prompt {prompt}", command.ChatId, command.Prompt);
+        _logger.LogDebug("Sending response to user {ChatId} for prompt {Prompt}", command.ChatId, command.Prompt);
         var message = await TelegramClient.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId);
 
         thread.Messages.Add(new ThreadMessage
@@ -108,7 +108,7 @@ public class PromptAction : BaseAction
             IsAssistant = true,
         });
 
-        _logger.LogDebug("Updating thread for chat {chatId}", command.ChatId);
+        _logger.LogDebug("Updating thread for chat {ChatId}", command.ChatId);
         await _threadRepository.UpdateThreadAsync(thread);
     }
 

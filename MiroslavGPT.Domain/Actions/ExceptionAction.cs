@@ -17,7 +17,7 @@ public class ExceptionAction: IExceptionAction
 
     public async Task ExecuteAsync(long chatId, int messageId)
     {
-        _logger.LogDebug("Executing exception action for chat {chatId} and message {messageId}", chatId, messageId);
+        _logger.LogDebug("Executing exception action for chat {ChatId} and message {MessageId}", chatId, messageId);
         await _telegramClient.SendTextMessageAsync(chatId, "Something went wrong. Please try again later.", messageId);
     }
 }

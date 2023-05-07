@@ -8,9 +8,9 @@ namespace MiroslavGPT.Domain.Tests.Actions;
 [TestFixture]
 public class UnknownActionTests
 {
-    private Fixture _fixture;
-    private Mock<ITelegramClient> _mockTelegramClient;
-    private UnknownAction _action;
+    private Fixture _fixture = null!;
+    private Mock<ITelegramClient> _mockTelegramClient = null!;
+    private UnknownAction _action = null!;
 
     [SetUp]
     public void SetUp()

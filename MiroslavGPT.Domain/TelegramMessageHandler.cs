@@ -2,7 +2,6 @@
 using MiroslavGPT.Domain.Settings;
 using System.Collections.Immutable;
 using MiroslavGPT.Domain.Interfaces.Actions;
-using MiroslavGPT.Domain.Models.Commands;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Microsoft.Extensions.Logging;
@@ -30,7 +29,7 @@ public class TelegramMessageHandler : ITelegramMessageHandler
         _logger = logger;
     }
 
-    public async Task ProcessUpdateAsync(Update update)
+    public async Task ProcessUpdateAsync(Update? update)
     {
         if (update?.Message == null || string.IsNullOrWhiteSpace(update.Message.Text) || !update.Message.Text.StartsWith("/"))
         {
@@ -55,11 +54,11 @@ public class TelegramMessageHandler : ITelegramMessageHandler
             _logger.LogDebug("Choosing the right action for the update");
             foreach (var action in _actions)
             {
-                _logger.LogDebug("Checking action {actionName}", action.GetType().Name);
+                _logger.LogDebug("Checking action {ActionName}", action.GetType().Name);
                 var command = action.TryGetCommand(update);
                 if (command != null)
                 {
-                    _logger.LogDebug("Executing action {actionName}", action.GetType().Name);
+                    _logger.LogDebug("Executing action {ActionName}", action.GetType().Name);
                     await action.ExecuteAsync(command);
                     return;
                 }

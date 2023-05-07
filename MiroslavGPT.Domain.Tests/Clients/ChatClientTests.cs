@@ -7,10 +7,10 @@ namespace MiroslavGPT.Domain.Tests.Clients;
 [TestFixture]
 public class ChatClientTests
 {
-    private Fixture _fixture;
-    private Mock<IChatEndpoint> _mockChatEndpoint;
-    private Mock<IChatGptBotSettings> _mockSettings;
-    private ChatClient _client;
+    private Fixture _fixture = null!;
+    private Mock<IChatEndpoint> _mockChatEndpoint = null!;
+    private Mock<IChatGptBotSettings> _mockSettings = null!;
+    private ChatClient _client = null!;
 
     [SetUp]
     public void SetUp()

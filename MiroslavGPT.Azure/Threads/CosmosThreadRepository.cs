@@ -12,15 +12,13 @@ namespace MiroslavGPT.Azure.Threads;
 
 public class CosmosThreadRepository : IThreadRepository
 {
-    private readonly CosmosClient _client;
     private readonly IThreadSettings _settings;
     private readonly Container _threadsContainer;
 
     public CosmosThreadRepository(CosmosClient client, IThreadSettings settings)
     {
-        _client = client;
         _settings = settings;
-        _threadsContainer = _client.GetContainer(settings.ThreadDatabaseName, settings.ThreadContainerName);
+        _threadsContainer = client.GetContainer(settings.ThreadDatabaseName, settings.ThreadContainerName);
     }
 
     public async Task<MessageThread> CreateThreadAsync(long chatId)

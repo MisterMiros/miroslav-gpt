@@ -1,7 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Azure.Threads;
 using MiroslavGPT.Azure.Users;

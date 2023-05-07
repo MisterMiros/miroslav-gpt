@@ -10,7 +10,7 @@ public class ChatClient: IChatClient
     private readonly IChatEndpoint _chatEndpoint;
     
     public ChatClient(IChatEndpoint chatEndpoint, IChatGptBotSettings chatGptBotSettings)
-    { ;
+    {
         _chatEndpoint = chatEndpoint;
         _chatGptBotSettings = chatGptBotSettings;
     }

@@ -10,12 +10,12 @@ namespace MiroslavGPT.Domain.Tests;
 [TestFixture]
 public class TelegramMessageHandlerTests
 {
-    private Fixture _fixture;
-    private List<Mock<IAction>> _mockActions;
-    private Mock<IExceptionAction> _mockExceptionAction;
-    private Mock<ITelegramBotSettings> _mockSettings;
-    private Mock<ILogger<TelegramMessageHandler>> _mockLogger;
-    private TelegramMessageHandler _handler;
+    private Fixture _fixture = null!;
+    private List<Mock<IAction>> _mockActions = null!;
+    private Mock<IExceptionAction> _mockExceptionAction = null!;
+    private Mock<ITelegramBotSettings> _mockSettings = null!;
+    private Mock<ILogger<TelegramMessageHandler>> _mockLogger = null!;
+    private TelegramMessageHandler _handler = null!;
 
     [SetUp]
     public void SetUp()
