@@ -61,16 +61,6 @@ public class CosmosThreadRepository : IThreadRepository
         await _threadsContainer.ReplaceItemAsync(ToCosmos(messageThread), messageThread.Id.ToString(), new PartitionKey(messageThread.Id.ToString()));
     }
     
-    private static CosmosMessageThread ToCosmos(MessageThread thread)
-    {
-        return new CosmosMessageThread
-        {
-            Id = thread.Id.ToString(),
-            ChatId = thread.ChatId,
-            Messages = thread.Messages.Select(ToCosmos).ToList(),
-        };
-    }
-    
     private static MessageThread FromCosmos(CosmosMessageThread thread)
     {
         return new MessageThread
@@ -80,10 +70,10 @@ public class CosmosThreadRepository : IThreadRepository
             Messages = thread.Messages.Select(FromCosmos).ToList(),
         };
     }
-
-    private static CosmosThreadMessage ToCosmos(ThreadMessage message)
+    
+    private static ThreadMessage FromCosmos(CosmosThreadMessage message)
     {
-        return new CosmosThreadMessage
+        return new ThreadMessage
         {
             MessageId = message.MessageId,
             Username = message.Username,
@@ -92,9 +82,19 @@ public class CosmosThreadRepository : IThreadRepository
         };
     }
     
-    private static ThreadMessage FromCosmos(CosmosThreadMessage message)
+    private static CosmosMessageThread ToCosmos(MessageThread thread)
     {
-        return new ThreadMessage
+        return new CosmosMessageThread
+        {
+            Id = thread.Id.ToString(),
+            ChatId = thread.ChatId,
+            Messages = thread.Messages.Select(ToCosmos).ToList(),
+        };
+    }
+
+    private static CosmosThreadMessage ToCosmos(ThreadMessage message)
+    {
+        return new CosmosThreadMessage
         {
             MessageId = message.MessageId,
             Username = message.Username,
