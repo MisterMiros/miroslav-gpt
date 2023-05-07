@@ -57,8 +57,9 @@ public class CosmosThreadRepository : IThreadRepository
 
     public async Task UpdateThreadAsync(MessageThread messageThread)
     {
-        messageThread.Messages = messageThread.Messages.TakeLast(_settings.ThreadLengthLimit).ToList();
-        await _threadsContainer.ReplaceItemAsync(ToCosmos(messageThread), messageThread.Id.ToString(), new PartitionKey(messageThread.Id.ToString()));
+        var cosmosThread = ToCosmos(messageThread);
+        cosmosThread.Messages = cosmosThread.Messages.TakeLast(_settings.ThreadLengthLimit).ToList();
+        await _threadsContainer.ReplaceItemAsync(cosmosThread, cosmosThread.Id, new PartitionKey(messageThread.Id.ToString()));
     }
     
     private static MessageThread FromCosmos(CosmosMessageThread thread)

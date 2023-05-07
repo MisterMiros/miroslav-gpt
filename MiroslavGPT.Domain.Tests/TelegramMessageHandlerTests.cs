@@ -126,7 +126,7 @@ public class TelegramMessageHandlerTests
             .Returns(botName);
 
         // Act
-        await _handler.ProcessUpdateAsync(null);
+        await _handler.ProcessUpdateAsync(update);
 
         // Assert
         foreach (var action in _mockActions)
@@ -154,7 +154,7 @@ public class TelegramMessageHandlerTests
             .Returns(botName);
 
         // Act
-        await _handler.ProcessUpdateAsync(null);
+        await _handler.ProcessUpdateAsync(update);
 
         // Assert
         foreach (var action in _mockActions)
@@ -200,6 +200,25 @@ public class TelegramMessageHandlerTests
 
         foreach (var action in _mockActions.Skip(actionNumber + 1))
         {
+            action.VerifyNoOtherCalls();
+        }
+    }
+
+    [Test]
+    public async Task ProcessUpdateAsync_ShouldSkip_WhenNoSuitableAction()
+    {
+        // Arrange
+        var text = "/command";
+        var update = _fixture.Create<Update>();
+        update.Message!.Text = text;
+        update.Message.Chat.Type = ChatType.Private;
+        // Act
+        await _handler.ProcessUpdateAsync(update);
+            
+        // Assert
+        foreach (var action in _mockActions)
+        { 
+            action.Verify(a => a.TryGetCommand(update), Times.Once);
             action.VerifyNoOtherCalls();
         }
     }

@@ -60,7 +60,7 @@ public class CosmosThreadsRepositoryTests
     public async Task GetThreadByMessage_ShouldReturnNull_WhenNotFoundException(long chatId, int messageId)
     {
         // Arrange
-        _mockContainer.Setup(c => c.GetItemQueryIterator<MessageThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosThreadRepository.CosmosMessageThread>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
             .Throws(new CosmosException("Not found", System.Net.HttpStatusCode.NotFound, 0, "", 0));
 
         // Act
@@ -115,13 +115,20 @@ public class CosmosThreadsRepositoryTests
     public async Task UpdateThreadAsync_ShouldUpdate(MessageThread messageThread)
     {
         // Arrange
-
+        _mockSettings.Setup(s => s.ThreadLengthLimit).Returns(1);
+        
         // Act
         await _repository.UpdateThreadAsync(messageThread);
 
         // Assert
         _mockContainer.Verify(c => c.ReplaceItemAsync(
-                It.Is<CosmosThreadRepository.CosmosMessageThread>(t => ThreadsEqual(t, messageThread)),
+                It.Is<CosmosThreadRepository.CosmosMessageThread>(t => t.Id == messageThread.Id.ToString() &&
+                                                                       t.ChatId == messageThread.ChatId &&
+                                                                       t.Messages.Count == 1 &&
+                                                                       t.Messages.Single().MessageId == messageThread.Messages.Last().MessageId &&
+                                                                       t.Messages.Single().Text == messageThread.Messages.Last().Text &&
+                                                                       t.Messages.Single().IsAssistant == messageThread.Messages.Last().IsAssistant &&
+                                                                       t.Messages.Single().Username == messageThread.Messages.Last().Username),
                 messageThread.Id.ToString(),
                 It.Is<PartitionKey>(k => k == new PartitionKey(messageThread.Id.ToString())),
                 It.IsAny<ItemRequestOptions>(),
