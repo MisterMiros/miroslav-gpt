@@ -19,8 +19,11 @@
 name: Deploy to Azure
 
 on:
-  push:
-    branches: ["master"]
+  workflow_run:
+    workflows: ["Run Unit Tests"]
+    branches: [master]
+    types:
+      - completed
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'       # set this to the path to your function app project, defaults to the repository root
