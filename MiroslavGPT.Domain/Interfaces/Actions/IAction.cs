@@ -5,6 +5,6 @@ namespace MiroslavGPT.Domain.Interfaces.Actions;
 
 public interface IAction
 {
-    ICommand TryGetCommand(Update update);
+    ICommand? TryGetCommand(Update update);
     Task ExecuteAsync(ICommand abstractCommand);
 }

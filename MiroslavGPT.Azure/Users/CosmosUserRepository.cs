@@ -3,20 +3,17 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Domain.Interfaces.Users;
-using MiroslavGPT.Domain.Models.Threads;
 using Newtonsoft.Json;
 
 namespace MiroslavGPT.Azure.Users;
 
 public class CosmosUserRepository : IUserRepository
 {
-    private readonly CosmosClient _client;
     private readonly Container _container;
 
     public CosmosUserRepository(CosmosClient client, IUserSettings userSettings)
     {
-        _client = client;
-        _container = _client.GetContainer(userSettings.UserDatabaseName, userSettings.UserContainerName);
+        _container = client.GetContainer(userSettings.UserDatabaseName, userSettings.UserContainerName);
     }
 
     public async Task<bool> IsAuthorizedAsync(long userId)

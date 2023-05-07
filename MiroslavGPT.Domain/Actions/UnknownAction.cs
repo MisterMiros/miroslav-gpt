@@ -26,7 +26,7 @@ public class UnknownAction : BaseAction
 
     public override async Task ExecuteAsync(ICommand command)
     {
-        _logger.LogDebug("Sending unknown command message to user {chatId}", command.ChatId);
+        _logger.LogDebug("Sending unknown command message to user {ChatId}", command.ChatId);
         await TelegramClient.SendTextMessageAsync(command.ChatId, "Unknown command. Please use /init or one of the personality commands.", command.MessageId);
     }
 }

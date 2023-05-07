@@ -8,11 +8,11 @@ namespace MiroslavGPT.Azure.Tests.Threads;
 [TestFixture]
 public class CosmosThreadsRepositoryTests
 {
-    private Fixture _fixture;
-    private Mock<IThreadSettings> _mockSettings;
-    private Mock<CosmosClient> _mockCosmosClient;
-    private Mock<Container> _mockContainer;
-    private CosmosThreadRepository _repository;
+    private Fixture _fixture = null!;
+    private Mock<IThreadSettings> _mockSettings = null!;
+    private Mock<CosmosClient> _mockCosmosClient = null!;
+    private Mock<Container> _mockContainer = null!;
+    private CosmosThreadRepository _repository = null!;
 
     [SetUp]
     public void SetUp()

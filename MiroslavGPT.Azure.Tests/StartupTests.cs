@@ -14,7 +14,6 @@ using MiroslavGPT.Domain.Interfaces.Clients;
 using MiroslavGPT.Domain.Interfaces.Personality;
 using MiroslavGPT.Domain.Interfaces.Threads;
 using MiroslavGPT.Domain.Interfaces.Users;
-using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Personality;
 using MiroslavGPT.Domain.Settings;
 using OpenAI_API.Chat;
@@ -24,11 +23,11 @@ namespace MiroslavGPT.Azure.Tests;
 
 public class StartupTests
 {
-    private Fixture _fixture;
-    private Startup _startup;
-    private Mock<IWebJobsBuilder> _mockBuilder;
-    private Mock<IServiceCollection> _mockServiceCollection;
-    private Mock<IConfiguration> _mockConfiguration;
+    private Fixture _fixture = null!;
+    private Startup _startup = null!;
+    private Mock<IWebJobsBuilder> _mockBuilder = null!;
+    private Mock<IServiceCollection> _mockServiceCollection = null!;
+    private Mock<IConfiguration> _mockConfiguration = null!;
 
     [SetUp]
     public void SetUp()

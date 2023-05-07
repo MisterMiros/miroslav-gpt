@@ -5,7 +5,7 @@ namespace MiroslavGPT.Domain.Tests.Personality;
 [TestFixture]
 public class PersonalityProviderTests
 {
-    private PersonalityProvider _provider;
+    private PersonalityProvider _provider = null!;
 
     [SetUp]
     public void SetUp()

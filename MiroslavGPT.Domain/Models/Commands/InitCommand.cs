@@ -4,5 +4,5 @@ public record InitCommand: ICommand
 {
     public long ChatId { get; set; }
     public int MessageId { get; set; }
-    public string Secret { get; set; }
+    public string? Secret { get; set; }
 }

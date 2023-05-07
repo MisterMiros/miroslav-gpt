@@ -24,18 +24,18 @@ public class InitAction : BaseAction
         _logger = logger;
     }
 
-    public override ICommand TryGetCommand(Update update)
+    public override ICommand? TryGetCommand(Update update)
     {
         _logger.LogDebug("Trying to get init command");
-        if (update!.Message!.Text!.StartsWith("/init"))
+        if (update.Message!.Text!.StartsWith("/init"))
         {
             _logger.LogDebug("Init command found");
-            var parts = update!.Message!.Text!.Split(' ', 2);
+            var parts = update.Message!.Text!.Split(' ', 2);
             return new InitCommand
             {
                 ChatId = update.Message.Chat.Id,
                 MessageId = update.Message.MessageId,
-                Secret = (parts[1] ?? "").Trim(),
+                Secret = (parts[1]).Trim(),
             };
         }
         _logger.LogInformation("Init command not found");
@@ -48,14 +48,14 @@ public class InitAction : BaseAction
         var command = (InitCommand)abstractCommand;
         if (command.Secret == _chatGptBotSettings.SecretKey)
         {
-            _logger.LogDebug("Authorizing user {chatId}", command.ChatId);
+            _logger.LogDebug("Authorizing user {ChatId}", command.ChatId);
             await _userRepository.AuthorizeUserAsync(command.ChatId);
-            _logger.LogDebug("Sending authorization successful message to user {chatId}", command.ChatId);
+            _logger.LogDebug("Sending authorization successful message to user {ChatId}", command.ChatId);
             await TelegramClient.SendTextMessageAsync(command.ChatId, "Authorization successful! You can now use prompt commands.", command.MessageId);
         }
         else
         {
-            _logger.LogDebug("Sending incorrect secret key message to user {chatId}", command.ChatId);
+            _logger.LogDebug("Sending incorrect secret key message to user {ChatId}", command.ChatId);
             await TelegramClient.SendTextMessageAsync(command.ChatId, "Incorrect secret key. Please try again.", command.MessageId);
         }
     }

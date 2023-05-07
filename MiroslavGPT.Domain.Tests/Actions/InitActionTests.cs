@@ -1,6 +1,5 @@
 ﻿using MiroslavGPT.Domain.Actions;
 using MiroslavGPT.Domain.Interfaces.Clients;
-using MiroslavGPT.Domain.Interfaces.Users;
 using MiroslavGPT.Domain.Models.Commands;
 using MiroslavGPT.Domain.Settings;
 using Telegram.Bot.Types;
@@ -10,11 +9,10 @@ namespace MiroslavGPT.Domain.Tests.Actions;
 [TestFixture]
 public class InitActionTests
 {
-    private Fixture _fixture;
-    private Mock<IUserRepository> _mockUserRepository;
-    private Mock<ITelegramClient> _mockTelegramClient;
-    private Mock<IChatGptBotSettings> _mockSettings;
-    private InitAction _action;
+    private Fixture _fixture = null!;
+    private Mock<ITelegramClient> _mockTelegramClient = null!;
+    private Mock<IChatGptBotSettings> _mockSettings = null!;
+    private InitAction _action = null!;
 
     [SetUp]
     public void SetUp()
@@ -22,8 +20,7 @@ public class InitActionTests
         _fixture = new Fixture();
         _fixture.Customize(new AutoMoqCustomization());
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
-        _mockUserRepository = _fixture.Freeze<Mock<IUserRepository>>();
+        
         _mockTelegramClient = _fixture.Freeze<Mock<ITelegramClient>>();
         _mockSettings = _fixture.Freeze<Mock<IChatGptBotSettings>>();
         _action = _fixture.Create<InitAction>();
@@ -47,7 +44,7 @@ public class InitActionTests
     [TestCase("  ")]
     [TestCase("some-secret-key")]
     [TestCase(" some-secret-key ")]
-    public void TryGetCommand_ReturnsCommand(string secretKey)
+    public void TryGetCommand_ReturnsCommand(string? secretKey)
     {
         // Arrange
         var update = _fixture.Create<Update>();
@@ -61,7 +58,7 @@ public class InitActionTests
         var initCommand = result.Should().BeOfType<InitCommand>().Subject;
         initCommand.ChatId.Should().Be(update.Message.Chat.Id);
         initCommand.MessageId.Should().Be(update.Message.MessageId);
-        initCommand.Secret.Should().Be((secretKey ?? "").Trim());
+        initCommand.Secret.Should().Be((secretKey ?? string.Empty).Trim());
     }
     
     [Test, AutoData]
@@ -69,7 +66,7 @@ public class InitActionTests
     {
         // Arrange
         _mockSettings.Setup(s => s.SecretKey)
-            .Returns(command.Secret);
+            .Returns(command.Secret!);
         
         // Act
         await _action.ExecuteAsync(command);

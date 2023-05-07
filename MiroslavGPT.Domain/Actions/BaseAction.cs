@@ -14,7 +14,7 @@ public abstract class BaseAction: IAction
         TelegramClient = telegramClient;
     }
 
-    public abstract ICommand TryGetCommand(Update update);
+    public abstract ICommand? TryGetCommand(Update update);
 
     public abstract Task ExecuteAsync(ICommand abstractCommand);
 }
