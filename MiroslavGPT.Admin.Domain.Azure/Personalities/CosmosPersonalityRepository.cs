@@ -45,9 +45,15 @@ public class CosmosPersonalityRepository: IPersonalityRepository
 
     public async Task<Personality?> GetPersonalityAsync(string id)
     {
-        
-        var result = await _container.ReadItemAsync<CosmosPersonality>(id, new(id));
-        return result.Resource is null ? null : FromCosmos(result.Resource);
+        try
+        {
+            var result = await _container.ReadItemAsync<CosmosPersonality>(id, new(id));
+            return FromCosmos(result.Resource);
+        }
+        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
     }
 
     public async Task<Personality?> GetPersonalityByCommandAsync(string command)
@@ -71,19 +77,15 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         }
     }
 
-    public async Task<Personality> CreatePersonality(Personality personality)
+    public async Task<Personality> UpsertPersonalityAsync(Personality personality)
     {
-        var id = Guid.NewGuid().ToString();
         var cosmosPersonality = ToCosmos(personality);
-        cosmosPersonality.Id = id;
-        var created = await _container.CreateItemAsync(cosmosPersonality, new PartitionKey(id));
+        if (string.IsNullOrEmpty(personality.Id))
+        {
+            cosmosPersonality.Id = Guid.NewGuid().ToString();
+        }
+        var created = await _container.UpsertItemAsync(cosmosPersonality, new PartitionKey(cosmosPersonality.Id));
         return FromCosmos(created.Resource);
-    }
-
-    public Task UpdatePersonality(Personality personality)
-    {
-        var cosmosPersonality = ToCosmos(personality);
-        return _container.UpsertItemAsync(cosmosPersonality, new PartitionKey(cosmosPersonality.Id));
     }
 
     private static CosmosPersonality ToCosmos(Personality personality)
