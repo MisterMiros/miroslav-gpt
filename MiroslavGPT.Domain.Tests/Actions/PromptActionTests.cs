@@ -5,7 +5,7 @@ using MiroslavGPT.Domain.Interfaces.Personality;
 using MiroslavGPT.Domain.Interfaces.Threads;
 using MiroslavGPT.Domain.Interfaces.Users;
 using MiroslavGPT.Domain.Models.Commands;
-using MiroslavGPT.Domain.Models.Threads;
+using MiroslavGPT.Model.Threads;
 using OpenAI_API.Chat;
 using Telegram.Bot.Types;
 

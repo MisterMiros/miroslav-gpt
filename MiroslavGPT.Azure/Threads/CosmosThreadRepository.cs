@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Domain.Interfaces.Threads;
-using MiroslavGPT.Domain.Models.Threads;
+using MiroslavGPT.Model.Threads;
 using Newtonsoft.Json;
 
 namespace MiroslavGPT.Azure.Threads;

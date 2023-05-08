@@ -1,4 +1,4 @@
-﻿using MiroslavGPT.Domain.Models.Threads;
+﻿using MiroslavGPT.Model.Threads;
 
 namespace MiroslavGPT.Domain.Interfaces.Threads;
 

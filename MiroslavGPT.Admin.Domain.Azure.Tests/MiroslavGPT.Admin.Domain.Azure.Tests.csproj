@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+        <PackageReference Include="coverlet.collector" Version="3.1.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MiroslavGPT.Admin.Domain.Azure\MiroslavGPT.Admin.Domain.Azure.csproj" />
+      <ProjectReference Include="..\MIroslavGPT.Tests.Core\MIroslavGPT.Tests.Core.csproj" />
+    </ItemGroup>
+
+</Project>

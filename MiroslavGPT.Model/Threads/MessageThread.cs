@@ -1,4 +1,4 @@
-﻿namespace MiroslavGPT.Domain.Models.Threads;
+﻿namespace MiroslavGPT.Model.Threads;
 
 public record MessageThread
 {

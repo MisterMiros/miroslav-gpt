@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
 using MiroslavGPT.Azure.Settings;
 using MiroslavGPT.Azure.Threads;
-using MiroslavGPT.Domain.Models.Threads;
+using MiroslavGPT.Model.Threads;
 
 namespace MiroslavGPT.Azure.Tests.Threads;
 

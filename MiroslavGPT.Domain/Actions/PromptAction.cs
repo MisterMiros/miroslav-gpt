@@ -5,8 +5,8 @@ using MiroslavGPT.Domain.Interfaces.Personality;
 using MiroslavGPT.Domain.Interfaces.Threads;
 using MiroslavGPT.Domain.Interfaces.Users;
 using MiroslavGPT.Domain.Models.Commands;
-using MiroslavGPT.Domain.Models.Threads;
 using MiroslavGPT.Domain.Settings;
+using MiroslavGPT.Model.Threads;
 using Telegram.Bot.Types;
 
 namespace MiroslavGPT.Domain.Actions;
