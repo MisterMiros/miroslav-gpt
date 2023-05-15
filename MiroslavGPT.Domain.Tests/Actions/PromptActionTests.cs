@@ -95,6 +95,12 @@ public class PromptActionTests
 
         // Assert
         _mockTelegramClient.Verify(t => t.SendTextMessageAsync(command.ChatId, "You are not authorized. Please use /init command with the correct secret key.", command.MessageId));
+        _mockTelegramClient.VerifyNoOtherCalls();
+        _mockChatClient.VerifyNoOtherCalls();
+        _mockPersonalityProvider.VerifyNoOtherCalls();
+        _mockThreadRepository.VerifyNoOtherCalls();
+        _mockUserRepository.VerifyAll();
+        _mockUserRepository.VerifyNoOtherCalls();
     }
 
     [TestCase("")]
@@ -114,6 +120,12 @@ public class PromptActionTests
 
         // Assert
         _mockTelegramClient.Verify(t => t.SendTextMessageAsync(command.ChatId, "Please provide a prompt after the personality command.", command.MessageId));
+        _mockTelegramClient.VerifyNoOtherCalls();
+        _mockChatClient.VerifyNoOtherCalls();
+        _mockPersonalityProvider.VerifyNoOtherCalls();
+        _mockThreadRepository.VerifyNoOtherCalls();
+        _mockUserRepository.VerifyAll();
+        _mockUserRepository.VerifyNoOtherCalls();
     }
 
     [TestCase(false, false)]

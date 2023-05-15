@@ -69,12 +69,14 @@ public class PromptAction : BaseAction
         {
             _logger.LogDebug("User {ChatId} is not authorized", command.ChatId);
             await TelegramClient.SendTextMessageAsync(command.ChatId, "You are not authorized. Please use /init command with the correct secret key.", command.MessageId);
+            return;
         }
 
         if (string.IsNullOrWhiteSpace(command.Prompt))
         {
             _logger.LogDebug("Prompt command {Command} does not have a prompt for user {ChatId}", command.Personality, command.ChatId);
             await TelegramClient.SendTextMessageAsync(command.ChatId, "Please provide a prompt after the personality command.", command.MessageId);
+            return;
         }
 
         _logger.LogDebug("Getting thread for chat {ChatId} and message {ReplyToId}", command.ChatId, command.ReplyToId);
