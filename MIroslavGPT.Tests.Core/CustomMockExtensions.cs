@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Moq;
-using System.Diagnostics.CodeAnalysis;
 
-namespace MiroslavGPT.Tests.Core;
+namespace MIroslavGPT.Tests.Core;
 
 [ExcludeFromCodeCoverage]
 public static class CustomMockExtensions

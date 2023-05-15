@@ -1,6 +1,4 @@
-﻿using MiroslavGPT.Model.Personality;
-
-namespace MiroslavGPT.Model.Personalities;
+﻿namespace MiroslavGPT.Model.Personalities;
 
 public record Personality
 {

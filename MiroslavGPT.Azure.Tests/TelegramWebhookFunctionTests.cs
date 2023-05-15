@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MiroslavGPT.Domain.Interfaces;
-using MiroslavGPT.Tests.Core;
+using MIroslavGPT.Tests.Core;
 using Telegram.Bot.Types;
 
 namespace MiroslavGPT.Azure.Tests;

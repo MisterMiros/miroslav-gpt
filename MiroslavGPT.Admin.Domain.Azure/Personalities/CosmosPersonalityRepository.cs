@@ -2,7 +2,6 @@
 using MiroslavGPT.Admin.Domain.Interfaces.Personalities;
 using MiroslavGPT.Admin.Domain.Interfaces.Settings;
 using MiroslavGPT.Model.Personalities;
-using MiroslavGPT.Model.Personality;
 using Newtonsoft.Json;
 
 namespace MiroslavGPT.Admin.Domain.Azure.Personalities;
@@ -77,15 +76,33 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         }
     }
 
-    public async Task<Personality> UpsertPersonalityAsync(Personality personality)
+    public async Task<Personality> InsertPersonalityAsync(Personality personality)
     {
         var cosmosPersonality = ToCosmos(personality);
-        if (string.IsNullOrEmpty(personality.Id))
-        {
-            cosmosPersonality.Id = Guid.NewGuid().ToString();
-        }
-        var created = await _container.UpsertItemAsync(cosmosPersonality, new PartitionKey(cosmosPersonality.Id));
+        cosmosPersonality.Id = Guid.NewGuid().ToString();
+        cosmosPersonality.Messages.ForEach(m => m.Id = Guid.NewGuid().ToString());
+        var created = await _container.CreateItemAsync(cosmosPersonality, new PartitionKey(cosmosPersonality.Id));
         return FromCosmos(created.Resource);
+    }
+
+    public Task UpdatePersonalityAsync(string id, string command)
+    {
+        var patchOperation = PatchOperation.Replace("/command", command);
+        return _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
+    }
+
+    public Task AddPersonalityMessageAsync(string id, PersonalityMessage message)
+    {
+        var cosmosMessage = ToCosmos(message);
+        cosmosMessage.Id = Guid.NewGuid().ToString();
+        var patchOperation = PatchOperation.Add("/messages/-", cosmosMessage);
+        return _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
+    }
+
+    public Task DeletePersonalityMessageAsync(string id, string messageId)
+    {
+        var patchOperation = PatchOperation.Remove($"/messages/[@id='{messageId}']");
+        return _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
     }
 
     private static CosmosPersonality ToCosmos(Personality personality)
@@ -102,6 +119,7 @@ public class CosmosPersonalityRepository: IPersonalityRepository
     {
         return new()
         {
+            Id = message.Id,
             Text = message.Text,
             IsAssistant = message.IsAssistant,
         };
@@ -121,6 +139,7 @@ public class CosmosPersonalityRepository: IPersonalityRepository
     {
         return new()
         {
+            Id = message.Id,
             Text = message.Text,
             IsAssistant = message.IsAssistant,
         };
@@ -138,6 +157,8 @@ public class CosmosPersonalityRepository: IPersonalityRepository
     
     public record CosmosPersonalityMessage
     {
+        [JsonProperty("id")] 
+        public string Id { get; set; } = string.Empty;
         [JsonProperty("text")]
         public string Text { get; set; } = string.Empty;
         [JsonProperty("isAssistant")]

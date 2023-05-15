@@ -8,9 +8,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MiroslavGPT.Admin.Domain.Azure\MiroslavGPT.Admin.Domain.Azure.csproj" />
     </ItemGroup>
 
 </Project>

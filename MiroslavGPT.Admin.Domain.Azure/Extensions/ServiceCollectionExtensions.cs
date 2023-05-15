@@ -7,7 +7,7 @@ namespace MiroslavGPT.Admin.Domain.Azure.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static ServiceCollection AddAzureAdminDomainServices(this ServiceCollection services)
+    public static IServiceCollection AddAzureAdminDomainServices(this IServiceCollection services)
     {
         services.AddSingleton<IPersonalityRepository, CosmosPersonalityRepository>();
         return services;

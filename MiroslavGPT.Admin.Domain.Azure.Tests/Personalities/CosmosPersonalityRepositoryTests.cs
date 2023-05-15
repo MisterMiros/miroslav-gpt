@@ -223,54 +223,22 @@ public class CosmosPersonalityRepositoryTests
     }
 
     [Test, AutoData]
-    public async Task UpsertPersonalityAsync_UpsertsPersonality(Personality personality)
-    {
-        // Arrange
-        var cosmosResult = _fixture.Create<CosmosPersonalityRepository.CosmosPersonality>();
-        var mockItemResponse = new Mock<ItemResponse<CosmosPersonalityRepository.CosmosPersonality>>();
-        mockItemResponse.Setup(r => r.Resource).Returns(cosmosResult);
-        
-        CosmosPersonalityRepository.CosmosPersonality? upsertedItem = null;
-        _mockContainer.Setup(c => c.UpsertItemAsync(It.IsAny<CosmosPersonalityRepository.CosmosPersonality>(), new(personality.Id), null, default))
-            .Callback((CosmosPersonalityRepository.CosmosPersonality p, PartitionKey? _, ItemRequestOptions __, CancellationToken ___) =>
-            {
-                upsertedItem = p;
-            })
-        .ReturnsAsync(mockItemResponse.Object);
-        
-        // Act
-        var result = await _repository.UpsertPersonalityAsync(personality);
-        
-        // Assert
-        result.Should().NotBeNull().And.Match<Personality>(r => PersonalitiesEqual(cosmosResult, r));
-        upsertedItem.Should().NotBeNull().And.Match<CosmosPersonalityRepository.CosmosPersonality>(r => PersonalitiesEqual(r, personality));
-        
-        mockItemResponse.VerifyAll();
-        mockItemResponse.VerifyNoOtherCalls();
-        _mockContainer.VerifyAll();
-        _mockContainer.VerifyNoOtherCalls();
-    }
-    
-    [Test, AutoData]
-    public async Task UpsertPersonalityAsync_UpsertsPersonality_AndSetsId(Personality personality)
+    public async Task InsertPersonalityAsync_InsertsPersonality(Personality personality)
     {
         // Arrange
         personality.Id = string.Empty;
-        
+
         var cosmosResult = _fixture.Create<CosmosPersonalityRepository.CosmosPersonality>();
         var mockItemResponse = new Mock<ItemResponse<CosmosPersonalityRepository.CosmosPersonality>>();
         mockItemResponse.Setup(r => r.Resource).Returns(cosmosResult);
-        
+
         CosmosPersonalityRepository.CosmosPersonality? upsertedItem = null;
-        _mockContainer.Setup(c => c.UpsertItemAsync(It.IsAny<CosmosPersonalityRepository.CosmosPersonality>(), It.IsAny<PartitionKey>(), null, default))
-            .Callback((CosmosPersonalityRepository.CosmosPersonality p, PartitionKey? _, ItemRequestOptions __, CancellationToken ___) =>
-            {
-                upsertedItem = p;
-            }).ReturnsAsync(mockItemResponse.Object);
-        
+        _mockContainer.Setup(c => c.CreateItemAsync(It.IsAny<CosmosPersonalityRepository.CosmosPersonality>(), It.IsAny<PartitionKey>(), null, default))
+            .Callback((CosmosPersonalityRepository.CosmosPersonality p, PartitionKey? _, ItemRequestOptions __, CancellationToken ___) => { upsertedItem = p; }).ReturnsAsync(mockItemResponse.Object);
+
         // Act
-        var result = await _repository.UpsertPersonalityAsync(personality);
-        
+        var result = await _repository.InsertPersonalityAsync(personality);
+
         // Assert
         result.Should().NotBeNull().And.Match<Personality>(r => PersonalitiesEqual(cosmosResult, r));
         upsertedItem.Should().NotBeNull();
@@ -281,10 +249,67 @@ public class CosmosPersonalityRepositoryTests
                                                                                                             pair.First.Text == pair.Second.Text &&
                                                                                                             pair.First.IsAssistant == pair.Second.IsAssistant
                                                                                                         ));
-        
+
         mockItemResponse.VerifyAll();
         mockItemResponse.VerifyNoOtherCalls();
         _mockContainer.VerifyAll();
+        _mockContainer.VerifyNoOtherCalls();
+    }
+
+    [Test, AutoData]
+    public async Task UpdatePersonalityAsync_UpdatesPersonality(string id, string command)
+    {
+        // Arrange
+        // Act
+        await _repository.UpdatePersonalityAsync(id, command);
+
+        // Assert
+        _mockContainer.Verify(c => c.PatchItemAsync<CosmosPersonalityRepository.CosmosPersonality>(
+            id,
+            new(id),
+            It.Is<IReadOnlyList<PatchOperation>>(l => l.Count == 1
+                                                      && l[0].OperationType == PatchOperationType.Replace
+                                                      && l[0].Path == "/command"),
+            null,
+            default), Times.Once);
+        _mockContainer.VerifyNoOtherCalls();
+    }
+
+    [Test, AutoData]
+    public async Task AddPersonalityMessageAsync_AddsMessage(string id, PersonalityMessage message)
+    {
+        // Arrange
+        // Act
+        await _repository.AddPersonalityMessageAsync(id, message);
+
+        // Assert
+        _mockContainer.Verify(c => c.PatchItemAsync<CosmosPersonalityRepository.CosmosPersonality>(
+            id,
+            new(id),
+            It.Is<IReadOnlyList<PatchOperation>>(l => l.Count == 1
+                                                      && l[0].OperationType == PatchOperationType.Add
+                                                      && l[0].Path == "/messages/-"),
+            null,
+            default), Times.Once);
+        _mockContainer.VerifyNoOtherCalls();
+    }
+
+    [Test, AutoData]
+    public async Task DeletePersonalityMessageAsync_DeletesMessage(string id, string messageId)
+    {
+        // Arrange
+        // Act
+        await _repository.DeletePersonalityMessageAsync(id, messageId);
+
+        // Assert
+        _mockContainer.Verify(c => c.PatchItemAsync<CosmosPersonalityRepository.CosmosPersonality>(
+            id,
+            new(id),
+            It.Is<IReadOnlyList<PatchOperation>>(l => l.Count == 1
+                                                      && l[0].OperationType == PatchOperationType.Remove
+                                                      && l[0].Path == $"/messages/[@id='{messageId}']"),
+            null,
+            default), Times.Once);
         _mockContainer.VerifyNoOtherCalls();
     }
 }
