@@ -6,7 +6,7 @@ using MiroslavGPT.Model.Personalities;
 namespace MiroslavGPT.Admin.API.Controllers;
 
 [ApiController]
-[Route("api/personality")]
+[Route("api/personalities")]
 public class PersonalityController : ControllerBase
 {
     private readonly IPersonalityRepository _personalityRepository;
@@ -35,8 +35,6 @@ public class PersonalityController : ControllerBase
     /// Gets a list of personalities.
     /// </summary>
     /// <returns>A a list of personalities</returns>
-    /// <remarks>
-    /// </remarks>
     /// <response code="200">Returns a personality</response>
     /// <response code="404">Not found a personality by that id</response>
     [HttpGet("{id:string}")]
@@ -57,18 +55,57 @@ public class PersonalityController : ControllerBase
     /// Gets an empty personality
     /// </summary>
     /// <returns>Newly created personality</returns>
-    /// <remarks>
-    /// </remarks>
     /// <response code="201">Returns newly created personality</response>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ApiPersonality))]
     public async Task<IActionResult> CreatePersonality([FromBody] CreatePersonalityRequest createRequest)
     {
-        var personality = await _personalityRepository.InsertPersonalityAsync(createRequest.ToPersonality());
+        var personality = await _personalityRepository.CreatePersonalityAsync(createRequest.Command);
         return CreatedAtAction(
             nameof(GetPersonality),
             new { id = personality.Id },
             ApiPersonality.From(personality)
         );
     }
+    
+    /// <summary>
+    /// Updates personality command
+    /// </summary>
+    /// <response code="204">Indicates successful update</response>
+    [HttpPut("{id:string}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> UpdatePersonality(string id, [FromBody] UpdatePersonalityRequest updateRequest)
+    {
+        await _personalityRepository.UpdatePersonalityAsync(id, updateRequest.Command);
+        return NoContent();
+    }
+    
+    /// <summary>
+    /// Updates personality command
+    /// </summary>
+    /// <response code="201">Newly created message with reference to containing personality</response>
+    [HttpPut("{id:string}/messages")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> AddPersonalityMessage(string id, [FromBody] CreatePersonalityMessageRequest updateRequest)
+    {
+        var message = await _personalityRepository.AddPersonalityMessageAsync(id, updateRequest.Text, updateRequest.IsAssistant);
+        return CreatedAtAction(
+            nameof(GetPersonality),
+            new { id },
+            ApiPersonalityMessage.From(message)
+        );
+    }
+    
+    /// <summary>
+    /// Deletes message from personality
+    /// </summary>
+    /// <response code="204">Indicates successful delete</response>
+    [HttpDelete("{id:string}/messages/{messageId:string}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> DeletePersonalityMessage(string id, string messageId)
+    {
+        await _personalityRepository.DeletePersonalityMessageAsync(id, messageId);
+        return NoContent();
+    }
+    
 }

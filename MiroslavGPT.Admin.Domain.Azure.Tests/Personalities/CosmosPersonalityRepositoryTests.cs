@@ -223,11 +223,9 @@ public class CosmosPersonalityRepositoryTests
     }
 
     [Test, AutoData]
-    public async Task InsertPersonalityAsync_InsertsPersonality(Personality personality)
+    public async Task InsertPersonalityAsync_InsertsPersonality(string command)
     {
         // Arrange
-        personality.Id = string.Empty;
-
         var cosmosResult = _fixture.Create<CosmosPersonalityRepository.CosmosPersonality>();
         var mockItemResponse = new Mock<ItemResponse<CosmosPersonalityRepository.CosmosPersonality>>();
         mockItemResponse.Setup(r => r.Resource).Returns(cosmosResult);
@@ -237,18 +235,13 @@ public class CosmosPersonalityRepositoryTests
             .Callback((CosmosPersonalityRepository.CosmosPersonality p, PartitionKey? _, ItemRequestOptions __, CancellationToken ___) => { upsertedItem = p; }).ReturnsAsync(mockItemResponse.Object);
 
         // Act
-        var result = await _repository.InsertPersonalityAsync(personality);
+        var result = await _repository.CreatePersonalityAsync(command);
 
         // Assert
         result.Should().NotBeNull().And.Match<Personality>(r => PersonalitiesEqual(cosmosResult, r));
         upsertedItem.Should().NotBeNull();
         upsertedItem!.Id.Should().NotBeEmpty();
-        upsertedItem.Should().NotBeNull().And.Match<CosmosPersonalityRepository.CosmosPersonality>(r => r.Command == personality.Command &&
-                                                                                                        r.Messages.Count == personality.Messages.Count &&
-                                                                                                        r.Messages.Zip(personality.Messages).All(pair =>
-                                                                                                            pair.First.Text == pair.Second.Text &&
-                                                                                                            pair.First.IsAssistant == pair.Second.IsAssistant
-                                                                                                        ));
+        upsertedItem.Should().NotBeNull().And.Match<CosmosPersonalityRepository.CosmosPersonality>(r => r.Command == command && r.Messages.Count == 0);
 
         mockItemResponse.VerifyAll();
         mockItemResponse.VerifyNoOtherCalls();
@@ -276,13 +269,16 @@ public class CosmosPersonalityRepositoryTests
     }
 
     [Test, AutoData]
-    public async Task AddPersonalityMessageAsync_AddsMessage(string id, PersonalityMessage message)
+    public async Task AddPersonalityMessageAsync_AddsMessage(string id, string text, bool isAssistant)
     {
         // Arrange
         // Act
-        await _repository.AddPersonalityMessageAsync(id, message);
+        var message = await _repository.AddPersonalityMessageAsync(id, text, isAssistant);
 
         // Assert
+        message.Should().NotBeNull();
+        message.Text.Should().Be(text);
+        message.IsAssistant.Should().Be(isAssistant);
         _mockContainer.Verify(c => c.PatchItemAsync<CosmosPersonalityRepository.CosmosPersonality>(
             id,
             new(id),

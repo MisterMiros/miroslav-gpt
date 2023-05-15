@@ -76,10 +76,14 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         }
     }
 
-    public async Task<Personality> InsertPersonalityAsync(Personality personality)
+    public async Task<Personality> CreatePersonalityAsync(string command)
     {
-        var cosmosPersonality = ToCosmos(personality);
-        cosmosPersonality.Id = Guid.NewGuid().ToString();
+        var cosmosPersonality = new CosmosPersonality
+        {
+            Id = Guid.NewGuid().ToString(),
+            Command = command,
+            Messages = new(),
+        };
         cosmosPersonality.Messages.ForEach(m => m.Id = Guid.NewGuid().ToString());
         var created = await _container.CreateItemAsync(cosmosPersonality, new PartitionKey(cosmosPersonality.Id));
         return FromCosmos(created.Resource);
@@ -91,38 +95,24 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         return _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
     }
 
-    public Task AddPersonalityMessageAsync(string id, PersonalityMessage message)
+    public async Task<PersonalityMessage> AddPersonalityMessageAsync(string id, string text, bool isAssistant)
     {
-        var cosmosMessage = ToCosmos(message);
+        var cosmosMessage = new CosmosPersonalityMessage
+        {
+            Id = Guid.NewGuid().ToString(),
+            Text = text,
+            IsAssistant = isAssistant,
+        };
         cosmosMessage.Id = Guid.NewGuid().ToString();
         var patchOperation = PatchOperation.Add("/messages/-", cosmosMessage);
-        return _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
+        await _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
+        return FromCosmos(cosmosMessage);
     }
 
     public Task DeletePersonalityMessageAsync(string id, string messageId)
     {
         var patchOperation = PatchOperation.Remove($"/messages/[@id='{messageId}']");
         return _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
-    }
-
-    private static CosmosPersonality ToCosmos(Personality personality)
-    {
-        return new()
-        {
-            Id = personality.Id,
-            Command = personality.Command,
-            Messages = personality.Messages.Select(ToCosmos).ToList(),
-        };
-    }
-
-    private static CosmosPersonalityMessage ToCosmos(PersonalityMessage message)
-    {
-        return new()
-        {
-            Id = message.Id,
-            Text = message.Text,
-            IsAssistant = message.IsAssistant,
-        };
     }
 
     private static Personality FromCosmos(CosmosPersonality personality)
