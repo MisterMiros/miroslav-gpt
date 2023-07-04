@@ -109,7 +109,7 @@ public class PersonalityService : IPersonalityService
         {
             return Result.Failure(PersonalityError.EMPTY_MESSAGE);
         }
-        var message = await _personalityRepository.GetPersonalityMessage(id, messageId);
+        var message = await _personalityRepository.GetPersonalityMessageAsync(id, messageId);
         if (message == null)
         {
             return Result.Failure(PersonalityError.NOT_FOUND);

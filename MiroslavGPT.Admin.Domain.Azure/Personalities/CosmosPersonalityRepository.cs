@@ -86,7 +86,6 @@ public class CosmosPersonalityRepository: IPersonalityRepository
             Command = command,
             Messages = new(),
         };
-        cosmosPersonality.Messages.ForEach(m => m.Id = Guid.NewGuid().ToString());
         var created = await _container.CreateItemAsync(cosmosPersonality, new PartitionKey(cosmosPersonality.Id));
         return FromCosmos(created.Resource);
     }
@@ -105,7 +104,7 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         await _container.DeleteItemAsync<CosmosPersonality>(id, new(id));
     }
 
-    public async Task<PersonalityMessage?> GetPersonalityMessage(string id, string messageId)
+    public async Task<PersonalityMessage?> GetPersonalityMessageAsync(string id, string messageId)
     {
         try
         {

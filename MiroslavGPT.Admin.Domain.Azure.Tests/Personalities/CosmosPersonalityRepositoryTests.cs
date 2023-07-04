@@ -33,11 +33,16 @@ public class CosmosPersonalityRepositoryTests
     {
         return cosmosPersonality.Id == personality.Id &&
                cosmosPersonality.Command == personality.Command &&
+               cosmosPersonality.SystemMessage == personality.SystemMessage &&
                cosmosPersonality.Messages.Count == personality.Messages.Count &&
-               cosmosPersonality.Messages.Zip(personality.Messages).All(pair =>
-                   pair.First.Text == pair.Second.Text &&
-                   pair.First.IsAssistant == pair.Second.IsAssistant
-               );
+               cosmosPersonality.Messages.Zip(personality.Messages).All(pair => MessagesEqual(pair.First, pair.Second));
+    }
+
+    private static bool MessagesEqual(CosmosPersonalityRepository.CosmosPersonalityMessage cosmosMessage, PersonalityMessage message)
+    {
+        return cosmosMessage.Id == message.Id &&
+               cosmosMessage.Text == message.Text &&
+               cosmosMessage.IsAssistant == message.IsAssistant;
     }
 
     [Test]
@@ -223,7 +228,7 @@ public class CosmosPersonalityRepositoryTests
     }
 
     [Test, AutoData]
-    public async Task InsertPersonalityAsync_InsertsPersonality(string command)
+    public async Task CreatePersonalityAsync_CreatesPersonality(string command)
     {
         // Arrange
         var cosmosResult = _fixture.Create<CosmosPersonalityRepository.CosmosPersonality>();
@@ -248,21 +253,91 @@ public class CosmosPersonalityRepositoryTests
         _mockContainer.VerifyAll();
         _mockContainer.VerifyNoOtherCalls();
     }
+    
+    [Test, AutoData]
+    public async Task GetPersonalityMessageAsync_ReturnsNull_WhenNotFound(string id, string messageId)
+    {
+        // Arrange
+        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosPersonalityRepository.CosmosPersonalityMessage>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+            .Throws(new CosmosException("Not found", System.Net.HttpStatusCode.NotFound, 0, "", 0));
+
+        // Act
+        var result = await _repository.GetPersonalityMessageAsync(id, messageId);
+
+        // Assert
+        result.Should().BeNull();
+        _mockContainer.VerifyAll();
+        _mockContainer.VerifyNoOtherCalls();
+    }
+    
+    [Test, AutoData]
+    public async Task GetPersonalityMessageAsync_ReturnsNull_WhenNoValuesInIterator(string id, string messageId)
+    {
+        // Arrange
+        var iterator = _fixture.Create<Mock<FeedIterator<CosmosPersonalityRepository.CosmosPersonalityMessage>>>();
+        iterator.Setup(i => i.HasMoreResults).Returns(false);
+
+        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosPersonalityRepository.CosmosPersonalityMessage>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+            .Returns(iterator.Object);
+
+        // Act
+        var result = await _repository.GetPersonalityMessageAsync(id, messageId);
+
+        // Assert
+        result.Should().BeNull();
+        iterator.VerifyAll();
+        iterator.VerifyNoOtherCalls();
+        _mockContainer.VerifyAll();
+        _mockContainer.VerifyNoOtherCalls();
+    }
 
     [Test, AutoData]
-    public async Task UpdatePersonalityAsync_UpdatesPersonality(string id, string command)
+    public async Task GetPersonalityMessageAsync_ReturnsPersonality(string id, string messageId, CosmosPersonalityRepository.CosmosPersonalityMessage message)
+    {
+        // Arrange
+        var personalities = new List<CosmosPersonalityRepository.CosmosPersonalityMessage> { message };
+        var feedResponse = _fixture.Create<Mock<FeedResponse<CosmosPersonalityRepository.CosmosPersonalityMessage>>>();
+        feedResponse.Setup(r => r.GetEnumerator())
+            .Returns(personalities.GetEnumerator());
+
+        var iterator = _fixture.Create<Mock<FeedIterator<CosmosPersonalityRepository.CosmosPersonalityMessage>>>();
+        iterator.Setup(i => i.HasMoreResults)
+            .Returns(true);
+        iterator.Setup(i => i.ReadNextAsync(default))
+            .ReturnsAsync(feedResponse.Object);
+
+        _mockContainer.Setup(c => c.GetItemQueryIterator<CosmosPersonalityRepository.CosmosPersonalityMessage>(It.IsAny<QueryDefinition>(), It.IsAny<string>(), It.IsAny<QueryRequestOptions>()))
+            .Returns(iterator.Object);
+
+        // Act
+        var result = await _repository.GetPersonalityMessageAsync(id, messageId);
+
+        // Assert
+        result.Should().NotBeNull().And.Match<PersonalityMessage>(r => MessagesEqual(message, r));
+        iterator.VerifyAll();
+        iterator.VerifyNoOtherCalls();
+        feedResponse.VerifyAll();
+        feedResponse.VerifyNoOtherCalls();
+        _mockContainer.VerifyAll();
+        _mockContainer.VerifyNoOtherCalls();
+    }
+
+    [Test, AutoData]
+    public async Task UpdatePersonalityAsync_UpdatesPersonality(string id, string command, string systemMessage)
     {
         // Arrange
         // Act
-        await _repository.UpdatePersonalityAsync(id, command);
+        await _repository.UpdatePersonalityAsync(id, command, systemMessage);
 
         // Assert
         _mockContainer.Verify(c => c.PatchItemAsync<CosmosPersonalityRepository.CosmosPersonality>(
             id,
             new(id),
-            It.Is<IReadOnlyList<PatchOperation>>(l => l.Count == 1
+            It.Is<IReadOnlyList<PatchOperation>>(l => l.Count == 2
                                                       && l[0].OperationType == PatchOperationType.Replace
-                                                      && l[0].Path == "/command"),
+                                                      && l[0].Path == "/command"
+                                                      && l[1].OperationType == PatchOperationType.Replace
+                                                      && l[1].Path == "/systemMessage"),
             null,
             default), Times.Once);
         _mockContainer.VerifyNoOtherCalls();

@@ -32,7 +32,7 @@ public class PersonalityController : ControllerBase
         var result = await _personalityService.GetPersonalitiesResultAsync();
         if (!result.Success)
         {
-            return Problem("Failed to get personalities");
+            throw new InvalidOperationException($"Failed to get personalities. Error: {result.Error}");
         }
         return Ok(result.Value!.Select(ApiPersonality.From));
     }
@@ -54,7 +54,7 @@ public class PersonalityController : ControllerBase
             return result.Error switch
             {
                 PersonalityError.NOT_FOUND => NotFound(),
-                _ => Problem("Failed to get personality")
+                _ => throw new InvalidOperationException($"Failed to get personality. Error: {result.Error}"),
             };
         }
 
@@ -82,7 +82,7 @@ public class PersonalityController : ControllerBase
                 PersonalityError.ALREADY_EXISTS => Conflict(),
                 PersonalityError.INVALID_COMMAND => BadRequest("Command should match start with '/' and contain only letters and numbers"),
                 PersonalityError.EMPTY_COMMAND => BadRequest("Command should not be empty"),
-                _ => Problem("Failed to create personality")
+                _ => throw new InvalidOperationException($"Failed to create personality. Error: {result.Error}"),
             };
         }
         return CreatedAtAction(
@@ -106,15 +106,16 @@ public class PersonalityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdatePersonalityAsync(string id, [FromBody] UpdatePersonalityRequest updateRequest)
     {
-        var result = await _personalityService.UpdatePersonalityResultAsync(id, updateRequest.Command, updateRequest.Message);
+        var result = await _personalityService.UpdatePersonalityResultAsync(id, updateRequest.Command, updateRequest.SystemMessage);
         if (!result.Success)
         {
             return result.Error switch
             {
+                PersonalityError.NOT_FOUND => NotFound(),
                 PersonalityError.ALREADY_EXISTS => Conflict(),
                 PersonalityError.INVALID_COMMAND => BadRequest("Command should match start with '/' and contain only letters and numbers"),
                 PersonalityError.EMPTY_COMMAND => BadRequest("Command should not be empty"),
-                _ => Problem("Failed to update personality")
+                _ => throw new InvalidOperationException($"Failed to update personality. Error: {result.Error}"),
             };
         }
         return NoContent();
@@ -126,11 +127,11 @@ public class PersonalityController : ControllerBase
     /// <response code="201">Newly created message with reference to containing personality</response>
     /// <response code="404">Not found a personality by that id</response>
     /// <response code="400">Message should not be empty</response>
-    [HttpPut("{id:string}/messages")]
+    [HttpPost("{id:string}/messages")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AddPersonalityMessageAsync(string id, [FromBody] CreatePersonalityMessageRequest updateRequest)
+    public async Task<IActionResult> AddPersonalityMessageAsync(string id, [FromBody] AddPersonalityMessageRequest updateRequest)
     {
         var result = await _personalityService.AddPersonalityMessageResultAsync(id, updateRequest.Text, updateRequest.IsAssistant);
         if (!result.Success)
@@ -139,7 +140,7 @@ public class PersonalityController : ControllerBase
             {
                 PersonalityError.NOT_FOUND => NotFound(),
                 PersonalityError.EMPTY_MESSAGE => BadRequest("Message should not be empty"),
-                _ => Problem("Failed to add message to personality")
+                _ => throw new InvalidOperationException($"Failed to add message to personality. Error: {result.Error}"),
             };
         }
         return CreatedAtAction(
@@ -170,7 +171,7 @@ public class PersonalityController : ControllerBase
             {
                 PersonalityError.NOT_FOUND => NotFound(),
                 PersonalityError.EMPTY_MESSAGE => BadRequest("Message should not be empty"),
-                _ => Problem("Failed to update message in personality")
+                _ => throw new InvalidOperationException($"Failed to update message in personality. Error: {result.Error}"),
             };
         }
         return NoContent();
@@ -187,7 +188,7 @@ public class PersonalityController : ControllerBase
         var result = await _personalityService.DeletePersonalityMessageResultAsync(id, messageId);
         if (!result.Success)
         {
-            return Problem("Failed to delete message from personality");
+            throw new InvalidOperationException($"Failed to delete message from personality. Error: {result.Error}");
         }
         return NoContent();
     }
