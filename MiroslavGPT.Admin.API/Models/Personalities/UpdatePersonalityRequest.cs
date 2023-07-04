@@ -1,6 +1,7 @@
 ﻿namespace MiroslavGPT.Admin.API.Models.Personalities;
 
-public class UpdatePersonalityRequest
+public record UpdatePersonalityRequest
 {
     public string Command { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
 }

@@ -46,6 +46,14 @@ public class PersonalityService : IPersonalityService
 
     public async Task<Result<Personality>> CreatePersonalityResultAsync(string command)
     {
+        if (string.IsNullOrWhiteSpace(command))
+        {
+            return Result<Personality>.Failure(PersonalityError.EMPTY_COMMAND);
+        }
+        if (!_commandRegex.IsMatch(command))
+        {
+            return Result<Personality>.Failure(PersonalityError.INVALID_COMMAND);
+        }
         var personality = await _personalityRepository.GetPersonalityByCommandAsync(command);
         if (personality != null)
         {
