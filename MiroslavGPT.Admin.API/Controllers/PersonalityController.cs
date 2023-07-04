@@ -25,7 +25,7 @@ public class PersonalityController : ControllerBase
     /// <response code="200">Returns a list of personalities</response>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ApiPersonality>))]
-    public async Task<IActionResult> GetPersonalities()
+    public async Task<IActionResult> GetPersonalitiesAsync()
     {
         var personalities = await _personalityRepository.GetPersonalitiesAsync();
         return Ok(personalities.Select(ApiPersonality.From));
@@ -40,7 +40,7 @@ public class PersonalityController : ControllerBase
     [HttpGet("{id:string}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiPersonality))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetPersonality([FromRoute] string id)
+    public async Task<IActionResult> GetPersonalityAsync([FromRoute] string id)
     {
         var personality = await _personalityRepository.GetPersonalityAsync(id);
         if (personality == null)
@@ -58,11 +58,11 @@ public class PersonalityController : ControllerBase
     /// <response code="201">Returns newly created personality</response>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ApiPersonality))]
-    public async Task<IActionResult> CreatePersonality([FromBody] CreatePersonalityRequest createRequest)
+    public async Task<IActionResult> CreatePersonalityAsync([FromBody] CreatePersonalityRequest createRequest)
     {
         var personality = await _personalityRepository.CreatePersonalityAsync(createRequest.Command);
         return CreatedAtAction(
-            nameof(GetPersonality),
+            "GetPersonality",
             new { id = personality.Id },
             ApiPersonality.From(personality)
         );
@@ -74,7 +74,7 @@ public class PersonalityController : ControllerBase
     /// <response code="204">Indicates successful update</response>
     [HttpPut("{id:string}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> UpdatePersonality(string id, [FromBody] UpdatePersonalityRequest updateRequest)
+    public async Task<IActionResult> UpdatePersonalityAsync(string id, [FromBody] UpdatePersonalityRequest updateRequest)
     {
         await _personalityRepository.UpdatePersonalityAsync(id, updateRequest.Command);
         return NoContent();
@@ -86,11 +86,11 @@ public class PersonalityController : ControllerBase
     /// <response code="201">Newly created message with reference to containing personality</response>
     [HttpPut("{id:string}/messages")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> AddPersonalityMessage(string id, [FromBody] CreatePersonalityMessageRequest updateRequest)
+    public async Task<IActionResult> AddPersonalityMessageAsync(string id, [FromBody] CreatePersonalityMessageRequest updateRequest)
     {
         var message = await _personalityRepository.AddPersonalityMessageAsync(id, updateRequest.Text, updateRequest.IsAssistant);
         return CreatedAtAction(
-            nameof(GetPersonality),
+            "GetPersonality",
             new { id },
             ApiPersonalityMessage.From(message)
         );
@@ -102,7 +102,7 @@ public class PersonalityController : ControllerBase
     /// <response code="204">Indicates successful delete</response>
     [HttpDelete("{id:string}/messages/{messageId:string}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeletePersonalityMessage(string id, string messageId)
+    public async Task<IActionResult> DeletePersonalityMessageAsync(string id, string messageId)
     {
         await _personalityRepository.DeletePersonalityMessageAsync(id, messageId);
         return NoContent();

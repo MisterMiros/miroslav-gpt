@@ -267,6 +267,22 @@ public class CosmosPersonalityRepositoryTests
             default), Times.Once);
         _mockContainer.VerifyNoOtherCalls();
     }
+    
+    [Test, AutoData]
+    public async Task UpdatePersonalityAsync_UpdatesPersonality(string id)
+    {
+        // Arrange
+        // Act
+        await _repository.DeletePersonalityAsync(id);
+
+        // Assert
+        _mockContainer.Verify(c => c.DeleteItemAsync<CosmosPersonalityRepository.CosmosPersonality>(
+            id,
+            new(id),
+            default,
+            default), Times.Once);
+        _mockContainer.VerifyNoOtherCalls();
+    }
 
     [Test, AutoData]
     public async Task AddPersonalityMessageAsync_AddsMessage(string id, string text, bool isAssistant)
@@ -285,6 +301,25 @@ public class CosmosPersonalityRepositoryTests
             It.Is<IReadOnlyList<PatchOperation>>(l => l.Count == 1
                                                       && l[0].OperationType == PatchOperationType.Add
                                                       && l[0].Path == "/messages/-"),
+            null,
+            default), Times.Once);
+        _mockContainer.VerifyNoOtherCalls();
+    }
+    
+    [Test, AutoData]
+    public async Task UpdatePersonalityMessageAsync_UpdatesMessage(string id, string messageId, string text)
+    {
+        // Arrange
+        // Act
+        await _repository.UpdatePersonalityMessageAsync(id, messageId, text);
+
+        // Assert
+        _mockContainer.Verify(c => c.PatchItemAsync<CosmosPersonalityRepository.CosmosPersonality>(
+            id,
+            new(id),
+            It.Is<IReadOnlyList<PatchOperation>>(l => l.Count == 1
+                                                      && l[0].OperationType == PatchOperationType.Replace
+                                                      && l[0].Path == $"/messages/[@id='{messageId}']/text"),
             null,
             default), Times.Once);
         _mockContainer.VerifyNoOtherCalls();

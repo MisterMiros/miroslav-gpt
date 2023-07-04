@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiroslavGPT.Admin.Domain.Az
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiroslavGPT.Admin.API", "MiroslavGPT.Admin.API\MiroslavGPT.Admin.API.csproj", "{461FA960-0D27-48C1-9891-E6F64851B041}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiroslavGPT.Admin.API.Tests", "MiroslavGPT.Admin.API.Tests\MiroslavGPT.Admin.API.Tests.csproj", "{5D9DEEBD-8CF9-44EE-A216-66FF8A49B103}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{461FA960-0D27-48C1-9891-E6F64851B041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{461FA960-0D27-48C1-9891-E6F64851B041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{461FA960-0D27-48C1-9891-E6F64851B041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D9DEEBD-8CF9-44EE-A216-66FF8A49B103}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D9DEEBD-8CF9-44EE-A216-66FF8A49B103}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D9DEEBD-8CF9-44EE-A216-66FF8A49B103}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D9DEEBD-8CF9-44EE-A216-66FF8A49B103}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +94,7 @@ Global
 		{16DD8512-CD81-4875-AC1B-886FD7B5934B} = {C1BAAF4C-C8CD-4B37-AD52-D172E77CD448}
 		{28C19908-599D-4E5B-BFFB-92BDB7C57595} = {16DD8512-CD81-4875-AC1B-886FD7B5934B}
 		{461FA960-0D27-48C1-9891-E6F64851B041} = {C1BAAF4C-C8CD-4B37-AD52-D172E77CD448}
+		{5D9DEEBD-8CF9-44EE-A216-66FF8A49B103} = {16DD8512-CD81-4875-AC1B-886FD7B5934B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F78CBB35-934D-4DAB-9148-310E49F96ADF}

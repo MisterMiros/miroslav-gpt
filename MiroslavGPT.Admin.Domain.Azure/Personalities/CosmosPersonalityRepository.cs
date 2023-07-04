@@ -9,10 +9,12 @@ namespace MiroslavGPT.Admin.Domain.Azure.Personalities;
 public class CosmosPersonalityRepository: IPersonalityRepository
 {
     private readonly Container _container;
-
+    private IPersonalitySettings _settings;
+    
     public CosmosPersonalityRepository(CosmosClient client, IPersonalitySettings settings)
     {
         _container = client.GetContainer(settings.PersonalityDatabaseName, settings.PersonalityContainerName);
+        _settings = settings;
     }
 
     public async Task<List<Personality>> GetPersonalitiesAsync()
@@ -29,7 +31,7 @@ public class CosmosPersonalityRepository: IPersonalityRepository
 
     private async IAsyncEnumerable<Personality> GetPersonalitiesPrivateAsync()
     {
-        var query = new QueryDefinition("SELECT * FROM c");
+        var query = new QueryDefinition($"SELECT * FROM {_settings.PersonalityContainerName}");
         var iterator = _container.GetItemQueryIterator<CosmosPersonality>(query);
             
         while (iterator.HasMoreResults)
@@ -59,7 +61,7 @@ public class CosmosPersonalityRepository: IPersonalityRepository
     {
         try
         {
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.command = @command)")
+            var query = new QueryDefinition($"SELECT * FROM {_settings.PersonalityContainerName} c WHERE c.command = @command)")
                 .WithParameter("@command", command);
             var iterator = _container.GetItemQueryIterator<CosmosPersonality>(query);
             if (!iterator.HasMoreResults)
@@ -89,10 +91,45 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         return FromCosmos(created.Resource);
     }
 
-    public Task UpdatePersonalityAsync(string id, string command)
+    public Task UpdatePersonalityAsync(string id, string command, string systemMessage)
     {
-        var patchOperation = PatchOperation.Replace("/command", command);
-        return _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
+        var patchOperations = new [] {
+            PatchOperation.Replace("/command", command),
+            PatchOperation.Replace("/systemMessage", systemMessage),
+        };
+        return _container.PatchItemAsync<CosmosPersonality>(id, new(id), patchOperations);
+    }
+
+    public async Task DeletePersonalityAsync(string id)
+    {
+        await _container.DeleteItemAsync<CosmosPersonality>(id, new(id));
+    }
+
+    public async Task<PersonalityMessage?> GetPersonalityMessage(string id, string messageId)
+    {
+        try
+        {
+            var query = new QueryDefinition(@$"
+                SELECT m
+                FROM {_settings.PersonalityContainerName} c
+                    JOIN m IN c.messages
+                WHERE c.id = @id AND m.id = @messageId")
+            .WithParameter("@id", id)
+            .WithParameter("@messageId", messageId);
+            var iterator = _container.GetItemQueryIterator<CosmosPersonalityMessage>(query);
+            if (!iterator.HasMoreResults)
+            {
+                return null;
+            }
+
+            var response = await iterator.ReadNextAsync();
+            return FromCosmos(response.First());
+        }
+        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+        
     }
 
     public async Task<PersonalityMessage> AddPersonalityMessageAsync(string id, string text, bool isAssistant)
@@ -109,6 +146,12 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         return FromCosmos(cosmosMessage);
     }
 
+    public async Task UpdatePersonalityMessageAsync(string id, string messageId, string text)
+    {
+        var patchOperation = PatchOperation.Replace($"/messages/[@id='{messageId}']/text", text);
+        await _container.PatchItemAsync<CosmosPersonality>(id, new(id), new[] { patchOperation });
+    }
+
     public Task DeletePersonalityMessageAsync(string id, string messageId)
     {
         var patchOperation = PatchOperation.Remove($"/messages/[@id='{messageId}']");
@@ -121,6 +164,7 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         {
             Id = personality.Id,
             Command = personality.Command,
+            SystemMessage = personality.SystemMessage,
             Messages = personality.Messages.Select(FromCosmos).ToList(),
         };
     }
@@ -141,6 +185,8 @@ public class CosmosPersonalityRepository: IPersonalityRepository
         public string Id { get; set; } = string.Empty;
         [JsonProperty("command")]
         public string Command { get; set; } = string.Empty;
+        [JsonProperty("systemMessage")]
+        public string SystemMessage { get; set; }
         [JsonProperty("messages")]
         public List<CosmosPersonalityMessage> Messages { get; set; } = new();
     }
