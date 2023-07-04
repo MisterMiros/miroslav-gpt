@@ -98,8 +98,6 @@ public class PromptAction : BaseAction
         var response = await _chatClient.GetChatGptResponseAsync(command.Prompt, messages);
         var usernames = thread.Messages.Select(m => m.Username).Distinct();
         response = response.EscapeUsernames();
-        
-        _logger.LogDebug("Escaped response is {Response}", response);
 
         _logger.LogDebug("Sending response to user {ChatId} for prompt {Prompt}", command.ChatId, command.Prompt);
         var message = await TelegramClient.SendTextMessageAsync(command.ChatId, $"*Response from ChatGPT API for prompt '{command.Prompt}':*\n\n{response}", command.MessageId);
