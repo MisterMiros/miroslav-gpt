@@ -1,29 +1,25 @@
 ﻿namespace MiroslavGPT.Admin.Domain.Common;
 
-public static class Result
+public record Result
 {
-    public static Result<TError> Ok<TError>() where TError: Enum
+    public bool Success { get; init; } = true;
+    public string? Error { get; init; }
+    
+    
+    public static Result Ok()
     {
-        return Result<TError>.Ok();
+        return new Result
+        {
+            Success = true,
+        };
     }
     
-    public static Result<TValue, TError> Ok<TValue, TError>(TValue value) where TError: Enum
+    public static Result Failure(string error)
     {
-        return Result<TValue, TError>.Ok(value);
-    }
-
-    public static Task<Result<TValue, TError>> OkAsync<TValue, TError>(Task<TValue> value) where TError: Enum
-    {
-        return Result<TValue, TError>.OkAsync(value);
-    }
-    
-    public static Result<TError> Failure<TError>(TError error) where TError: Enum
-    {
-        return Result<TError>.Failure(error);
-    }
-    
-    public static Result<TValue, TError> Failure<TValue, TError>(TError error) where TError: Enum
-    {
-        return Result<TValue, TError>.Failure(error);
+        return new Result
+        {
+            Success = false,
+            Error = error,
+        };
     }
 }

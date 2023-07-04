@@ -1,30 +1,35 @@
 ﻿namespace MiroslavGPT.Admin.Domain.Common;
 
-public record Result<TError> where TError : Enum
+public record Result<TValue>
 {
+    public TValue? Value { get; init; }
     public bool Success { get; init; } = true;
-    public TError? Error { get; init; }
+    public string? Error { get; init; }
     
-    public static Result<TError> Ok()
-    {
-        return new Result<TError>
-        {
-            Success = true,
-        };
-    }
     
-    public static Result<TError> OkAsync()
+    public static Result<TValue> Ok(TValue value)
     {
-        return new Result<TError>
+        return new Result<TValue>
         {
+            Value = value,
             Success = true,
         };
     }
 
-    public static Result<TError> Failure(TError error)
+    public static async Task<Result<TValue>> OkAsync(Task<TValue> value)
     {
-        return new Result<TError>
+        return new Result<TValue>
         {
+            Value = await value,
+            Success = true,
+        };
+    }
+    
+    public static Result<TValue> Failure(string error)
+    {
+        return new Result<TValue>
+        {
+            Value = default,
             Success = false,
             Error = error,
         };
