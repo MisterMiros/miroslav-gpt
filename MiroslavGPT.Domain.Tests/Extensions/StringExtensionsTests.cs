@@ -13,7 +13,7 @@ public class StringExtensionsTests
         var usernames = new[] { "@World", "@miroslav_gpt" };
 
         // Act
-        var result = markdown.EscapeUsernames(usernames);
+        var result = markdown.EscapeUsernames();
 
         // Assert
         result.Should().Be("Hello @World! My name is @miroslav\\_gpt and I'm a bot.");
