@@ -96,7 +96,6 @@ public class PromptAction : BaseAction
 
         _logger.LogDebug("Getting response from ChatGPT API for prompt {Prompt} and {Messages} messages", command.Prompt, messages.Count);
         var response = await _chatClient.GetChatGptResponseAsync(command.Prompt, messages);
-        var usernames = thread.Messages.Select(m => m.Username).Distinct();
         response = response.EscapeUsernames();
 
         _logger.LogDebug("Sending response to user {ChatId} for prompt {Prompt}", command.ChatId, command.Prompt);
